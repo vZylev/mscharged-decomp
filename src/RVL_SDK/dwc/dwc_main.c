@@ -71,7 +71,7 @@ typedef struct DWCConnectionInfo
 } DWCConnectionInfo;
 
 extern DWCConnectionInfo lbl_806C9920[32];
-extern u8 lbl_806E03A8[4];
+extern char lbl_806E03A8[4];
 
 static GT2Connection lbl_806C98A0[32];
 static DWCMainControlView* sMainControl;
@@ -82,7 +82,7 @@ int fn_804929C4(void);
 int fn_80492ABC(u8** aidList);
 int fn_80492AE8(u8** aidList);
 BOOL fn_8048E638(GT2Result result);
-void fn_8048C54C(int arg0, int arg1);
+void DWCi_StopLogin(DWCError error, int errorCode);
 BOOL DWC_UpdateServersAsync(const char* reserved,
     DWCUpdateServersCallback updateCallback, void* updateParam,
     DWCFriendStatusCallback statusCallback, void* statusParam,
@@ -91,12 +91,13 @@ void fn_8048E7DC(void);
 void fn_804900B8(u8 numEntry, const char* addFilter,
     DWCMatchedSCCallbackView matchedCallback, void* matchedParam,
     void* evalCallback, void* evalParam);
-GT2Bool fn_80491578(GT2Socket socket, unsigned int ip, unsigned short port,
-    GT2Byte* message, int len);
-void fn_804916EC(GT2Socket socket, GT2Connection connection, unsigned int ip,
-    unsigned short port, int latency, GT2Byte* message, int len);
+GT2Bool DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, unsigned int ip,
+    unsigned short port, GT2Byte* message, int len);
+void DWCi_GT2ConnectAttemptCallback(GT2Socket socket,
+    GT2Connection connection, unsigned int ip, unsigned short port,
+    int latency, GT2Byte* message, int len);
 BOOL DWC_isValidAid(u8 aid);
-int fn_8048E27C(void);
+int DWCi_GT2GetConnectionListIdx(void);
 int DWC_LoginAsync(const u16* ingamesn, void* unused,
     DWCLoginCallback loginCallback, void* loginParam);
 int fn_8048A504(const u16* string);
@@ -109,14 +110,15 @@ void fn_804903EC(u8 numEntry, DWCMatchedSCCallbackView matchedCallback,
 int DWC_ConnectToAnybodyAsync(u8 maxEntry, const char* filter,
     DWCMatchCallback callback, void* callbackParam,
     DWCMatchEvaluationCallback evaluationCallback, void* evaluationParam);
-GT2Connection* fn_8048E334(int profileId, int count);
+GT2Connection* DWCi_GetGT2ConnectionByProfileID(int profileID, int numHost);
 int DWC_CloseAllConnectionsHard(void);
-void fn_8048AFCC(int arg0, void* arg1, int arg2);
+int DWCi_SetGPStatus(int status, const char* statusString,
+    const char* locationString);
 void fn_8048E708(int error, int profileID);
 void DWCi_InitGPProcessCount(void);
 void fn_8048E7A8(int error, BOOL isChanged, void* param);
-GT2Connection* fn_8048E320(int index);
-DWCConnectionInfo* fn_8048E430(int index);
+GT2Connection* DWCi_GetGT2ConnectionByIdx(int index);
+DWCConnectionInfo* DWCi_GetConnectionInfoByIdx(int index);
 void fn_8048F048(GT2Connection connection, GT2Byte* message, int len,
     GT2Bool reliable);
 void fn_8049B244(GT2Connection connection, GT2Byte* message, int len,
@@ -217,8 +219,9 @@ GT2Result fn_8048E0C4(void)
     {
         return result;
     }
-    gt2Listen(sMainControl->_00, fn_804916EC);
-    gt2SetUnrecognizedMessageCallback(sMainControl->_00, fn_80491578);
+    gt2Listen(sMainControl->_00, DWCi_GT2ConnectAttemptCallback);
+    gt2SetUnrecognizedMessageCallback(
+        sMainControl->_00, DWCi_GT2UnrecognizedMessageCallback);
     return result;
 }
 
@@ -268,12 +271,12 @@ static void fn_8048F4F8(GT2Socket socket)
     sMainControl->_00 = 0;
 }
 
-GT2Connection* fn_8048E320(int index)
+GT2Connection* DWCi_GetGT2ConnectionByIdx(int index)
 {
     return &lbl_806C98A0[index];
 }
 
-DWCConnectionInfo* fn_8048E430(int index)
+DWCConnectionInfo* DWCi_GetConnectionInfoByIdx(int index)
 {
     return &lbl_806C9920[index];
 }
@@ -290,7 +293,7 @@ void fn_8048F4A0(GT2Connection connection, int latency)
     fn_8049B380(connection, latency);
 }
 
-int fn_8048E27C(void)
+int DWCi_GT2GetConnectionListIdx(void)
 {
     int i;
 
@@ -379,7 +382,8 @@ BOOL fn_8048E638(GT2Result result)
     }
     if (error != 0)
     {
-        fn_8048C54C(error, DWC_ECODE_SEQ_LOGIN + DWC_ECODE_GS_GT2 + errorCode);
+        DWCi_StopLogin(error,
+            DWC_ECODE_SEQ_LOGIN + DWC_ECODE_GS_GT2 + errorCode);
     }
     return result;
 }
@@ -397,7 +401,7 @@ int DWC_CloseAllConnectionsHard(void)
     if (sMainControl->numConnections == 0)
     {
         DWC_Printf(0x100, "Closed 0 connection.\n");
-        fn_8048AFCC(1, lbl_806E03A8, 0);
+        DWCi_SetGPStatus(1, lbl_806E03A8, 0);
         NNFreeNegotiateList();
         sMainControl->savedState = sMainControl->state;
         sMainControl->state = DWC_STATE_ONLINE;
@@ -432,7 +436,7 @@ BOOL DWC_UpdateServersAsync(const char* reserved,
     return TRUE;
 }
 
-GT2Connection* fn_8048E334(int profileId, int count)
+GT2Connection* DWCi_GetGT2ConnectionByProfileID(int profileID, int numHost)
 {
     u8 i;
     u8 aid;
@@ -440,14 +444,14 @@ GT2Connection* fn_8048E334(int profileId, int count)
     GT2Connection connection;
     DWCConnectionDataView* data;
 
-    for (i = 0; i < count; i++)
+    for (i = 0; i < numHost; i++)
     {
-        if (sMainControl->pidList[i] == profileId)
+        if (sMainControl->pidList[i] == profileID)
         {
             break;
         }
     }
-    if (i >= count)
+    if (i >= numHost)
     {
         return NULL;
     }

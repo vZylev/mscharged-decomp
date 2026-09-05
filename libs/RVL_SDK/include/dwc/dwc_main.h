@@ -7,6 +7,10 @@ extern "C"
 {
 #endif
 
+#define DWC_DNS_ERROR_RETRY_MAX 5
+#define DWC_GP_COMMAND_STRING       "GPCM"
+#define DWC_GP_COMMAND_MATCH_STRING "MAT"
+
     typedef enum DWCState
     {
         DWC_STATE_INIT,

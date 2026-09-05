@@ -1837,6 +1837,23 @@ Game/SH/SHSceneBase.cpp:
 	.sdata      start:0x806DECB8 end:0x806DED40
 	.sdata2     start:0x806E5BD0 end:0x806E5BE0
 
+unclassified/tu_8026B10C.cpp:
+	.text       start:0x8026B10C end:0x8026EF60
+	.data       start:0x80520CD8 end:0x80520E48
+	.sdata      start:0x806DED40 end:0x806DEDA0
+	.sdata2     start:0x806E5BE0 end:0x806E5BF0
+
+unclassified/tu_806E1908.cpp:
+	.text       start:0x8026EF60 end:0x8026F444
+	.data       start:0x80520E48 end:0x80520E70
+	.sdata      start:0x806DEDA0 end:0x806DEDA8
+	.sbss       start:0x806E1908 end:0x806E1910
+
+unclassified/tu_8026F444.cpp:
+	.text       start:0x8026F444 end:0x80270280
+	.data       start:0x80520E70 end:0x80520E88
+	.sdata2     start:0x806E5BF0 end:0x806E5BF4
+
 Game/Render/RLView.cpp:
 	.text       start:0x80271C48 end:0x80271DE0
 	.data       start:0x80520FC0 end:0x80520FE0

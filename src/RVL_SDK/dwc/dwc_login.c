@@ -1,5 +1,6 @@
 #include <dwc/dwc_main.h>
 
+#include <dwc/dwc_account.h>
 #include <dwc/dwc_auth_interface.h>
 #include <dwc/dwc_error.h>
 #include <dwc/dwc_report.h>
@@ -74,26 +75,26 @@ BOOL fn_8048C368(void)
     return FALSE;
 }
 
-void* fn_8048C530(void)
+DWCAccUserData* DWCi_GetUserData(void)
 {
     if (sLoginControl != NULL)
     {
-        return sLoginControl->_1C;
+        return (DWCAccUserData*)sLoginControl->_1C;
     }
     return NULL;
 }
 
-void fn_8048C54C(int arg0, int arg1)
+void DWCi_StopLogin(DWCError error, int errorCode)
 {
-    if (sLoginControl == NULL || arg0 == 0)
+    if (sLoginControl == NULL || error == 0)
     {
         return;
     }
 
-    DWCi_SetError(arg0, arg1);
+    DWCi_SetError(error, errorCode);
     if (sLoginControl->_14 != NULL)
     {
-        sLoginControl->_14(arg0, 0, sLoginControl->_18);
+        sLoginControl->_14(error, 0, sLoginControl->_18);
     }
     if (sLoginControl != NULL)
     {

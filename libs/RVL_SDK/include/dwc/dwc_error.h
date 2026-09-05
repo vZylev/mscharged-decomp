@@ -6,9 +6,13 @@
 
 #define DWC_ECODE_SEQ_LOGIN      (-60000)
 #define DWC_ECODE_SEQ_FRIEND     (-70000)
+#define DWC_ECODE_SEQ_MATCH      (-80000)
 #define DWC_ECODE_SEQ_ETC        (-90000)
 #define DWC_ECODE_GS_GP          (-1000)
 #define DWC_ECODE_GS_PERS        (-2000)
+#define DWC_ECODE_GS_QR2         (-4000)
+#define DWC_ECODE_GS_SB          (-5000)
+#define DWC_ECODE_GS_NN          (-6000)
 #define DWC_ECODE_GS_GT2         (-7000)
 #define DWC_ECODE_TYPE_ALLOC     (-1)
 #define DWC_ECODE_TYPE_PARAM     (-2)
@@ -18,7 +22,12 @@
 #define DWC_ECODE_TYPE_DNS       (-30)
 #define DWC_ECODE_TYPE_DATA      (-40)
 #define DWC_ECODE_TYPE_SOCKET    (-50)
+#define DWC_ECODE_TYPE_BIND      (-60)
 #define DWC_ECODE_TYPE_TIMEOUT   (-70)
+#define DWC_ECODE_TYPE_PEER      (-80)
+#define DWC_ECODE_TYPE_CONN_OVER (-100)
+#define DWC_ECODE_TYPE_OTHER     (-410)
+#define DWC_ECODE_TYPE_SC_CL_FAIL (-430)
 
 typedef DWCErrorType DWCError;
 

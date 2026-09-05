@@ -13,6 +13,9 @@ extern "C"
 #define DWC_FRIEND_UPDATE_WAIT_COUNT 7
 #define DWC_GP_SSTR_KEY_MATCH_SC_MAX "SCM"
 #define DWC_GP_SSTR_KEY_MATCH_SC_NUM "SCN"
+#define DWC_GP_SSTR_KEY_MATCH_VERSION "VER"
+#define DWC_GP_SSTR_KEY_MATCH_FRIEND_NUM "FME"
+#define DWC_GP_SSTR_KEY_DISTANT_FRIEND "MDF"
 #define DWC_GP_STATUS_NO_CHANGE -1
 
     typedef void (*DWCBuddyFriendCallback)(int index, void* param);

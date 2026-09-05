@@ -15,6 +15,8 @@ typedef enum {
   DWC_ERROR_NETWORK = DWC_ERROR_TYPE_6,
   DWC_ERROR_TYPE_7 = 7,
   DWC_ERROR_FATAL = 9,
+  DWC_ERROR_MO_SC_CONNECT_BLOCK = 12,
+  DWC_ERROR_SERVER_FULL = 13,
 } DWCErrorType;
 
 //! @brief @return Return if there is an error.
