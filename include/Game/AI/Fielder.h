@@ -75,6 +75,9 @@ struct LooseBallContactAnimInfo
 }; // total size: 0xC
 
 class cFielder;
+class cSHierarchy;
+class AnimRetargetList;
+class CharacterPhysicsData;
 class WaluigiWallManager_80178400;
 void fn_80048870(cFielder* pFielder);
 const LooseBallContactAnimInfo* GetOneTimerIdleGroundContactAnims();
@@ -133,6 +136,12 @@ class cFielder : public cPlayer
     friend class DesireUserControlled;
 
 public:
+    cFielder(int nPlayerID, int nTeamID, eCharacterClass cc,
+        const int* pTemplate, cSHierarchy* pHierarchy,
+        cAnimInventory* pAnimInventory,
+        const CharacterPhysicsData* pPhysicsData, PlayerTweaks* pTweaks,
+        PlayerTweaks* pUnidentifiedTweaks,
+        AnimRetargetList* pAnimRetargetList, int nIndex);
     virtual ~cFielder();
     virtual void PrePhysicsUpdate();
     virtual void PreUpdate(float fTime);
@@ -150,6 +159,8 @@ public:
         const CollisionPlayerWallData* eventData);
     bool CanDoCaptainShootToScore();
     bool CanReceivePass();
+    bool fn_8003E8F4() const;
+    bool fn_8003EA6C() const;
     cFielder* GetMark() const { return mUnidentified464[0]; }
     cFielder* GetMark(int index) const { return mUnidentified464[index]; }
     void fn_8002FDC4(unsigned short aParam, bool bParam);

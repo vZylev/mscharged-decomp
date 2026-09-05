@@ -1,4 +1,5 @@
 #include "Game/AI/Fielder.h"
+#include "Game/AI/UnidentifiedAvoidanceObject.h"
 
 #include "Game/AI/FuzzyVariant.h"
 #include "Game/AI/ShotMeter.h"
@@ -7,6 +8,7 @@
 #include "Game/EventDataTypes.h"
 #include "Game/Field.h"
 #include "Game/GameInfo.h"
+#include "Game/Goalie.h"
 #include "Game/Net.h"
 #include "Game/Physics/PhysicsCharacter.h"
 #include "Game/SAnim/pnSAnimController.h"
@@ -40,6 +42,8 @@ extern "C" void fn_8001DCCC(
 extern "C" void fn_80060608(void* pParam, cFielder* pFielder);
 extern "C" void fn_800ED92C(unsigned long soundID);
 extern "C" bool fn_8001E168(const cCharacter* pCharacter);
+extern "C" void fn_8003E354(cFielder* pFielder);
+extern "C" void fn_80080BFC(Goalie* pGoalie, float fDeltaT);
 extern "C" void fn_800BED24(
     UnidentifiedPadAction* pAction, unsigned short* pParam);
 extern unsigned char lbl_806E0C61;
@@ -141,6 +145,36 @@ void cFielder::PreUpdate(float fTime)
     cPlayer::PreUpdate(fTime);
     m_bHasBeenUpdated = false;
     mbWasHitByPowerupThisFrame = false;
+}
+
+void cFielder::PrePhysicsUpdate()
+{
+    cPlayer::PrePhysicsUpdate();
+
+    UnidentifiedPadAction* pAction
+        = fn_80319FC0(mUnidentified428->mUnidentified18, 0x1D);
+    bool bActionActive = false;
+    if (pAction != 0 && pAction->mUnidentified08
+        && pAction->mUnidentifiedA4 != 0)
+    {
+        bActionActive = true;
+    }
+
+    if (!bActionActive
+        && (m_eActionState == ACTION_RECEIVE_PASS
+            || m_eActionState == ACTION_ONETIMER
+            || m_eActionState == ACTION_LOOSE_BALL_SHOT
+            || m_eActionState == ACTION_LOOSE_BALL_PASS))
+    {
+        fn_8003E354(this);
+    }
+
+    Goalie* pGoalie = m_pTeam->GetOtherTeam()->GetGoalie();
+    if (pGoalie->mGoalieActionState == GOALIEACTION_UNIDENTIFIED_13
+        && pGoalie->mpTarget == this)
+    {
+        fn_80080BFC(pGoalie, 0.0f);
+    }
 }
 
 bool cFielder::CanPickupBall(cBall* pBall, bool bParam)
@@ -339,6 +373,28 @@ bool cFielder::CanDoCaptainShootToScore()
     return false;
 }
 
+bool cFielder::fn_8003E8F4() const
+{
+    bool result = false;
+    if (m_eCharacterClass == LUIGI
+        && fn_80319FEC(mUnidentified428->mUnidentified18, 0x17))
+    {
+        result = true;
+    }
+    return result;
+}
+
+bool cFielder::fn_8003EA6C() const
+{
+    bool result = false;
+    if (m_eCharacterClass == TOAD
+        && fn_80319FEC(mUnidentified428->mUnidentified18, 0x17))
+    {
+        result = true;
+    }
+    return result;
+}
+
 bool cFielder::CanReceivePass()
 {
     bool bCanReceivePass = false;
@@ -389,9 +445,7 @@ bool cFielder::CanReceivePass()
 
     if (bCondition2)
     {
-        bool bExcluded
-            = m_eCharacterClass == TOAD
-           && fn_80319FEC(mUnidentified428->mUnidentified18, 0x17);
+        bool bExcluded = fn_8003EA6C();
         if (!bExcluded)
         {
             bCondition3 = true;
@@ -422,9 +476,7 @@ bool cFielder::CanReceivePass()
 
     if (bCondition5)
     {
-        bool bExcluded
-            = m_eCharacterClass == LUIGI
-           && fn_80319FEC(mUnidentified428->mUnidentified18, 0x17);
+        bool bExcluded = fn_8003E8F4();
         if (!bExcluded)
         {
             bCondition6 = true;
@@ -607,4 +659,160 @@ void cFielder::CollideWithWallCallback(
             fn_80046244();
         }
     }
+}
+
+bool cFielder::IsFallenDown() const
+{
+    if (m_tFireTimer.m_uPackedTime != 0)
+    {
+        return true;
+    }
+
+    bool bUnidentified;
+    switch (m_eActionState)
+    {
+    case (eFielderActionState)3:
+    case (eFielderActionState)0x18:
+        bUnidentified = true;
+        break;
+    default:
+        bUnidentified = false;
+        break;
+    }
+    if (bUnidentified)
+    {
+        return true;
+    }
+
+    if (m_eActionState == (eFielderActionState)0x21)
+    {
+        if (m_eAnimID != 0x81 || m_pCurrentAnimController->m_fTime < 0.3f)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    if (m_eActionState == (eFielderActionState)0x22
+        || m_eActionState == (eFielderActionState)0x23)
+    {
+        return true;
+    }
+
+    float fGetUpFrame = -1.0f;
+    switch (m_eAnimID)
+    {
+    case 0x7F:
+        fGetUpFrame = 44.0f;
+        break;
+    case 0x65:
+        fGetUpFrame = 67.0f;
+        break;
+    case 0x66:
+        fGetUpFrame = 64.0f;
+        break;
+    case 0x6A:
+        fGetUpFrame = 30.0f;
+        break;
+    case 0x6E:
+        fGetUpFrame = 43.0f;
+        break;
+    case 0x72:
+        fGetUpFrame = 56.0f;
+        break;
+    case 0x6B:
+    case 0x6D:
+        fGetUpFrame = 30.0f;
+        break;
+    case 0x6F:
+    case 0x71:
+        fGetUpFrame = 45.0f;
+        break;
+    case 0x73:
+    case 0x75:
+        fGetUpFrame = 60.0f;
+        break;
+    case 0x6C:
+        fGetUpFrame = 30.0f;
+        break;
+    case 0x70:
+        fGetUpFrame = 43.0f;
+        break;
+    case 0x74:
+        fGetUpFrame = 56.0f;
+        break;
+    case 0x5F:
+        fGetUpFrame = 42.0f;
+        break;
+    case 0x61:
+        fGetUpFrame = 46.0f;
+        break;
+    case 0x60:
+    case 0x62:
+        fGetUpFrame = 43.0f;
+        break;
+    case 0x63:
+        fGetUpFrame = 46.0f;
+        break;
+    case 0x64:
+        fGetUpFrame = 42.0f;
+        break;
+    case 0x56:
+        fGetUpFrame = 108.0f;
+        break;
+    case 0x76:
+    case 0x77:
+    case 0x79:
+    case 0x7A:
+        fGetUpFrame = (float)m_pCurrentAnimController->m_pSAnim->m_nNumKeys;
+        break;
+    case 0x7C:
+        fGetUpFrame = (float)m_pCurrentAnimController->m_pSAnim->m_nNumKeys;
+        break;
+    case 0x7D:
+        fGetUpFrame = 55.0f;
+        break;
+    case 0x78:
+    case 0x7B:
+        fGetUpFrame = 29.0f;
+        break;
+    case 0x68:
+        if (m_eCharacterClass == DAISY)
+        {
+            fGetUpFrame = (float)m_pCurrentAnimController->m_pSAnim->m_nNumKeys;
+        }
+        break;
+    }
+
+    return m_pCurrentAnimController->m_fTime
+        < fGetUpFrame / m_pCurrentAnimController->m_pSAnim->m_nNumKeys;
+}
+
+void cFielder::ShootBallDueToContact(const nlVector3& v3IncomingVelocity)
+{
+    if (m_eActionState == ACTION_SHOOT_TO_SCORE || m_eActionState == ACTION_SHOT)
+    {
+        g_pBall->ShootRelease(v3Zero, SPINTYPE_NONE);
+        return;
+    }
+
+    nlVector3 v3ReleaseVelocity;
+    nlVec3Add(v3ReleaseVelocity, v3IncomingVelocity, m_v3Velocity);
+    if (nlVec3LengthSquared(v3IncomingVelocity) < 0.001f * 0.001f
+        || nlVec3LengthSquared(m_v3Velocity) < 0.001f * 0.001f
+        || nlVec3LengthSquared(v3ReleaseVelocity) < 0.001f * 0.001f)
+    {
+        nlVector3 v3ReleaseVelocity;
+        nlPolarToCartesian(v3ReleaseVelocity.x, v3ReleaseVelocity.y,
+            m_aActualFacingDirection, 2.0f);
+        v3ReleaseVelocity.z = 0.5f;
+        g_pBall->ShootRelease(v3ReleaseVelocity, SPINTYPE_NONE);
+        return;
+    }
+
+    nlVec3Scale(v3ReleaseVelocity, v3ReleaseVelocity,
+        nlRecipSqrt(nlVec3LengthSquared(v3ReleaseVelocity), true));
+    nlVec3Scale(v3ReleaseVelocity, v3ReleaseVelocity, 2.0f + m_fActualSpeed);
+    v3ReleaseVelocity.z = 0.5f;
+    g_pBall->ShootRelease(v3ReleaseVelocity, SPINTYPE_NONE);
 }

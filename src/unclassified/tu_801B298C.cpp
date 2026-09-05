@@ -1,3 +1,4 @@
+#include "Game/AI/UnidentifiedAvoidanceObject.h"
 #include "unclassified/tu_801B298C.h"
 
 #include "Game/AI/Fielder.h"
@@ -41,7 +42,6 @@ extern "C"
     char lbl_80514730[] = "ThwompUp";
     char lbl_8051473C[] = "fx_thwompland";
 
-    extern const nlVector3 lbl_804DCF68 = { 0.0f, 0.0f, 0.0f };
     extern const nlVector3 lbl_804DCF74 = { 0.0f, 0.0f, -100.0f };
     extern const nlVector3 lbl_804DCF80 = { 0.0f, 0.0f, 0.0f };
     extern const nlVector3 lbl_804DCF8C = { 0.0f, 0.0f, -10.0f };
@@ -52,8 +52,6 @@ extern "C"
     extern const nlVector4 lbl_804DCFC8 = { 0.1f, 0.08f, 0.0f, 0.0f };
 
     RenderObject* fn_80276360(int, int);
-    UnidentifiedThwompMember_801B2EAC* fn_8000E110(
-        void*, int, const nlVector3*, float, float);
     EmissionController* fn_802E7DC4(
         EmissionManager*, const char*, int, bool, bool);
     void fn_802B5370(
@@ -291,7 +289,7 @@ extern "C" void fn_801B2EAC(
     else if (state == 1)
     {
         object->mPhysics->m_gravity = 0.0f;
-        object->mPhysics->SetLinearVelocity(lbl_804DCF68);
+        object->mPhysics->SetLinearVelocity(v3Zero);
 
         nlQuaternion orientation;
         nlVector3 axis;
@@ -319,7 +317,7 @@ extern "C" void fn_801B2EAC(
         bodyOrientation[2] = orientation.z;
         bodyOrientation[3] = orientation.w;
         dBodySetQuaternion(object->mPhysics->m_bodyID, bodyOrientation);
-        object->mPhysics->SetAngularVelocity(lbl_804DCF68);
+        object->mPhysics->SetAngularVelocity(v3Zero);
         object->mPhysics->DisableCollisions();
         object->mState = 1;
     }
@@ -327,15 +325,10 @@ extern "C" void fn_801B2EAC(
     {
         object->mUnidentified020 = lbl_806DD104;
         object->mState = 2;
-        void* memory = nlMalloc(0x68, 8, false);
-        UnidentifiedThwompMember_801B2EAC* member
-            = (UnidentifiedThwompMember_801B2EAC*)memory;
-        if (memory != 0)
-        {
-            member = fn_8000E110(memory, 3,
-                &object->mPhysics->GetPosition(), 3.14f, 2.88f);
-        }
-        object->mUnidentified014 = member;
+        object->mUnidentified014 = new (nlMalloc(
+            sizeof(UnidentifiedAvoidancePolygon_804F4750), 8, false))
+            UnidentifiedAvoidancePolygon_804F4750(
+                3, object->mPhysics->GetPosition(), 3.14f, 2.88f);
     }
     else if (state == 3)
     {
@@ -353,7 +346,7 @@ extern "C" void fn_801B2EAC(
         EmissionController* controller = fn_802E7DC4(
             EmissionManager::Instance(), lbl_8051473C, 2, true, false);
         controller->SetPosition(object->mPhysics->GetPosition());
-        controller->SetVelocity(lbl_804DCF68);
+        controller->SetVelocity(v3Zero);
     }
     else if (state == 5)
     {
@@ -369,10 +362,10 @@ extern "C" void fn_801B2EAC(
     {
         object->mVisible = false;
         object->mPhysics->m_gravity = 0.0f;
-        object->mPhysics->SetLinearVelocity(lbl_804DCF68);
+        object->mPhysics->SetLinearVelocity(v3Zero);
         object->mPhysics->SetPosition(
             lbl_804DCF74, PhysicsObject::WORLD_COORDINATES);
-        object->mPhysics->SetAngularVelocity(lbl_804DCF68);
+        object->mPhysics->SetAngularVelocity(v3Zero);
         object->mPhysics->DisableCollisions();
         object->mState = -1;
     }
@@ -386,7 +379,7 @@ extern "C" void fn_801B2EAC(
         nlVector3 velocity = { 0.0f, 0.0f, lbl_806DD10C };
         object->mPhysics->SetLinearVelocity(velocity);
         object->mPhysics->m_gravity = lbl_806DD110;
-        object->mPhysics->SetAngularVelocity(lbl_804DCF68);
+        object->mPhysics->SetAngularVelocity(v3Zero);
         object->mState = 7;
     }
 }

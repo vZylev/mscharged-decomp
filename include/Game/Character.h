@@ -182,7 +182,8 @@ public:
     /* 0x0D4 */ cHeadTrack* m_pHeadTrack;
     /* 0x0D8 */ int m_nHeadJointIndex;
     /* 0x0DC */ int m_nBip01JointIndex_0xA4;
-    /* 0x0E0 */ u8 unknown_0x0E0[0x10];
+    /* 0x0E0 */ u8 unknown_0x0E0[0xC];
+    /* 0x0EC */ const char* m_szEffectsName;
     /* 0x0F0 */ eClassTypes m_eClassType;
     /* 0x0F4 */ bool m_bIsUsingElectrocutionTexture;
     /* 0x0F5 */ u8 unknown_0x0F5[0x27];

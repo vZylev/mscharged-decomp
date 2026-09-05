@@ -6,6 +6,7 @@
 #include "NL/globalpad.h"
 #include "NL/nlMemory.h"
 #include "NL/nlPrint.h"
+#include "NL/plat/tu_80364604.h"
 #include "decomp.h"
 
 class TLComponentInstance;
@@ -19,15 +20,6 @@ public:
     /* 0x00 */ u8 mUnidentified000[0x54];
     /* 0x54 */ int mUnidentified054;
 }; // size 0x58
-
-struct UnidentifiedPointerData
-{
-    /* 0x00 */ int mCount;
-    /* 0x04 */ u8 mUnidentified004[8];
-    /* 0x0C */ u16 mAngle;
-    /* 0x0E */ u8 mUnidentified00E[0xA];
-    /* 0x18 */ nlVector2 mPosition;
-}; // size 0x20
 
 typedef int (*GetDeviceType)(void* device);
 
@@ -43,8 +35,6 @@ extern int lbl_806E228C;
 extern unsigned int nlDefaultSeed;
 
 extern "C" bool fn_80273B00();
-extern "C" int fn_80364630(
-    UnidentifiedPointerData* data, nlVector2* position, u16* angle);
 extern "C" void fn_80375DF8(void* owner, int index, bool value);
 extern "C" bool fn_80375E04(void* owner, int index);
 

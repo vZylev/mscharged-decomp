@@ -169,7 +169,6 @@ extern "C" void fn_801B93E8(cCharacter* pCharacter);
 extern "C" bool fn_8007BF68(Goalie* pGoalie, bool bParam);
 extern "C" bool fn_8007C590(Goalie* pGoalie);
 extern "C" bool fn_8007D644(Goalie* pGoalie);
-extern "C" bool fn_8003EA6C(cFielder* pFielder);
 extern "C" void fn_8007EA90(Goalie* pGoalie);
 extern "C" void fn_8007E940(Goalie* pGoalie, float fFudgeDist);
 extern "C" float fn_8007ECB4(Goalie* pGoalie, float fTimeToContact,
@@ -2972,7 +2971,7 @@ bool Goalie::IsTeammateHoardingBall()
     {
         cBall* pBall;
         cFielder* pOwner = g_pBall->GetOwnerFielder();
-        if (pOwner != 0 && !fn_8003EA6C(pOwner)
+        if (pOwner != 0 && !pOwner->fn_8003EA6C()
             && IsOnSameTeam(pOwner))
         {
             float ownerX;

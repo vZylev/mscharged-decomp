@@ -1,3 +1,4 @@
+#include "Game/AI/UnidentifiedAvoidanceObject.h"
 #include "Game/AI/Fielder.h"
 
 #include "Game/Render/RLView.h"
@@ -48,7 +49,6 @@
 #include "Game/Render/ShootToScoreMeter.h"
 #include "math.h"
 
-static const nlVector3 v3Zero = { 0.0f, 0.0f, 0.0f };
 static const nlVector3 v3LaunchUp = { 0.0f, 0.0f, 5.0f };
 static const nlVector3 v3ElectrocutionLaunch = { -5.0f, 0.0f, 5.0f };
 static const nlVector3 v3Up = { 0.0f, 0.0f, 1.0f };
@@ -290,18 +290,7 @@ struct UnidentifiedSkillshotNode
 };
 extern BasicSlotPool<UnidentifiedSkillshotNode> lbl_805712F8;
 
-struct UnidentifiedWindupObject
-{
-    virtual ~UnidentifiedWindupObject();
-
-    /* 0x04 */ u8 mUnidentified04[0x60];
-    /* 0x64 */ cFielder* mUnidentified64;
-};
-extern UnidentifiedWindupObject* lbl_806E0C74;
-
-extern "C" UnidentifiedWindupObject* fn_8000DDE8(
-    UnidentifiedWindupObject* pObject, int nParam, const nlVector3* pPosition,
-    const nlVector3* pTarget, float fParam);
+extern UnidentifiedAvoidancePolygon_804F4750* lbl_806E0C74;
 extern "C" void fn_801B94EC(
     cFielder* pFielder, const nlVector3* pPosition, const nlVector3* pNormal);
 extern "C" void fn_801B968C(cFielder* pFielder);
@@ -4736,15 +4725,11 @@ void cFielder::fn_8004BB80(float fDeltaT)
             nlVec3Scale(v3Dir, v3Dir, fRecipLength);
             nlVec3ScaleAdd(v3Dir, 2.0f, v3Dir, m_v3Position);
 
-            UnidentifiedWindupObject* pObject
-                = (UnidentifiedWindupObject*)nlMalloc(0x68, 8, false);
-            if (pObject != 0)
-            {
-                pObject = fn_8000DDE8(pObject, 2, &v3Dir,
-                    &m_pTeam->GetOtherNet()->m_v3NetLocation, lbl_806E35DC);
-            }
-            lbl_806E0C74 = pObject;
-            lbl_806E0C74->mUnidentified64 = this;
+            lbl_806E0C74 = new (nlMalloc(
+                sizeof(UnidentifiedAvoidancePolygon_804F4750), 8, false))
+                UnidentifiedAvoidancePolygon_804F4750(2, v3Dir,
+                    m_pTeam->GetOtherNet()->m_v3NetLocation, lbl_806E35DC);
+            lbl_806E0C74->mUnidentified064 = this;
         }
     }
 

@@ -1,76 +1,10 @@
+#include "Game/Audio/AudioEffect_802F98F4.h"
 #include "Game/UnidentifiedStaticStorage.h"
 #include "NL/nlAlgorithm.h"
-#include "NL/nlDLListContainer.h"
 #include "NL/nlMemory.h"
 #include "NL/nlSlotPool.h"
 #include "NL/nlString.h"
 #include "types.h"
-
-class AudioEffectParameter_802F69A8
-{
-public:
-    AudioEffectParameter_802F69A8()
-    {
-        m_State.m_Flags.bytes[0] = false;
-    }
-
-    virtual ~AudioEffectParameter_802F69A8() { }
-    virtual void fn_802F6A60(float);
-    virtual bool fn_802F69E8();
-
-    struct State
-    {
-        union Value
-        {
-            u32 word;
-            float scalar;
-            void* pointer;
-        };
-
-        Value m_Current;
-        Value m_Target;
-        union Flags
-        {
-            u32 word;
-            u8 bytes[4];
-        } m_Flags;
-    } m_State;
-};
-
-class AudioEffectBase_802F98F4
-{
-public:
-    AudioEffectBase_802F98F4(const char*)
-        : m_Enabled(false)
-        , m_Parameters()
-        , m_CurrentParameter(0)
-        , m_ResultParameter(0)
-    {
-    }
-
-    virtual ~AudioEffectBase_802F98F4() { }
-    virtual void fn_802F6930(u32, void*, bool,
-        AudioEffectParameter_802F69A8**);
-    virtual void fn_802F9B5C();
-    virtual void fn_802F9B60(AudioEffectParameter_802F69A8*,
-        AudioEffectParameter_802F69A8*);
-    virtual void fn_802F9B8C();
-    virtual void fn_802F9B64(AudioEffectParameter_802F69A8*);
-    virtual void fn_802F692C();
-    virtual void fn_802F98F0();
-    virtual void fn_802F98EC();
-    virtual void fn_802F9974(float);
-    virtual void fn_802F9B68(AudioEffectParameter_802F69A8*);
-
-    void* operator new(unsigned long);
-    void operator delete(void*);
-
-    bool m_Enabled;
-    u8 m_Pad05[3];
-    nlDLListSlotPool<AudioEffectParameter_802F69A8*> m_Parameters;
-    AudioEffectParameter_802F69A8* m_CurrentParameter;
-    AudioEffectParameter_802F69A8* m_ResultParameter;
-};
 
 class CategoryVolumeParameter_803595A4
     : public AudioEffectParameter_802F69A8
@@ -101,10 +35,10 @@ class CategoryVolume : public AudioEffectBase_802F98F4
 {
 public:
     virtual ~CategoryVolume();
-    virtual void fn_803595C8(u32 definition, void* context, bool negate,
+    virtual void fn_802F6930(u32 definition, void* context, bool negate,
         AudioEffectParameter_802F69A8** output);
-    virtual void fn_80359924();
-    virtual void fn_8035984C(AudioEffectParameter_802F69A8* destination,
+    virtual void fn_802F9B5C();
+    virtual void fn_802F9B60(AudioEffectParameter_802F69A8* destination,
         AudioEffectParameter_802F69A8* source);
 
     static void* operator new(unsigned long)
@@ -123,17 +57,6 @@ public:
     CategoryVolumeParameter_803595A4 m_Final;
 
     static SlotPool<CategoryVolume> s_Pool;
-};
-
-class AuxEffectMap_8035952C
-{
-public:
-    AuxEffectMap_8035952C();
-    int fn_80359544(const int& effect);
-    int fn_80359590(const int& effect) const;
-
-    int m_Effects[2];
-    int m_Indices[2];
 };
 
 struct CategoryEntry_80359888
@@ -264,7 +187,7 @@ CategoryVolumeParameter_803595A4::CategoryVolumeParameter_803595A4()
 {
 }
 
-void CategoryVolume::fn_803595C8(u32 definition, void*, bool negate,
+void CategoryVolume::fn_802F6930(u32 definition, void*, bool negate,
     AudioEffectParameter_802F69A8** output)
 {
     CategoryVolumeParameter_803595A4* parameter
@@ -320,7 +243,7 @@ void CategoryVolume::fn_803595C8(u32 definition, void*, bool negate,
     }
 }
 
-void CategoryVolume::fn_8035984C(
+void CategoryVolume::fn_802F9B60(
     AudioEffectParameter_802F69A8* destination,
     AudioEffectParameter_802F69A8* source)
 {
@@ -336,7 +259,7 @@ CategoryVolumeParameter_803595A4::~CategoryVolumeParameter_803595A4()
 {
 }
 
-void CategoryVolume::fn_80359924()
+void CategoryVolume::fn_802F9B5C()
 {
     m_Final.m_State = m_Initial.m_State;
     m_Final.m_Volume = m_Initial.m_Volume;
