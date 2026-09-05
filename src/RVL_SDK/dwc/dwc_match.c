@@ -53,11 +53,6 @@ typedef enum
     DWC_MATCH_RESET_NUM
 } DWCMatchResetLevel;
 
-typedef void (*DWCMatchedSCCallback)(DWCError error, BOOL cancel, BOOL self,
-    BOOL isServer, int index, void* param);
-typedef void (*DWCNewClientCallback)(int index, void* param);
-typedef int (*DWCEvalPlayerCallback)(int index, void* param);
-
 typedef struct DWCstNNInfo
 {
     u8 isQR2;
@@ -74,6 +69,18 @@ typedef struct DWCstConnectionInfo
     u16 reserve;
     void* param;
 } DWCConnectionInfo;
+
+typedef struct DWCstMatchCommandControl
+{
+    u8 command;
+    u8 count;
+    u16 port;
+    u32 ip;
+    u32 data[32];
+    int profileID;
+    int len;
+    OSTime sendTime;
+} DWCMatchCommandControl;
 
 typedef struct DWCstMatchControl
 {
@@ -156,23 +163,15 @@ typedef struct DWCstMatchControl
     u8 friendIdxList[DWC_MAX_MATCH_IDX_LIST];
     int friendIdxListLen;
     u32 svDataBak[DWC_MAX_CONNECTIONS + 1];
-    u32 _3DC;
-    u8 _3E0;
-    u8 _3E1;
-    u16 _3E2;
-    u32 _3E4;
-    u8 _3E8[0x80];
-    int _468;
-    int _46C;
-    s64 _470;
+    DWCMatchCommandControl cmdCnt;
     DWCMatchedSCCallback matchedCallback;
     void* matchedParam;
     DWCNewClientCallback newClientCallback;
     void* newClientParam;
-    DWCEvalPlayerCallback _488;
-    void* _48C;
-    void (*_490)(void* param);
-    void* _494;
+    DWCEvalPlayerCallback evalCallback;
+    void* evalParam;
+    void (*stopSCCallback)(void* param);
+    void* stopSCParam;
 } DWCMatchControl;
 
 typedef struct DWCstMatchOptSCBlock
@@ -186,21 +185,30 @@ GPResult DWCi_SetGPStatus(int status, const char* statusString,
     const char* locationString);
 int DWCi_GetFriendListIndex(int profileID);
 void DWCi_StopLogin(DWCError error, int errorCode);
-void fn_8049AE0C(int type, int aid, const void* data, int size);
-void fn_80499A30(SBServer server);
+static void DWCi_SBPrintServerData(SBServer server);
 static int DWCi_EvaluateServers(int sort);
-void fn_80499E90(void);
+static void DWCi_RandomizeServers(void);
 
-extern const int lbl_804F31F8[];
+static const int stEvalRate[DWC_SB_UPDATE_MAX_SERVERS] = {
+    3,
+    3,
+    2,
+    2,
+    1,
+    1,
+};
 
 void SBServerAddIntKeyValue(SBServer server, const char* keyname, int value);
 
-void fn_804970B0(void);
+static void DWCi_DoCancelMatching(void);
 void DWCi_StopMatching(DWCError error, int errorCode);
 static SBError DWCi_SBUpdateAsync(int profileID);
 static int DWCi_GetDefaultMatchFilter(
     char* filter, int profileID, u8 numEntry, u8 matchType);
 static void DWCi_ResetMatchParam(DWCMatchResetLevel level);
+static void DWCi_SetMatchCommonParam(u8 matchType, u8 numEntry,
+    DWCMatchedSCCallback callback, void* param);
+static void DWCi_CloseMatching(void);
 static GPResult DWCi_HandleGPError(GPResult result);
 static SBError DWCi_HandleSBError(SBError error);
 static qr2_error_t DWCi_HandleQR2Error(qr2_error_t error);
@@ -210,11 +218,11 @@ static BOOL DWCi_RetryReserving(int resendPid);
 static int DWCi_CancelReservation(int profileID);
 static BOOL DWCi_CancelPreConnectedServerProcess(int clientPid);
 static BOOL DWCi_CancelPreConnectedClientProcess(int serverPid);
-static int DWCi_PostProcessConnection(DWCMatchPpConnectionType type);
+static void DWCi_PostProcessConnection(DWCMatchPpConnectionType type);
 static int DWCi_ResumeMatching(void);
-int fn_804979F4(void);
-int fn_8049811C(void);
-void fn_80498440(void);
+static BOOL DWCi_ProcessMatchSynTimeout(void);
+static BOOL DWCi_ProcessCancelMatchSynTimeout(void);
+static void DWCi_ProcessOptMinComp(void);
 static int DWCi_SendMatchCommand(u8 command, int profileID, u32 ip, u16 port,
     const u32 data[], int len);
 static SBError DWCi_SendSBMsgCommand(
@@ -238,42 +246,41 @@ static void DWCi_QR2NatnegCallback(int cookie, void* userdata);
 static void DWCi_QR2ClientMsgCallback(
     gsi_char* data, int len, void* userdata);
 
-void fn_804993C8(ServerBrowser sb, SBCallbackReason reason,
+static void DWCi_SBCallback(ServerBrowser sb, SBCallbackReason reason,
     SBServer server, void* instance);
 static void DWCi_NNProgressCallback(NegotiateState state, void* userdata);
 static void DWCi_NNCompletedCallback(NegotiateResult result, SOCKET gamesocket,
     struct sockaddr_in* remoteaddr, void* userdata);
+static BOOL DWCi_ProcessNNFailure(BOOL ignoreError);
 
-int DWCi_GT2GetConnectionListIdx(void);
-GT2Connection* DWCi_GetGT2ConnectionByIdx(int index);
 DWCConnectionInfo* DWCi_GetConnectionInfoByIdx(int index);
 DWCAccUserData* DWCi_GetUserData(void);
-GT2Connection* DWCi_GetGT2ConnectionByProfileID(int profileID, int numHost);
 int DWCi_GetProfileIDFromList(int index);
-void DWC_CloseConnectionHard(u8 aid);
 static u8 DWCi_CheckResvCommand(
     int profileID, u32 qr2IP, u16 qr2Port, u32 matchType, BOOL priorFlag);
 static int DWCi_ProcessResvOK(int profileID, u32 ip, u16 port);
 static void DWCi_MakeBackupServerData(int profileID, const u32 data[]);
 static int DWCi_SendResvCommandToFriend(
     BOOL delay, BOOL init, int resendPid);
-static int DWCi_ProcessCancelMatchSynCommand(
+static BOOL DWCi_ProcessCancelMatchSynCommand(
     int profileID, u8 command, u32 data);
 static void DWCi_SendMatchSynPacket(u8 aid, u16 type);
 static NegotiateError DWCi_HandleNNError(NegotiateError error);
-int fn_8049925C(int error);
+static NegotiateResult DWCi_HandleNNResult(NegotiateResult result);
+static GT2Result DWCi_HandleGT2Error(GT2Result result);
 static void DWCi_RestartFromCancel(DWCMatchResetLevel level);
 
-void fn_804929E0(void);
+void DWCi_SetNumValidConnection(void);
 
-GPResult fn_80492BA0(void);
-int fn_80493B94(char* dstMsg, const char* srcMsg, int index);
+GPResult DWCi_GPSetServerStatus(void);
+static int DWCi_GetGPBuddyAdditionalMsg(
+    char* dstMsg, const char* srcMsg, int index);
 static BOOL DWCi_ProcessRecvMatchCommand(u8 command, int srcPid, u32 srcIP,
     u16 srcPort, const u32 data[], int len);
 static NegotiateError DWCi_NNStartupAsync(
     int isQR2, int cookie, SBServer server);
 static NegotiateError DWCi_DoNatNegotiationAsync(DWCNNInfo* nnInfo);
-BOOL fn_80492D3C(void);
+BOOL DWCi_IsShutdownMatch(void);
 static DWCMatchControl* DWCi_GetMatchCnt(void);
 static void DWCi_SetMatchStatus(DWCMatchState state);
 static void DWCi_StopResendingMatchCommand(void);
@@ -294,55 +301,60 @@ static void DWCi_InitClWaitTimeout(void);
 static void DWCi_InitOptMinCompParam(BOOL reset);
 static int DWCi_ChangeToClient(void);
 
-static char* stpAddFilter;
-static DWCMatchOptMinCompleteIn* stpOptMinComp;
-static int s_sbCallbackLevel;
-static int s_needSbFree;
-static DWCMatchControl* stpMatchCnt;
+static char* stpAddFilter = NULL;
+static DWCMatchOptMinCompleteIn* stpOptMinComp = NULL;
+static int s_sbCallbackLevel = 0;
+static BOOL s_needSbFree = FALSE;
+static DWCMatchControl* stpMatchCnt = NULL;
 static DWCMatchOptSCBlock stOptSCBlock;
 
-u8 lbl_806C9920[0x100];
 static DWCGameMatchKeyData stGameMatchKeys[DWC_QR2_GAME_RESERVED_KEYS];
-u8 lbl_806CA158[0x20];
-
-static u32 fn_ByteSwap32(u32 value)
-{
-    value = ((value >> 8) & 0x00FF00FF) | ((value << 8) & 0xFF00FF00);
-    return (value >> 16) | (value << 16);
-}
-
-static s64 fn_ElapsedMSec(s64 time)
-{
-    return (OSGetTime() - time) / (OS_BUS_CLOCK_SPEED / 4 / 1000);
-}
 
 BOOL DWC_RegisterMatchingStatus(void)
 {
     DWC_Printf(4, "!!DWC_RegisterMatchingStatus() was called!!\n");
-    DWC_Printf(4, "But ignored.\n");
+
+    if (DWCi_GetMatchCnt() == NULL || DWCi_GetMatchCnt()->profileID == 0
+        || DWCi_IsError())
+    {
+        DWC_Printf(4, "But ignored.\n");
+        return FALSE;
+    }
+
+    if (DWCi_QR2Startup(DWCi_GetMatchCnt()->profileID))
+    {
+        return FALSE;
+    }
+
     return TRUE;
 }
 
-void ClearMOSCConnectBlock(void)
+BOOL DWC_CancelMatching(void)
 {
-    DWC_Printf(4, "[OPT_SC_BLOCK] ClearMOSCConnectBlock\n");
-    stOptSCBlock.valid = 0;
-    stOptSCBlock.lock = 0;
-    stOptSCBlock.pad = 0;
-}
-
-BOOL DWC_CancelMatch(void)
-{
-    if (DWC_IsValidMatchCancel())
+    if (DWC_IsValidCancelMatching())
     {
-        fn_804970B0();
+        DWCi_DoCancelMatching();
         return TRUE;
     }
     DWC_Printf(4, "Now unable to cancel.\n");
     return FALSE;
 }
 
-BOOL DWC_IsValidMatchCancel(void)
+BOOL DWC_CancelMatchingAsync(void)
+{
+    if (DWC_IsValidCancelMatching())
+    {
+        DWCi_DoCancelMatching();
+        return TRUE;
+    }
+    else
+    {
+        DWC_Printf(DWC_REPORTFLAG_DEBUG, "Now unable to cancel.\n");
+        return FALSE;
+    }
+}
+
+BOOL DWC_IsValidCancelMatching(void)
 {
     if (DWCi_IsError())
     {
@@ -356,7 +368,7 @@ BOOL DWC_IsValidMatchCancel(void)
     return TRUE;
 }
 
-BOOL fn_8048F648(void (*callback)(void* param), void* param)
+BOOL DWC_StopSCMatchingAsync(DWCStopSCCallback callback, void* param)
 {
     if (DWCi_IsError() || stpMatchCnt == NULL
         || stpMatchCnt->qr2MatchType != 2
@@ -369,7 +381,7 @@ BOOL fn_8048F648(void (*callback)(void* param), void* param)
     if (stpMatchCnt->state == 10)
     {
         stpMatchCnt->qr2NumEntry = stpMatchCnt->gt2NumConnection;
-        fn_80492BA0();
+        DWCi_GPSetServerStatus();
         if (callback != NULL)
         {
             callback(param);
@@ -377,8 +389,8 @@ BOOL fn_8048F648(void (*callback)(void* param), void* param)
     }
     else
     {
-        stpMatchCnt->_490 = callback;
-        stpMatchCnt->_494 = param;
+        stpMatchCnt->stopSCCallback = callback;
+        stpMatchCnt->stopSCParam = param;
         stpMatchCnt->stopSCFlag = 1;
     }
     return TRUE;
@@ -505,25 +517,58 @@ u8 DWC_AddMatchKeyString(u8 keyID, const char* keyString,
     return keyID;
 }
 
-int fn_8048FACC(int index, const char* key, int defaultValue)
+int DWC_GetMatchIntValue(int index, const char* keyString, int idefault)
 {
     SBServer server;
 
     if (stpMatchCnt == NULL || DWCi_IsError())
     {
-        return defaultValue;
+        return idefault;
     }
     server = ServerBrowserGetServer(stpMatchCnt->sbObj, index);
     if (server != NULL)
     {
-        return SBServerGetIntValueA(server, key, defaultValue);
+        return SBServerGetIntValueA(server, keyString, idefault);
     }
-    return defaultValue;
+    return idefault;
 }
 
-int DWC_SetMatchingOption(int option, const void* optval)
+const char* DWC_GetMatchStringValue(
+    int index, const char* keyString, const char* sdefault)
 {
-    DWC_Printf(4, "!!DWC_SetMatchingOption() was called!! type %d\n", option);
+    SBServer server;
+
+    if (!DWCi_GetMatchCnt() || DWCi_IsError())
+    {
+        return sdefault;
+    }
+
+    server = ServerBrowserGetServer(DWCi_GetMatchCnt()->sbObj, index);
+    if (!server)
+    {
+        return sdefault;
+    }
+
+    return SBServerGetStringValue(server, keyString, sdefault);
+}
+
+int DWC_GetLastMatchingType(void)
+{
+    if (DWCi_GetMatchCnt())
+    {
+        return DWCi_GetMatchCnt()->qr2MatchType;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+int DWC_SetMatchingOption(
+    DWCMatchOptType opttype, const void* optval, int optlen)
+{
+#pragma unused(optlen)
+    DWC_Printf(4, "!!DWC_SetMatchingOption() was called!! type %d\n", opttype);
 
     if (stpMatchCnt == NULL)
     {
@@ -534,7 +579,7 @@ int DWC_SetMatchingOption(int option, const void* optval)
         return 3;
     }
 
-    switch (option)
+    switch (opttype)
     {
     case DWC_MATCH_OPTION_MIN_COMPLETE:
         if (stpMatchCnt->state == 19)
@@ -582,6 +627,62 @@ int DWC_SetMatchingOption(int option, const void* optval)
     }
 }
 
+int DWC_GetMatchingOption(
+    DWCMatchOptType opttype, void* optval, int* optlen)
+{
+    if (!DWCi_GetMatchCnt())
+    {
+        return 1;
+    }
+    if (!optval)
+    {
+        return 3;
+    }
+
+    switch (opttype)
+    {
+    case DWC_MATCH_OPTION_MIN_COMPLETE:
+        if (!stpOptMinComp)
+        {
+            if (optlen)
+            {
+                *optlen = 0;
+            }
+        }
+        else
+        {
+            DWCMatchOptMinComplete* pVal = optval;
+            pVal->valid = stpOptMinComp->valid;
+            pVal->minEntry = stpOptMinComp->minEntry;
+            pVal->timeout = stpOptMinComp->timeout;
+            pVal->pad[0] = pVal->pad[1] = 0;
+            if (optlen)
+            {
+                *optlen = sizeof(DWCMatchOptMinComplete);
+            }
+        }
+        return 0;
+
+    case DWC_MATCH_OPTION_SC_CONNECT_BLOCK:
+        if (stOptSCBlock.valid == 1)
+        {
+            *(BOOL*)optval = TRUE;
+        }
+        else
+        {
+            *(BOOL*)optval = FALSE;
+        }
+        if (optlen)
+        {
+            *optlen = sizeof(BOOL);
+        }
+        return 0;
+
+    default:
+        return 2;
+    }
+}
+
 int DWC_GetMOMinCompState(u64* time)
 {
     u64 passTime;
@@ -607,14 +708,47 @@ int DWC_GetMOMinCompState(u64* time)
     }
 }
 
-void fn_8048FD9C(DWCMatchControl* control, void* p0, GT2Socket* socket,
-    void* p2, const char* gamename, const char* secretKey,
-    const DWCFriendData* p5, int p6)
+BOOL DWC_GetMOSCConnectBlockState(void)
 {
-    stpMatchCnt = control;
-    stpMatchCnt->pGpObj = p0;
-    stpMatchCnt->pGt2Socket = socket;
-    stpMatchCnt->gt2Callbacks = p2;
+    if (stOptSCBlock.valid == 0 || stOptSCBlock.lock == 0)
+    {
+        return FALSE;
+    }
+    else
+    {
+        return TRUE;
+    }
+}
+
+void DWC_ClearMOSCConnectBlock(void)
+{
+    stOptSCBlock.lock = 0;
+
+    DWC_Printf(
+        DWC_REPORTFLAG_DEBUG, "[OPT_SC_BLOCK] ClearMOSCConnectBlock\n");
+}
+
+DWCMatchState DWC_GetMatchingState(void)
+{
+    if (DWCi_GetMatchCnt())
+    {
+        return DWCi_GetMatchCnt()->state;
+    }
+    else
+    {
+        return DWC_MATCH_STATE_INIT;
+    }
+}
+
+void DWCi_MatchInit(DWCMatchControl* matchcnt, GPConnection pGpObj,
+    GT2Socket* pGt2Socket, GT2ConnectionCallbacks* gt2Callbacks,
+    const char* gameName, const char* secretKey,
+    const DWCFriendData friendList[], int friendListLen)
+{
+    stpMatchCnt = matchcnt;
+    stpMatchCnt->pGpObj = pGpObj;
+    stpMatchCnt->pGt2Socket = pGt2Socket;
+    stpMatchCnt->gt2Callbacks = gt2Callbacks;
     stpMatchCnt->qr2Obj = NULL;
     stpMatchCnt->qr2IP = 0;
     stpMatchCnt->qr2Port = 0;
@@ -626,18 +760,18 @@ void fn_8048FD9C(DWCMatchControl* control, void* p0, GT2Socket* socket,
     stpMatchCnt->pad4 = 0;
     stpMatchCnt->friendAcceptBit = 0;
     stpMatchCnt->profileID = 0;
-    stpMatchCnt->gameName = gamename;
+    stpMatchCnt->gameName = gameName;
     stpMatchCnt->secretKey = secretKey;
-    stpMatchCnt->friendList = p5;
-    stpMatchCnt->friendListLen = p6;
+    stpMatchCnt->friendList = friendList;
+    stpMatchCnt->friendListLen = friendListLen;
     memset(stpMatchCnt->friendIdxList, 0, sizeof(stpMatchCnt->friendIdxList));
     stpMatchCnt->friendIdxListLen = 0;
     stpMatchCnt->matchedCallback = NULL;
     stpMatchCnt->matchedParam = NULL;
-    stpMatchCnt->_488 = NULL;
-    stpMatchCnt->_48C = NULL;
-    stpMatchCnt->_490 = NULL;
-    stpMatchCnt->_494 = NULL;
+    stpMatchCnt->evalCallback = NULL;
+    stpMatchCnt->evalParam = NULL;
+    stpMatchCnt->stopSCCallback = NULL;
+    stpMatchCnt->stopSCParam = NULL;
     stpMatchCnt->sbUpdateRequestTick = 0;
 
     DWCi_ClearGameMatchKeys();
@@ -743,15 +877,15 @@ void DWCi_ConnectToAnybodyAsync(u8 numEntry, const char* addFilter,
     qr2_register_keyA(0x34, "dwc_mresv");
     qr2_register_keyA(0x35, "dwc_mver");
     qr2_register_keyA(0x36, "dwc_eval");
-    DWCi_GetMatchCnt()->_488 = evalCallback;
-    DWCi_GetMatchCnt()->_48C = evalParam;
+    DWCi_GetMatchCnt()->evalCallback = evalCallback;
+    DWCi_GetMatchCnt()->evalParam = evalParam;
     DWCi_GetMatchCnt()->state = 2;
 
     if (DWCi_GetMatchCnt()->sbObj == NULL)
     {
         DWCi_GetMatchCnt()->sbObj = ServerBrowserNewA(
             DWCi_GetMatchCnt()->gameName, DWCi_GetMatchCnt()->gameName,
-            DWCi_GetMatchCnt()->secretKey, 0, 20, 1, SBFalse, fn_804993C8,
+            DWCi_GetMatchCnt()->secretKey, 0, 20, 1, SBFalse, DWCi_SBCallback,
             NULL);
     }
     if (DWCi_GetMatchCnt()->sbObj == NULL)
@@ -782,14 +916,94 @@ void DWCi_ConnectToAnybodyAsync(u8 numEntry, const char* addFilter,
     }
 }
 
-void fn_804903EC(u8 a0, DWCMatchedSCCallback callback, void* param,
-    void* callback2, void* param2)
+void DWCi_ConnectToFriendsAsync(const u8 friendIdxList[],
+    int friendIdxListLen, u8 numEntry, BOOL distantFriend,
+    DWCMatchedSCCallback matchedCallback, void* matchedParam,
+    DWCEvalPlayerCallback evalCallback, void* evalParam)
+{
+    char valueStr[12], keyValueStr[32];
+    int result;
+    GPResult gpResult;
+
+    DWCi_SetMatchCommonParam(
+        DWC_MATCH_TYPE_FRIEND, numEntry, matchedCallback, matchedParam);
+
+    DWCi_GetMatchCnt()->distantFriend = (u8)(distantFriend ? 1 : 0);
+    DWCi_GetMatchCnt()->evalCallback = evalCallback;
+    DWCi_GetMatchCnt()->evalParam = evalParam;
+
+    memcpy(DWCi_GetMatchCnt()->friendIdxList, friendIdxList,
+        (u32)friendIdxListLen);
+    DWCi_GetMatchCnt()->friendIdxListLen = friendIdxListLen;
+
+    if (!friendIdxListLen
+        || (friendIdxListLen < numEntry && !distantFriend
+            && (!stpOptMinComp || !stpOptMinComp->valid
+                || friendIdxListLen < stpOptMinComp->minEntry - 1)))
+    {
+        DWCi_StopMatching(DWC_ERROR_FRIENDS_SHORTAGE, 0);
+        return;
+    }
+
+    DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_WAIT_RESV);
+
+    if (!DWCi_GetMatchCnt()->sbObj)
+    {
+        DWCi_GetMatchCnt()->sbObj = ServerBrowserNew(
+            DWCi_GetMatchCnt()->gameName, DWCi_GetMatchCnt()->gameName,
+            DWCi_GetMatchCnt()->secretKey, 0, 20, QVERSION_QR2, SBFalse,
+            DWCi_SBCallback, NULL);
+    }
+    if (!DWCi_GetMatchCnt()->sbObj)
+    {
+        if (DWCi_HandleSBError(sbe_allocerror))
+        {
+            return;
+        }
+    }
+
+    (void)snprintf(valueStr, sizeof(valueStr), "%u", numEntry);
+    (void)DWC_SetCommonKeyValueString(
+        DWC_GP_SSTR_KEY_MATCH_FRIEND_NUM, valueStr, keyValueStr, '/');
+    (void)DWC_AddCommonKeyValueString(DWC_GP_SSTR_KEY_DISTANT_FRIEND,
+        distantFriend ? "Y" : "N", keyValueStr, '/');
+
+    (void)snprintf(valueStr, sizeof(valueStr), "%u", DWC_MATCHING_VERSION);
+    (void)DWC_AddCommonKeyValueString(
+        DWC_GP_SSTR_KEY_MATCH_VERSION, valueStr, keyValueStr, '/');
+
+    gpResult = DWCi_SetGPStatus(DWC_STATUS_MATCH_FRIEND, keyValueStr, NULL);
+    if (DWCi_HandleGPError(gpResult))
+    {
+        return;
+    }
+
+    if (DWCi_GetMatchCnt()->qr2Obj == NULL)
+    {
+        if (DWCi_QR2Startup(DWCi_GetMatchCnt()->profileID))
+        {
+            return;
+        }
+    }
+
+    result = DWCi_SendResvCommandToFriend(FALSE, TRUE, 0);
+    if (DWCi_HandleMatchCommandError(result))
+    {
+        return;
+    }
+
+    DWCi_InitOptMinCompParam(FALSE);
+}
+
+void DWCi_SetupGameServer(u8 maxEntry, DWCMatchedSCCallback matchedCallback,
+    void* matchedParam, DWCNewClientCallback newClientCallback,
+    void* newClientParam)
 {
     DWCi_ResetMatchParam(DWC_MATCH_RESET_ALL);
     stpMatchCnt->qr2MatchType = 2;
-    stpMatchCnt->qr2NumEntry = a0;
-    stpMatchCnt->matchedCallback = callback;
-    stpMatchCnt->matchedParam = param;
+    stpMatchCnt->qr2NumEntry = maxEntry;
+    stpMatchCnt->matchedCallback = matchedCallback;
+    stpMatchCnt->matchedParam = matchedParam;
     stpMatchCnt->nnFailureCount = 0;
     stpMatchCnt->aidList[0] = 0;
     qr2_register_keyA(0x32, "dwc_pid");
@@ -797,15 +1011,15 @@ void fn_804903EC(u8 a0, DWCMatchedSCCallback callback, void* param,
     qr2_register_keyA(0x34, "dwc_mresv");
     qr2_register_keyA(0x35, "dwc_mver");
     qr2_register_keyA(0x36, "dwc_eval");
-    stpMatchCnt->newClientCallback = (DWCNewClientCallback)callback2;
-    stpMatchCnt->newClientParam = param2;
+    stpMatchCnt->newClientCallback = newClientCallback;
+    stpMatchCnt->newClientParam = newClientParam;
     stpMatchCnt->sbPidList[0] = stpMatchCnt->profileID;
     stpMatchCnt->validAidBitmap = 1;
     stpMatchCnt->gt2NumValidConn = 0;
     stOptSCBlock.lock = 0;
     stpMatchCnt->state = 10;
 
-    if (DWCi_HandleGPError(fn_80492BA0()) == 0)
+    if (DWCi_HandleGPError(DWCi_GPSetServerStatus()) == 0)
     {
         if (stpMatchCnt->qr2Obj == NULL)
         {
@@ -814,8 +1028,10 @@ void fn_804903EC(u8 a0, DWCMatchedSCCallback callback, void* param,
     }
 }
 
-void fn_804905D0(int serverPid, DWCMatchedSCCallback matchedCallback,
-    void* matchedParam, void* newClientCallback, void* newClientParam)
+void DWCi_ConnectToGameServerAsync(int serverPid,
+    DWCMatchedSCCallback matchedCallback,
+    void* matchedParam, DWCNewClientCallback newClientCallback,
+    void* newClientParam)
 {
     int result;
     GPResult gpResult;
@@ -832,7 +1048,7 @@ void fn_804905D0(int serverPid, DWCMatchedSCCallback matchedCallback,
     qr2_register_keyA(0x34, "dwc_mresv");
     qr2_register_keyA(0x35, "dwc_mver");
     qr2_register_keyA(0x36, "dwc_eval");
-    DWCi_GetMatchCnt()->newClientCallback = (DWCNewClientCallback)newClientCallback;
+    DWCi_GetMatchCnt()->newClientCallback = newClientCallback;
     DWCi_GetMatchCnt()->newClientParam = newClientParam;
     DWCi_GetMatchCnt()->qr2IsReserved = 1;
     DWCi_GetMatchCnt()->qr2Reservation = DWCi_GetMatchCnt()->profileID;
@@ -843,7 +1059,7 @@ void fn_804905D0(int serverPid, DWCMatchedSCCallback matchedCallback,
     {
         DWCi_GetMatchCnt()->sbObj = ServerBrowserNewA(
             DWCi_GetMatchCnt()->gameName, DWCi_GetMatchCnt()->gameName,
-            DWCi_GetMatchCnt()->secretKey, 0, 20, 1, SBFalse, fn_804993C8,
+            DWCi_GetMatchCnt()->secretKey, 0, 20, 1, SBFalse, DWCi_SBCallback,
             NULL);
     }
     if (DWCi_GetMatchCnt()->sbObj == NULL)
@@ -882,298 +1098,314 @@ void fn_804905D0(int serverPid, DWCMatchedSCCallback matchedCallback,
     }
 }
 
-void fn_8049079C(BOOL enableProcess)
+static void DWCi_SendStateChanged(qr2_t qr2Obj)
 {
-    int state;
-
-    if (stpMatchCnt == NULL)
-    {
+    if (qr2Obj == NULL)
         return;
-    }
-    if (DWCi_IsError())
-    {
-        return;
-    }
 
-    if (!enableProcess)
+    qr2_think(qr2Obj);
+
+    if (qr2Obj->userstatechangerequested)
+        return;
+
+    switch (DWCi_GetMatchCnt()->qr2MatchType)
     {
-        if (stpMatchCnt->qr2Obj != NULL)
+    case DWC_MATCH_TYPE_ANYBODY:
+    case DWC_MATCH_TYPE_FRIEND:
+        switch (DWCi_GetMatchCnt()->state)
         {
-            qr2_think(stpMatchCnt->qr2Obj);
+        case DWC_MATCH_STATE_CL_WAITING:
+        case DWC_MATCH_STATE_CL_SEARCH_OWN:
+        case DWC_MATCH_STATE_CL_SEARCH_HOST:
+        case DWC_MATCH_STATE_CL_WAIT_RESV:
+        case DWC_MATCH_STATE_CL_NN:
+        case DWC_MATCH_STATE_SV_OWN_NN:
+            qr2_send_statechanged(DWCi_GetMatchCnt()->qr2Obj);
+            break;
         }
-        if (stpMatchCnt->pGt2Socket == NULL)
-        {
-            return;
-        }
-        gt2Think(*stpMatchCnt->pGt2Socket);
+        break;
+    case DWC_MATCH_TYPE_SC_SV:
+        if (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_OWN_NN)
+            qr2_send_statechanged(DWCi_GetMatchCnt()->qr2Obj);
+        break;
+    }
+}
+
+void DWCi_MatchProcess(BOOL fullSpec)
+{
+    u32 resendInterval;
+    u32 sbInterval;
+    int result;
+    SBError sbError;
+
+    if (!DWCi_GetMatchCnt() || DWCi_IsError())
+        return;
+
+    if (!fullSpec)
+    {
+        if (DWCi_GetMatchCnt()->qr2Obj)
+            qr2_think(DWCi_GetMatchCnt()->qr2Obj);
+        if (DWCi_GetMatchCnt()->pGt2Socket)
+            gt2Think(*DWCi_GetMatchCnt()->pGt2Socket);
         return;
     }
 
-    state = stpMatchCnt->state;
-    if (state == 0)
-    {
+    if (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_INIT)
         return;
-    }
 
-    switch (state)
+    switch (DWCi_GetMatchCnt()->state)
     {
-    case 4:
-        if (stpMatchCnt->cmdTimeoutTime != 0
-            && fn_ElapsedMSec(stpMatchCnt->cmdTimeoutStartTick) >= stpMatchCnt->cmdTimeoutTime)
+    case DWC_MATCH_STATE_CL_WAIT_RESV:
+        if (DWCi_GetMatchCnt()->cmdTimeoutTime > 0)
         {
-            stpMatchCnt->cmdTimeoutTime = 0;
-            if (stpMatchCnt->qr2MatchType == 3)
+            if (DWCi_Np_TicksToMilliSeconds(
+                    DWCi_Np_GetTick()
+                    - DWCi_GetMatchCnt()->cmdTimeoutStartTick)
+                > DWCi_GetMatchCnt()->cmdTimeoutTime)
             {
-                DWC_Printf(0x40, "Timeout: wait server response %d/%d.\n",
-                    stpMatchCnt->scResvRetryCount, 5);
-                stpMatchCnt->scResvRetryCount++;
-                if (stpMatchCnt->scResvRetryCount > 5)
+                DWCi_GetMatchCnt()->cmdTimeoutTime = 0;
+
+                if (DWCi_GetMatchCnt()->qr2MatchType
+                    == DWC_MATCH_TYPE_SC_CL)
                 {
-                    DWCi_StopMatching(DWC_ERROR_NETWORK,
-                        DWC_ECODE_SEQ_MATCH - 430);
-                    return;
-                }
-                if (stpMatchCnt->qr2MatchType == 0)
-                {
-                    if (DWCi_HandleSBError(DWCi_SendResvCommand(
-                            stpMatchCnt->sbPidList[0], FALSE))
-                        != 0)
+                    DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                        "Timeout: wait server response %d/%d.\n",
+                        DWCi_GetMatchCnt()->scResvRetryCount,
+                        DWC_MATCH_CMD_RETRY_MAX);
+
+                    DWCi_GetMatchCnt()->scResvRetryCount++;
+                    if (DWCi_GetMatchCnt()->scResvRetryCount
+                        > DWC_MATCH_CMD_RETRY_MAX)
                     {
+                        DWCi_StopMatching(DWC_ERROR_NETWORK,
+                            DWC_ECODE_SEQ_MATCH
+                                + DWC_ECODE_TYPE_SC_CL_FAIL);
                         return;
                     }
-                }
-                else if (DWCi_HandleGPError(DWCi_SendResvCommand(
-                             stpMatchCnt->sbPidList[0], FALSE))
-                    != 0)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                DWC_Printf(0x40,
-                    "NN resv(with %u) timed out. Try next server.\n",
-                    stpMatchCnt->sbPidList[0]);
-                if (DWCi_RetryReserving(0) == 0)
-                {
-                    return;
-                }
-            }
-        }
-        if (stpMatchCnt->cmdResendFlag != 0
-            && fn_ElapsedMSec(stpMatchCnt->cmdResendTick)
-                >= stpMatchCnt->gt2NumConnection * 3000 + 3000)
-        {
-            if (stpMatchCnt->qr2MatchType == 0)
-            {
-                if (DWCi_HandleSBError(DWCi_SendResvCommand(
-                        stpMatchCnt->sbPidList[0], FALSE))
-                    != 0)
-                {
-                    return;
-                }
-            }
-            else if (DWCi_HandleGPError(DWCi_SendResvCommand(
-                         stpMatchCnt->sbPidList[0], FALSE))
-                != 0)
-            {
-                return;
-            }
-        }
-        break;
-
-    case 2:
-    case 3:
-    case 5:
-        if (stpMatchCnt->sbUpdateFlag > 0)
-        {
-            int limit;
-
-            if (state == 3)
-            {
-                limit = stpMatchCnt->gt2NumConnection * 3000 + 3000;
-            }
-            else if (stpMatchCnt->sbUpdateFlag == 1)
-            {
-                limit = 1000;
-            }
-            else
-            {
-                limit = 3000;
-            }
-            if (fn_ElapsedMSec(stpMatchCnt->sbUpdateTick) >= limit)
-            {
-                if (DWCi_HandleSBError(DWCi_SBUpdateAsync(stpMatchCnt->reqProfileID)) != 0)
-                {
-                    return;
-                }
-                stpMatchCnt->sbUpdateFlag = 0;
-            }
-        }
-        break;
-
-    case 7:
-        if (stpMatchCnt->nnFinishTime != 0)
-        {
-            if (fn_ElapsedMSec(stpMatchCnt->nnFinishTime) >= 25000)
-            {
-                DWC_Printf(0x40, "Timeout: wait gt2Connect().\n");
-                stpMatchCnt->nnFinishTime = 0;
-                if (DWCi_CancelPreConnectedClientProcess(stpMatchCnt->sbPidList[0]) == 0)
-                {
-                    return;
-                }
-            }
-        }
-        else if (stpMatchCnt->_3E0 == 6
-            && fn_ElapsedMSec(stpMatchCnt->_470) >= 6000)
-        {
-            DWC_Printf(4, "RTT Timeout with DWC_MATCH_STATE_CL_GT2.\n");
-            stpMatchCnt->_3E1++;
-            if (stpMatchCnt->_3E1 > 5)
-            {
-                stpMatchCnt->_3E0 = 0xFF;
-                stpMatchCnt->_3E1 = 0;
-                DWC_Printf(0x40, "Stop resending command %d.\n", 6);
-                if (DWCi_CancelPreConnectedClientProcess(stpMatchCnt->sbPidList[0]) == 0)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                GPResult result = DWCi_SendMatchCommand(6, stpMatchCnt->_468,
-                    stpMatchCnt->_3E4, stpMatchCnt->_3E2,
-                    (u32*)stpMatchCnt->_3E8, stpMatchCnt->_46C);
-                if (stpMatchCnt->qr2MatchType == 0)
-                {
-                    if (DWCi_HandleSBError(result) != 0)
+                    else
                     {
-                        return;
+                        result = DWCi_SendResvCommand(
+                            DWCi_GetMatchCnt()->sbPidList[0], FALSE);
+                        if (DWCi_HandleMatchCommandError(result))
+                            return;
                     }
-                }
-                else if (DWCi_HandleGPError(result) != 0)
-                {
-                    return;
-                }
-            }
-        }
-        break;
-
-    case 11:
-        if (stpMatchCnt->_3E0 == 2)
-        {
-            if (stpMatchCnt->qr2MatchType == 0
-                && fn_ElapsedMSec(stpMatchCnt->_470) >= 6000)
-            {
-            }
-            else if (stpMatchCnt->qr2MatchType == 0
-                || fn_ElapsedMSec(stpMatchCnt->_470) < 19000)
-            {
-                break;
-            }
-            DWC_Printf(0x40, "Reservation timeout. Cancel reservation.\n");
-            stpMatchCnt->_3E0 = 0xFF;
-            stpMatchCnt->_3E1 = 0;
-            if (DWCi_CancelPreConnectedServerProcess(stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection + 1])
-                == 0)
-            {
-                return;
-            }
-        }
-        break;
-
-    case 13:
-        if (stpMatchCnt->_3E0 == 8
-            && fn_ElapsedMSec(stpMatchCnt->_470) >= 30000)
-        {
-            stpMatchCnt->_3E1++;
-            if (stpMatchCnt->_3E1 != 0)
-            {
-                stpMatchCnt->_3E0 = 0xFF;
-                DWC_Printf(0x40, "Wait clients connecting timeout.\n");
-                stpMatchCnt->_3E1 = 0;
-                if (stpMatchCnt->qr2MatchType == 2)
-                {
-                    if (DWCi_CancelPreConnectedServerProcess(stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection])
-                        == 0)
-                    {
-                        return;
-                    }
-                }
-                else if (stpMatchCnt->qr2MatchType == 2
-                    || stpMatchCnt->qr2MatchType == 3)
-                {
-                    DWC_Printf(8,
-                        "DWCi_RestartFromTimeout() shouldn't be called.\n");
                 }
                 else
                 {
-                    stpMatchCnt->closeState = 2;
-                    gt2CloseAllConnectionsHard(*stpMatchCnt->pGt2Socket);
-                    stpMatchCnt->closeState = 0;
-                    DWC_Printf(0x40,
-                        "Closed all connections and restart matching.\n");
-                    DWCi_RestartFromCancel(1);
+                    DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                        "NN resv(with %u) timed out. Try next server.\n",
+                        DWCi_GetMatchCnt()->sbPidList[0]);
+                    if (!DWCi_RetryReserving(0))
+                        return;
                 }
             }
-            else
+        }
+
+        if (DWCi_GetMatchCnt()->cmdResendFlag)
+        {
+            resendInterval = (u32)DWC_MATCH_CMD_RESEND_INTERVAL_MSEC
+                + DWC_MATCH_CMD_RESEND_INTERVAL_ADD_MSEC
+                    * DWCi_GetMatchCnt()->gt2NumConnection;
+
+            if (DWCi_Np_TicksToMilliSeconds(
+                    DWCi_Np_GetTick() - DWCi_GetMatchCnt()->cmdResendTick)
+                >= resendInterval)
             {
-                GPResult result = DWCi_SendMatchCommand(8, stpMatchCnt->_468,
-                    stpMatchCnt->_3E4, stpMatchCnt->_3E2,
-                    (u32*)stpMatchCnt->_3E8, stpMatchCnt->_46C);
-                if (stpMatchCnt->qr2MatchType == 0)
-                {
-                    if (DWCi_HandleSBError(result) != 0)
-                    {
-                        return;
-                    }
-                }
-                else if (DWCi_HandleGPError(result) != 0)
-                {
+                result = DWCi_SendResvCommand(
+                    DWCi_GetMatchCnt()->sbPidList[0], FALSE);
+                if (DWCi_HandleMatchCommandError(result))
                     return;
-                }
             }
         }
         break;
 
-    case 1:
-        if (DWC_GetState() != DWC_STATE_MATCHING)
-        {
+    case DWC_MATCH_STATE_CL_SEARCH_OWN:
+    case DWC_MATCH_STATE_CL_SEARCH_HOST:
+    case DWC_MATCH_STATE_CL_SEARCH_NN_HOST:
+        if (DWCi_GetMatchCnt()->sbUpdateFlag <= 0)
             break;
-        }
-        if (fn_ElapsedMSec(stpMatchCnt->clWaitTime) >= 30000)
+
+        if (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_CL_SEARCH_HOST)
         {
-            DWC_Printf(0x40, "No data from server %d/%d.\n",
-                stpMatchCnt->clWaitTimeoutCount, 5);
-            if (stpMatchCnt->clWaitTimeoutCount >= 5)
+            sbInterval = (u32)DWC_SB_UPDATE_INTERVAL_MSEC
+                + DWC_SB_UPDATE_INTERVAL_ADD_MSEC
+                    * DWCi_GetMatchCnt()->gt2NumConnection;
+        }
+        else
+        {
+            if (DWCi_GetMatchCnt()->sbUpdateFlag
+                == DWC_SB_UPDATE_INTERVAL_SHORT)
+                sbInterval = DWC_SB_UPDATE_INTERVAL_SHORT_MSEC;
+            else
+                sbInterval = DWC_SB_UPDATE_INTERVAL_MSEC;
+        }
+
+        if (DWCi_Np_TicksToMilliSeconds(
+                DWCi_Np_GetTick() - DWCi_GetMatchCnt()->sbUpdateTick)
+            > sbInterval)
+        {
+            sbError = DWCi_SBUpdateAsync(DWCi_GetMatchCnt()->reqProfileID);
+            if (DWCi_HandleSBError(sbError))
+                return;
+            DWCi_GetMatchCnt()->sbUpdateFlag = 0;
+        }
+        break;
+
+    case DWC_MATCH_STATE_CL_GT2:
+        if (DWCi_GetMatchCnt()->nnFinishTime)
+        {
+            if (DWCi_Np_TicksToMilliSeconds(
+                    DWCi_Np_GetTick() - DWCi_GetMatchCnt()->nnFinishTime)
+                > DWC_WAIT_GT2_CONNECT_TIMEOUT)
             {
-                DWC_Printf(0x40,
-                    "Timeout: Connection to server was shut down.\n");
-                if (DWCi_CancelPreConnectedClientProcess(stpMatchCnt->sbPidList[0]) == 0)
-                {
+                DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                    "Timeout: wait gt2Connect().\n");
+
+                DWCi_GetMatchCnt()->nnFinishTime = 0;
+                if (!DWCi_CancelPreConnectedClientProcess(
+                        DWCi_GetMatchCnt()->sbPidList[0]))
                     return;
+            }
+        }
+        else if ((DWCi_GetMatchCnt()->cmdCnt.command
+                     == DWC_MATCH_COMMAND_TELL_ADDR)
+            && (DWCi_Np_TicksToMilliSeconds(DWCi_Np_GetTick()
+                    - DWCi_GetMatchCnt()->cmdCnt.sendTime)
+                > DWC_MATCH_CMD_RTT_TIMEOUT))
+        {
+            DWC_Printf(DWC_REPORTFLAG_DEBUG,
+                "RTT Timeout with DWC_MATCH_STATE_CL_GT2.\n");
+            DWCi_GetMatchCnt()->cmdCnt.count++;
+            if (DWCi_GetMatchCnt()->cmdCnt.count
+                > DWC_MATCH_CMD_RETRY_MAX)
+            {
+                DWCi_StopResendingMatchCommand();
+
+                DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                    "Stop resending command %d.\n",
+                    DWC_MATCH_COMMAND_TELL_ADDR);
+
+                if (!DWCi_CancelPreConnectedClientProcess(
+                        DWCi_GetMatchCnt()->sbPidList[0]))
+                    return;
+                break;
+            }
+
+            result = DWCi_SendMatchCommand(DWC_MATCH_COMMAND_TELL_ADDR,
+                DWCi_GetMatchCnt()->cmdCnt.profileID,
+                DWCi_GetMatchCnt()->cmdCnt.ip,
+                DWCi_GetMatchCnt()->cmdCnt.port,
+                DWCi_GetMatchCnt()->cmdCnt.data,
+                DWCi_GetMatchCnt()->cmdCnt.len);
+            if (DWCi_HandleMatchCommandError(result))
+                return;
+        }
+        break;
+
+    case DWC_MATCH_STATE_SV_OWN_NN:
+        if ((DWCi_GetMatchCnt()->cmdCnt.command
+                == DWC_MATCH_COMMAND_RESV_OK)
+            && (((DWCi_GetMatchCnt()->qr2MatchType
+                     == DWC_MATCH_TYPE_ANYBODY)
+                    && (DWCi_Np_TicksToMilliSeconds(DWCi_Np_GetTick()
+                            - DWCi_GetMatchCnt()->cmdCnt.sendTime)
+                        > DWC_MATCH_RESV_KEEP_TIME_ANYBODY))
+                || ((DWCi_GetMatchCnt()->qr2MatchType
+                         != DWC_MATCH_TYPE_ANYBODY)
+                    && (DWCi_Np_TicksToMilliSeconds(DWCi_Np_GetTick()
+                            - DWCi_GetMatchCnt()->cmdCnt.sendTime)
+                        > DWC_MATCH_RESV_KEEP_TIME_FRIEND))))
+        {
+            DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                "Reservation timeout. Cancel reservation.\n");
+
+            DWCi_StopResendingMatchCommand();
+
+            if (!DWCi_CancelPreConnectedServerProcess(
+                    DWCi_GetMatchCnt()
+                        ->sbPidList[DWCi_GetMatchCnt()->gt2NumConnection + 1]))
+                return;
+        }
+        break;
+
+    case DWC_MATCH_STATE_SV_WAIT_CL_LINK:
+        if ((DWCi_GetMatchCnt()->cmdCnt.command
+                == DWC_MATCH_COMMAND_LINK_CLS_REQ)
+            && (DWCi_Np_TicksToMilliSeconds(DWCi_Np_GetTick()
+                    - DWCi_GetMatchCnt()->cmdCnt.sendTime)
+                > DWC_MATCH_LINK_CLS_TIMEOUT))
+        {
+            DWCi_GetMatchCnt()->cmdCnt.count++;
+            if (DWCi_GetMatchCnt()->cmdCnt.count > 0)
+            {
+                DWCi_StopResendingMatchCommand();
+
+                DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                    "Wait clients connecting timeout.\n");
+
+                if (DWCi_GetMatchCnt()->qr2MatchType
+                    == DWC_MATCH_TYPE_SC_SV)
+                {
+                    if (!DWCi_CancelPreConnectedServerProcess(
+                            DWCi_GetMatchCnt()
+                                ->sbPidList[DWCi_GetMatchCnt()
+                                               ->gt2NumConnection]))
+                        return;
                 }
+                else
+                {
+                    DWCi_RestartFromTimeout();
+                }
+                break;
+            }
+
+            result = DWCi_SendMatchCommand(DWC_MATCH_COMMAND_LINK_CLS_REQ,
+                DWCi_GetMatchCnt()->cmdCnt.profileID,
+                DWCi_GetMatchCnt()->cmdCnt.ip,
+                DWCi_GetMatchCnt()->cmdCnt.port,
+                DWCi_GetMatchCnt()->cmdCnt.data,
+                DWCi_GetMatchCnt()->cmdCnt.len);
+            if (DWCi_HandleMatchCommandError(result))
+                return;
+        }
+        break;
+
+    case DWC_MATCH_STATE_CL_WAITING:
+        if ((DWC_GetState() == DWC_STATE_MATCHING)
+            && (DWCi_Np_TicksToMilliSeconds(
+                    DWCi_Np_GetTick() - DWCi_GetMatchCnt()->clWaitTime)
+                > DWC_MATCH_CL_WAIT_TIMEOUT))
+        {
+            DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                "No data from server %d/%d.\n",
+                DWCi_GetMatchCnt()->clWaitTimeoutCount,
+                DWC_MATCH_CMD_RETRY_MAX);
+
+            if (DWCi_GetMatchCnt()->clWaitTimeoutCount
+                >= DWC_MATCH_CMD_RETRY_MAX)
+            {
+                DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                    "Timeout: Connection to server was shut down.\n");
+
+                if (!DWCi_CancelPreConnectedClientProcess(
+                        DWCi_GetMatchCnt()->sbPidList[0]))
+                    return;
             }
             else
             {
-                GPResult result = DWCi_SendMatchCommand(0x40,
-                    stpMatchCnt->sbPidList[0], stpMatchCnt->qr2IPList[0],
-                    stpMatchCnt->qr2PortList[0], NULL, 0);
-                if (stpMatchCnt->qr2MatchType == 0)
-                {
-                    if (DWCi_HandleSBError(result) != 0)
-                    {
-                        return;
-                    }
-                }
-                else if (DWCi_HandleGPError(result) != 0)
-                {
+                result = DWCi_SendMatchCommand(
+                    DWC_MATCH_COMMAND_CL_WAIT_POLL,
+                    DWCi_GetMatchCnt()->sbPidList[0],
+                    DWCi_GetMatchCnt()->qr2IPList[0],
+                    DWCi_GetMatchCnt()->qr2PortList[0], NULL, 0);
+                if (DWCi_HandleMatchCommandError(result))
                     return;
-                }
-                stpMatchCnt->clWaitTimeoutCount++;
-                stpMatchCnt->clWaitTime = OSGetTime()
-                    - (s64)(OS_BUS_CLOCK_SPEED / 4 / 1000) * 24000;
+
+                DWCi_GetMatchCnt()->clWaitTimeoutCount++;
+                DWCi_GetMatchCnt()->clWaitTime = DWCi_Np_GetTick()
+                    - DWCi_Np_MilliSecondsToTicks(
+                        DWC_MATCH_CL_WAIT_TIMEOUT
+                        - DWC_MATCH_CMD_RTT_TIMEOUT);
             }
         }
         break;
@@ -1182,112 +1414,99 @@ void fn_8049079C(BOOL enableProcess)
         break;
     }
 
-    if (stpMatchCnt->state == 11 || stpMatchCnt->state == 6)
+    if (((DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_OWN_NN)
+            || (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_CL_NN))
+        && DWCi_GetMatchCnt()->nnFailedTime
+        && (DWCi_Np_TicksToMilliSeconds(
+                DWCi_Np_GetTick() - DWCi_GetMatchCnt()->nnFailedTime)
+            > DWC_WAIT_NN_RETRY_TIMEOUT))
     {
-        if (stpMatchCnt->nnFailedTime != 0
-            && fn_ElapsedMSec(stpMatchCnt->nnFailedTime) >= 10000)
-        {
-            DWC_Printf(0x40, "Timeout : wait NN retry.\n");
-            DWCi_NNCompletedCallback(nr_deadbeatpartner, 0, NULL, &stpMatchCnt->nnInfo);
-        }
+        DWC_Printf(
+            DWC_REPORTFLAG_MATCH_NN, "Timeout : wait NN retry.\n");
+
+        DWCi_NNCompletedCallback(nr_deadbeatpartner, NULL, NULL,
+            &DWCi_GetMatchCnt()->nnInfo);
     }
 
-    if (stpMatchCnt->sbObj != NULL)
+    if (DWCi_GetMatchCnt()->sbObj)
     {
+#if 1
         s_sbCallbackLevel = 0;
-        s_needSbFree = 0;
-        ServerBrowserThink(stpMatchCnt->sbObj);
-        if (s_needSbFree != 0)
+        s_needSbFree = FALSE;
+
+        (void)ServerBrowserThink(DWCi_GetMatchCnt()->sbObj);
+
+        if (s_needSbFree)
         {
-            ServerBrowserFree(stpMatchCnt->sbObj);
-            stpMatchCnt->sbObj = NULL;
+            ServerBrowserFree(DWCi_GetMatchCnt()->sbObj);
+            DWCi_GetMatchCnt()->sbObj = NULL;
         }
-        if (stpMatchCnt->sbObj != NULL
-            && ServerBrowserState(stpMatchCnt->sbObj) != 0)
+#else
+        sbError = ServerBrowserThink(DWCi_GetMatchCnt()->sbObj);
+        if (DWCi_HandleSBError(sbError))
+            return;
+#endif
+        if (DWCi_GetMatchCnt()->sbObj)
         {
-            if (stpMatchCnt->sbUpdateRequestTick != 0 && OSGetTime() >= stpMatchCnt->sbUpdateRequestTick)
+            if (ServerBrowserState(DWCi_GetMatchCnt()->sbObj)
+                    != sb_disconnected
+                && DWCi_GetMatchCnt()->sbUpdateRequestTick != 0
+                && DWCi_Np_GetTick()
+                    > DWCi_GetMatchCnt()->sbUpdateRequestTick)
             {
                 DWCi_StopMatching(DWC_ERROR_NETWORK,
                     DWC_ECODE_SEQ_MATCH + DWC_ECODE_GS_SB
                         + DWC_ECODE_TYPE_NETWORK);
-                DWC_Printf(0x400, "ServerBrowserLimitUpdate timeout.\n");
+                DWC_Printf(DWC_REPORTFLAG_SB_UPDATE,
+                    "ServerBrowserLimitUpdate timeout.\n");
             }
         }
     }
 
-    if (stpMatchCnt->qr2Obj != NULL)
-    {
-        qr2_think(stpMatchCnt->qr2Obj);
-        if (stpMatchCnt->qr2Obj->userstatechangerequested == 0)
-        {
-            switch (stpMatchCnt->qr2MatchType)
-            {
-            case 0:
-            case 1:
-                switch (stpMatchCnt->state)
-                {
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 6:
-                case 11:
-                    qr2_send_statechanged(stpMatchCnt->qr2Obj);
-                    break;
-                default:
-                    break;
-                }
-                break;
-            case 2:
-                if (stpMatchCnt->state == 11)
-                {
-                    qr2_send_statechanged(stpMatchCnt->qr2Obj);
-                }
-                break;
-            default:
-                break;
-            }
-        }
-    }
+    DWCi_SendStateChanged(DWCi_GetMatchCnt()->qr2Obj);
 
     NNThink();
 
-    if (stpMatchCnt->pGt2Socket != NULL)
-    {
-        gt2Think(*stpMatchCnt->pGt2Socket);
-    }
+    if (DWCi_GetMatchCnt()->pGt2Socket)
+        gt2Think(*DWCi_GetMatchCnt()->pGt2Socket);
 
-    if (stpMatchCnt->state == 18
-        && fn_ElapsedMSec(stpMatchCnt->closedTime) >= 3000)
+    if ((DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_WAIT_CLOSE)
+        && (DWCi_Np_TicksToMilliSeconds(
+                DWCi_Np_GetTick() - DWCi_GetMatchCnt()->closedTime)
+            > (DWC_MATCH_CMD_RTT_TIMEOUT >> 1)))
     {
-        DWC_Printf(4, "RTT Timeout with DWCi_MatchProcess.\n");
-        DWC_Printf(0x40, "Timeout : Wait prior profileID.\n");
-        if (DWCi_ResumeMatching() != 0)
-        {
+        DWC_Printf(DWC_REPORTFLAG_DEBUG,
+            "RTT Timeout with DWCi_MatchProcess.\n");
+        DWC_Printf(
+            DWC_REPORTFLAG_MATCH_NN, "Timeout : Wait prior profileID.\n");
+
+        if (DWCi_ResumeMatching())
             return;
-        }
     }
 
-    if (fn_804979F4() == 0)
-    {
+    if (!DWCi_ProcessMatchSynTimeout())
         return;
-    }
-    if (fn_8049811C() == 0)
-    {
-        return;
-    }
-    fn_80498440();
 
-    if (stpMatchCnt->stopSCFlag != 0 && stpMatchCnt->state == 10)
+    if (!DWCi_ProcessCancelMatchSynTimeout())
+        return;
+
+    DWCi_ProcessOptMinComp();
+
+#ifdef DWC_STOP_SC_SERVER
+    if (DWCi_GetMatchCnt()->stopSCFlag
+        && (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_WAITING))
     {
-        stpMatchCnt->qr2NumEntry = stpMatchCnt->gt2NumConnection;
-        fn_80492BA0();
-        stpMatchCnt->stopSCFlag = 0;
-        if (stpMatchCnt->_490 != NULL)
-        {
-            stpMatchCnt->_490(stpMatchCnt->_494);
-        }
+        DWCi_GetMatchCnt()->qr2NumEntry
+            = DWCi_GetMatchCnt()->gt2NumConnection;
+        (void)DWCi_GPSetServerStatus();
+
+        DWCi_GetMatchCnt()->stopSCFlag = 0;
+
+        if (DWCi_GetMatchCnt()->stopSCCallback)
+            DWCi_GetMatchCnt()->stopSCCallback(
+                DWCi_GetMatchCnt()->stopSCParam);
     }
+#endif
 }
 
 GT2Bool DWCi_GT2UnrecognizedMessageCallback(GT2Socket socket, unsigned int ip,
@@ -1445,7 +1664,8 @@ void DWCi_GT2ConnectAttemptCallback(GT2Socket socket,
     DWCi_PostProcessConnection(DWC_PP_CONNECTION_CL_GT2_ACCEPT);
 }
 
-void fn_80491AE0(GT2Connection connection, GT2Result result, GT2Byte* message,
+void DWCi_GT2ConnectedCallback(
+    GT2Connection connection, GT2Result result, GT2Byte* message,
     int len)
 {
     char pidStr[12];
@@ -1493,7 +1713,7 @@ void fn_80491AE0(GT2Connection connection, GT2Result result, GT2Byte* message,
                 (GT2Byte*)pidStr, -1, 5000, DWCi_GetMatchCnt()->gt2Callbacks, GT2False);
             if (gt2Result == GT2OutOfMemory)
             {
-                fn_8049925C(gt2Result);
+                DWCi_HandleGT2Error(gt2Result);
                 return;
             }
             else if (gt2Result == GT2Success)
@@ -1548,7 +1768,8 @@ void fn_80491AE0(GT2Connection connection, GT2Result result, GT2Byte* message,
     }
 }
 
-void fn_80491E18(GPConnection* connection, u32 profileId, char* message)
+void DWCi_MatchGPRecvBuddyMsgCallback(
+    GPConnection* connection, u32 profileId, char* message)
 {
     char buf[16];
     u32 list[0x80];
@@ -1559,7 +1780,7 @@ void fn_80491E18(GPConnection* connection, u32 profileId, char* message)
 
     for (i = 0; i < 0x80; i++)
     {
-        if (fn_80493B94(buf, message + 1, i) == -1)
+        if (DWCi_GetGPBuddyAdditionalMsg(buf, message + 1, i) == -1)
         {
             break;
         }
@@ -1570,8 +1791,8 @@ void fn_80491E18(GPConnection* connection, u32 profileId, char* message)
 
 static void DWCi_StopResendingMatchCommand(void)
 {
-    DWCi_GetMatchCnt()->_3E0 = 0xff;
-    DWCi_GetMatchCnt()->_3E1 = 0;
+    DWCi_GetMatchCnt()->cmdCnt.command = DWC_MATCH_COMMAND_DUMMY;
+    DWCi_GetMatchCnt()->cmdCnt.count = 0;
 }
 
 void DWCi_StopMatching(DWCError error, int errorCode)
@@ -1592,7 +1813,7 @@ void DWCi_StopMatching(DWCError error, int errorCode)
     DWCi_CloseMatching();
 }
 
-void fn_80491FC4(void)
+void DWCi_ClearQR2Key(void)
 {
     if (stpMatchCnt->qr2MatchType == 2)
     {
@@ -1687,8 +1908,10 @@ void DWCi_ProcessMatchSynPacket(u8 aid, u16 type, u8* data)
     }
 }
 
-BOOL DWCi_ProcessMatchClosing(DWCError error, int errorCode)
+BOOL DWCi_ProcessMatchClosing(
+    DWCError error, int errorCode, int profileID)
 {
+#pragma unused(profileID)
     if (DWC_GetState() != DWC_STATE_MATCHING)
     {
         return FALSE;
@@ -1795,81 +2018,80 @@ BOOL DWCi_DeleteHostByProfileID(int profileID, int numHost)
 int DWCi_DeleteHostByIndex(int index, int numHost)
 {
     int profileID;
-    int i;
 
-    if (stpMatchCnt == NULL)
-    {
+    if (!DWCi_GetMatchCnt())
         return 0;
-    }
 
-    profileID = stpMatchCnt->sbPidList[index];
-    stpMatchCnt->validAidBitmap
-        &= ~(1 << stpMatchCnt->aidList[index]);
-    fn_804929E0();
+    profileID = DWCi_GetMatchCnt()->sbPidList[index];
+    DWCi_GetMatchCnt()->validAidBitmap
+        &= ~(1 << DWCi_GetMatchCnt()->aidList[index]);
+    DWCi_SetNumValidConnection();
 
-    for (i = index; i < numHost - 1; i++)
+    if (index < numHost - 1)
     {
-        stpMatchCnt->qr2IPList[i] = stpMatchCnt->qr2IPList[i + 1];
-        stpMatchCnt->qr2PortList[i] = stpMatchCnt->qr2PortList[i + 1];
-        stpMatchCnt->sbPidList[i] = stpMatchCnt->sbPidList[i + 1];
-        stpMatchCnt->ipList[i] = stpMatchCnt->ipList[i + 1];
-        stpMatchCnt->portList[i] = stpMatchCnt->portList[i + 1];
-        stpMatchCnt->aidList[i] = stpMatchCnt->aidList[i + 1];
+        int i;
+        for (i = 0; i < numHost - index - 1; ++i)
+        {
+            DWCi_GetMatchCnt()->qr2IPList[index + i]
+                = DWCi_GetMatchCnt()->qr2IPList[index + i + 1];
+            DWCi_GetMatchCnt()->qr2PortList[index + i]
+                = DWCi_GetMatchCnt()->qr2PortList[index + i + 1];
+            DWCi_GetMatchCnt()->sbPidList[index + i]
+                = DWCi_GetMatchCnt()->sbPidList[index + i + 1];
+            DWCi_GetMatchCnt()->ipList[index + i]
+                = DWCi_GetMatchCnt()->ipList[index + i + 1];
+            DWCi_GetMatchCnt()->portList[index + i]
+                = DWCi_GetMatchCnt()->portList[index + i + 1];
+            DWCi_GetMatchCnt()->aidList[index + i]
+                = DWCi_GetMatchCnt()->aidList[index + i + 1];
+        }
     }
 
     if (numHost > 0)
     {
-        stpMatchCnt->qr2IPList[numHost - 1] = 0;
-        stpMatchCnt->qr2PortList[numHost - 1] = 0;
-        stpMatchCnt->sbPidList[numHost - 1] = 0;
-        stpMatchCnt->ipList[numHost - 1] = 0;
-        stpMatchCnt->portList[numHost - 1] = 0;
-        stpMatchCnt->aidList[numHost - 1] = 0;
+        DWCi_GetMatchCnt()->qr2IPList[numHost - 1] = 0;
+        DWCi_GetMatchCnt()->qr2PortList[numHost - 1] = 0;
+        DWCi_GetMatchCnt()->sbPidList[numHost - 1] = 0;
+        DWCi_GetMatchCnt()->ipList[numHost - 1] = 0;
+        DWCi_GetMatchCnt()->portList[numHost - 1] = 0;
+        DWCi_GetMatchCnt()->aidList[numHost - 1] = 0;
     }
+
     return profileID;
 }
 
-int fn_804929A8(void)
+int DWCi_GetNumAllConnection(void)
 {
-    if (stpMatchCnt != NULL)
-    {
-        return stpMatchCnt->gt2NumConnection;
-    }
-    return 0;
+    if (!DWCi_GetMatchCnt())
+        return 0;
+    return DWCi_GetMatchCnt()->gt2NumConnection;
 }
 
-int fn_804929C4(void)
+int DWCi_GetNumValidConnection(void)
 {
-    if (stpMatchCnt != NULL)
-    {
-        return stpMatchCnt->gt2NumValidConn;
-    }
-    return 0;
+    if (!DWCi_GetMatchCnt())
+        return 0;
+    return DWCi_GetMatchCnt()->gt2NumValidConn;
 }
 
-void fn_804929E0(void)
+void DWCi_SetNumValidConnection(void)
 {
     int count = -1;
     int i;
 
-    for (i = 0; i < 32; i++)
+    for (i = 0; i < DWC_MAX_CONNECTIONS; i++)
     {
-        if ((1 << i) & stpMatchCnt->validAidBitmap)
-        {
+        if (DWCi_GetMatchCnt()->validAidBitmap & (1 << i))
             count++;
-        }
     }
+
     if (count == -1)
-    {
-        stpMatchCnt->gt2NumValidConn = 0;
-    }
+        DWCi_GetMatchCnt()->gt2NumValidConn = 0;
     else
-    {
-        stpMatchCnt->gt2NumValidConn = count;
-    }
+        DWCi_GetMatchCnt()->gt2NumValidConn = (u8)count;
 }
 
-int fn_80492ABC(u8** aidList)
+int DWCi_GetAllAIDList(u8** aidList)
 {
     if (stpMatchCnt == NULL)
     {
@@ -1879,8 +2101,9 @@ int fn_80492ABC(u8** aidList)
     return stpMatchCnt->gt2NumConnection + 1;
 }
 
-int fn_80492AE8(u8** aidList)
+int DWCi_GetValidAIDList(u8** aidList)
 {
+    static u8 validAidList[DWC_MAX_CONNECTIONS];
     int i;
 
     if (stpMatchCnt == NULL)
@@ -1888,7 +2111,7 @@ int fn_80492AE8(u8** aidList)
         return 0;
     }
 
-    memset(lbl_806CA158, 0, sizeof(lbl_806CA158));
+    memset(validAidList, 0, sizeof(validAidList));
     for (i = 0; i <= stpMatchCnt->gt2NumValidConn; i++)
     {
         if (!(stpMatchCnt->validAidBitmap
@@ -1896,13 +2119,13 @@ int fn_80492AE8(u8** aidList)
         {
             break;
         }
-        lbl_806CA158[i] = stpMatchCnt->aidList[i];
+        validAidList[i] = stpMatchCnt->aidList[i];
     }
-    *aidList = lbl_806CA158;
+    *aidList = validAidList;
     return stpMatchCnt->gt2NumValidConn + 1;
 }
 
-GPResult fn_80492BA0(void)
+GPResult DWCi_GPSetServerStatus(void)
 {
     char value[12];
     char status[32];
@@ -1920,7 +2143,7 @@ GPResult fn_80492BA0(void)
     return DWCi_SetGPStatus(6, status, NULL);
 }
 
-void fn_80492C74(void)
+void DWCi_ShutdownMatch(void)
 {
     stpMatchCnt = NULL;
     if (stpAddFilter != NULL)
@@ -1941,7 +2164,7 @@ void fn_80492C74(void)
     stOptSCBlock.lock = 0;
 }
 
-BOOL fn_80492D3C(void)
+BOOL DWCi_IsShutdownMatch(void)
 {
     return stpMatchCnt == NULL;
 }
@@ -1966,7 +2189,8 @@ static void DWCi_ResetMatchParam(DWCMatchResetLevel level)
     DWCi_GetMatchCnt()->searchIP = 0;
     DWCi_GetMatchCnt()->lastSynSent = 0;
     DWCi_GetMatchCnt()->closedTime = 0;
-    DWCi_Np_CpuClear32(&DWCi_GetMatchCnt()->_3E0, 0x98);
+    DWCi_Np_CpuClear32(
+        &DWCi_GetMatchCnt()->cmdCnt, sizeof(DWCi_GetMatchCnt()->cmdCnt));
 
     if (level == DWC_MATCH_RESET_CONTINUE)
     {
@@ -2044,7 +2268,27 @@ static void DWCi_ResetMatchParam(DWCMatchResetLevel level)
     }
 }
 
-void DWCi_CloseMatching(void)
+static void DWCi_SetMatchCommonParam(u8 matchType, u8 numEntry,
+    DWCMatchedSCCallback callback, void* param)
+{
+    DWCi_ResetMatchParam(DWC_MATCH_RESET_ALL);
+
+    DWCi_GetMatchCnt()->qr2MatchType = matchType;
+    DWCi_GetMatchCnt()->qr2NumEntry = numEntry;
+    DWCi_GetMatchCnt()->matchedCallback = callback;
+    DWCi_GetMatchCnt()->matchedParam = param;
+    DWCi_GetMatchCnt()->nnFailureCount = 0;
+
+    DWCi_GetMatchCnt()->aidList[0] = 0;
+
+    qr2_register_key(DWC_QR2_PID_KEY, DWC_QR2_PID_KEY_STR);
+    qr2_register_key(DWC_QR2_MATCH_TYPE_KEY, DWC_QR2_MATCH_TYPE_KEY_STR);
+    qr2_register_key(DWC_QR2_MATCH_RESV_KEY, DWC_QR2_MATCH_RESV_KEY_STR);
+    qr2_register_key(DWC_QR2_MATCH_VER_KEY, DWC_QR2_MATCH_VER_KEY_STR);
+    qr2_register_key(DWC_QR2_MATCH_EVAL_KEY, DWC_QR2_MATCH_EVAL_KEY_STR);
+}
+
+static void DWCi_CloseMatching(void)
 {
     DWC_Printf(0x40, " Close Matching....\n");
     if (stpMatchCnt == NULL)
@@ -2277,7 +2521,7 @@ static NegotiateError DWCi_NNStartupAsync(
                 DWCi_GetMatchCnt()->sbPidList[index],
                 SBServerGetPublicInetAddress(server),
                 SBServerGetPublicQueryPort(server), senddata, 2);
-            DWCi_GetMatchCnt()->_3E1 = 0;
+            DWCi_GetMatchCnt()->cmdCnt.count = 0;
             if (result)
                 return ne_socketerror;
             DWCi_GetMatchCnt()->nnInfo.cookie = 0;
@@ -2387,16 +2631,16 @@ static int DWCi_SendMatchCommand(u8 command, int profileID, u32 ip, u16 port,
         || (command == DWC_MATCH_COMMAND_LINK_CLS_REQ)
         || (command == DWC_MATCH_COMMAND_LINK_CLS_SUC))
     {
-        DWCi_GetMatchCnt()->_3E0 = command;
-        DWCi_GetMatchCnt()->_3E2 = port;
-        DWCi_GetMatchCnt()->_3E4 = ip;
-        DWCi_GetMatchCnt()->_468 = profileID;
-        DWCi_GetMatchCnt()->_46C = len;
-        DWCi_GetMatchCnt()->_470 = DWCi_Np_GetTick();
+        DWCi_GetMatchCnt()->cmdCnt.command = command;
+        DWCi_GetMatchCnt()->cmdCnt.port = port;
+        DWCi_GetMatchCnt()->cmdCnt.ip = ip;
+        DWCi_GetMatchCnt()->cmdCnt.profileID = profileID;
+        DWCi_GetMatchCnt()->cmdCnt.len = len;
+        DWCi_GetMatchCnt()->cmdCnt.sendTime = DWCi_Np_GetTick();
         if (data && len)
         {
             DWCi_Np_CpuCopy32(
-                data, DWCi_GetMatchCnt()->_3E8, (u32)len * 4);
+                data, DWCi_GetMatchCnt()->cmdCnt.data, (u32)len * 4);
         }
     }
 
@@ -2479,7 +2723,8 @@ static GPResult DWCi_SendGPBuddyMsgCommand(GPConnection* connection,
     return result;
 }
 
-int fn_80493B94(char* dstMsg, const char* srcMsg, int index)
+static int DWCi_GetGPBuddyAdditionalMsg(
+    char* dstMsg, const char* srcMsg, int index)
 {
     const char* pSrcBegin = srcMsg;
     char* pSrcNext = NULL;
@@ -2792,7 +3037,7 @@ static BOOL DWCi_ProcessRecvMatchCommand(u8 command, int srcPid, u32 srcIP,
             DWC_Printf(0x40, "But already canceled reservation.\n");
             break;
         }
-        stpMatchCnt->_3E0 = 0xFF;
+        stpMatchCnt->cmdCnt.command = DWC_MATCH_COMMAND_DUMMY;
         if ((int)srcPid
             != stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection + 1])
         {
@@ -3571,7 +3816,7 @@ static BOOL DWCi_CancelPreConnectedServerProcess(int clientPid)
             DWCi_GetMatchCnt()->gt2NumConnection + 1] = 0;
     }
 
-    DWCi_GetMatchCnt()->_3E0 = DWC_MATCH_COMMAND_DUMMY;
+    DWCi_GetMatchCnt()->cmdCnt.command = DWC_MATCH_COMMAND_DUMMY;
 
     if (DWCi_GetMatchCnt()->nnInfo.cookie)
     {
@@ -3678,265 +3923,268 @@ static BOOL DWCi_CancelPreConnectedClientProcess(int serverPid)
     return result;
 }
 
-static int DWCi_PostProcessConnection(DWCMatchPpConnectionType mode)
+static void DWCi_PostProcessConnection(DWCMatchPpConnectionType type)
 {
-    int count = 3;
-    BOOL clear = FALSE;
-    u32 buf[5];
+    u32 senddata[5];
+    int sendlen = 3;
+    int result;
     int i;
+    BOOL sbClear = FALSE;
+    GPResult gpResult;
 
-    switch (mode)
+    switch (type)
     {
-    case 0:
-        if (stpMatchCnt->clLinkProgress < stpMatchCnt->gt2NumConnection - 1)
+    case DWC_PP_CONNECTION_SV_CONNECT:
+        if (DWCi_GetMatchCnt()->clLinkProgress
+            < DWCi_GetMatchCnt()->gt2NumConnection - 1)
         {
-            DWC_Printf(0x40, "Send client-client link request.\n");
-            stpMatchCnt->state = 13;
-            count = 5;
-            buf[0] = fn_ByteSwap32(
-                stpMatchCnt->sbPidList[stpMatchCnt->clLinkProgress + 1]);
-            buf[1] = fn_ByteSwap32(stpMatchCnt->clLinkProgress + 1);
-            buf[2] = fn_ByteSwap32(
-                stpMatchCnt->aidList[stpMatchCnt->clLinkProgress + 1]);
-            buf[3] = stpMatchCnt->qr2IPList[stpMatchCnt->clLinkProgress + 1];
-            buf[4] = fn_ByteSwap32(
-                stpMatchCnt->qr2PortList[stpMatchCnt->clLinkProgress + 1]);
+            DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                "Send client-client link request.\n");
+
+            DWCi_SetMatchStatus(DWC_MATCH_STATE_SV_WAIT_CL_LINK);
+
+            senddata[0] = DWCi_HtoLEl((u32)DWCi_GetMatchCnt()
+                    ->sbPidList[DWCi_GetMatchCnt()->clLinkProgress + 1]);
+            senddata[1]
+                = DWCi_HtoLEl((u32)(DWCi_GetMatchCnt()->clLinkProgress + 1));
+            senddata[2] = DWCi_HtoLEl(DWCi_GetMatchCnt()
+                    ->aidList[DWCi_GetMatchCnt()->clLinkProgress + 1]);
+            senddata[3] = DWCi_GetMatchCnt()
+                    ->qr2IPList[DWCi_GetMatchCnt()->clLinkProgress + 1];
+            senddata[4] = DWCi_HtoLEl(DWCi_GetMatchCnt()
+                    ->qr2PortList[DWCi_GetMatchCnt()->clLinkProgress + 1]);
+            sendlen = 5;
         }
         else
         {
-            DWC_Printf(0x40, "Tell new client completion of matching.\n");
-            stpMatchCnt->qr2IsReserved = 0;
-            stpMatchCnt->qr2Reservation = 0;
-            qr2_send_statechanged(stpMatchCnt->qr2Obj);
-            if (stpMatchCnt->qr2MatchType == 0)
+            DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                "Tell new client completion of matching.\n");
+
+            DWCi_GetMatchCnt()->qr2IsReserved = 0;
+            DWCi_GetMatchCnt()->qr2Reservation = 0;
+
+            qr2_send_statechanged(DWCi_GetMatchCnt()->qr2Obj);
+
+            if (DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_ANYBODY)
             {
-                stpMatchCnt->state = 3;
+                DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_SEARCH_HOST);
             }
-            else if (stpMatchCnt->qr2MatchType == 1)
+            else if (DWCi_GetMatchCnt()->qr2MatchType
+                == DWC_MATCH_TYPE_FRIEND)
             {
-                stpMatchCnt->state = 4;
+                DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_WAIT_RESV);
             }
             else
             {
-                stpMatchCnt->state = 10;
+                DWCi_SetMatchStatus(DWC_MATCH_STATE_SV_WAITING);
             }
-            stpMatchCnt->clLinkProgress = 0;
 
-            if (stpMatchCnt->qr2MatchType == 2
-                || stpMatchCnt->gt2NumConnection == stpMatchCnt->qr2NumEntry)
+            DWCi_GetMatchCnt()->clLinkProgress = 0;
+
+            if ((DWCi_GetMatchCnt()->qr2MatchType
+                    == DWC_MATCH_TYPE_SC_SV)
+                || (DWCi_GetMatchCnt()->gt2NumConnection
+                    == DWCi_GetMatchCnt()->qr2NumEntry))
             {
-                if (stpMatchCnt->qr2MatchType == 2)
+                if (DWCi_GetMatchCnt()->qr2MatchType
+                    == DWC_MATCH_TYPE_SC_SV)
                 {
-                    stpMatchCnt->cbEventPid
-                        = stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection];
+                    DWCi_GetMatchCnt()->cbEventPid = DWCi_GetMatchCnt()
+                            ->sbPidList[DWCi_GetMatchCnt()->gt2NumConnection];
                 }
                 else
                 {
-                    stpMatchCnt->cbEventPid = 0;
-                    stpMatchCnt->sbPidList[0] = stpMatchCnt->profileID;
+                    DWCi_GetMatchCnt()->cbEventPid = 0;
+                    DWCi_GetMatchCnt()->sbPidList[0]
+                        = DWCi_GetMatchCnt()->profileID;
                 }
-                stpMatchCnt->state = 16;
-                stpMatchCnt->synAckBit = 0;
-                for (i = 1; i <= stpMatchCnt->gt2NumConnection; i++)
+
+                DWCi_SetMatchStatus(DWC_MATCH_STATE_SV_SYN);
+                DWCi_GetMatchCnt()->synAckBit = 0;
+
+                for (i = 1; i <= DWCi_GetMatchCnt()->gt2NumConnection; i++)
                 {
-                    DWCi_SendMatchSynPacket(stpMatchCnt->aidList[i],
+                    DWCi_SendMatchSynPacket(DWCi_GetMatchCnt()->aidList[i],
                         DWC_SEND_TYPE_MATCH_SYN);
                 }
             }
             else
             {
-                buf[0] = 0;
-                buf[1] = fn_ByteSwap32(stpMatchCnt->gt2NumConnection);
-                buf[2] = fn_ByteSwap32(
-                    stpMatchCnt->aidList[stpMatchCnt->gt2NumConnection]);
-                if (stpMatchCnt->qr2MatchType == 0)
-                {
-                    stpMatchCnt->sbUpdateFlag = 2;
-                    stpMatchCnt->sbUpdateTick = OSGetTime();
-                }
-                else if (stpMatchCnt->qr2MatchType == 1)
-                {
-                    DWCi_SendResvCommandToFriend(1, 0, 0);
-                    if (stpMatchCnt->distantFriend == 0
-                        && stpMatchCnt->gt2NumConnection >= 2)
-                    {
-                        u32 bitmap = 0;
+                senddata[0] = 0;
+                senddata[1] = DWCi_HtoLEl(
+                    (u8)DWCi_GetMatchCnt()->gt2NumConnection);
+                senddata[2] = DWCi_HtoLEl(DWCi_GetMatchCnt()
+                        ->aidList[DWCi_GetMatchCnt()->gt2NumConnection]);
 
-                        for (i = 1; i < stpMatchCnt->gt2NumConnection; i++)
+                if (DWCi_GetMatchCnt()->qr2MatchType
+                    == DWC_MATCH_TYPE_ANYBODY)
+                {
+                    DWCi_GetMatchCnt()->sbUpdateFlag
+                        = DWC_SB_UPDATE_INTERVAL_LONG;
+                    DWCi_GetMatchCnt()->sbUpdateTick = DWCi_Np_GetTick();
+                }
+                else if (DWCi_GetMatchCnt()->qr2MatchType
+                    == DWC_MATCH_TYPE_FRIEND)
+                {
+                    (void)DWCi_SendResvCommandToFriend(TRUE, FALSE, 0);
+
+#ifdef DWC_LIMIT_FRIENDS_MATCH_VALID
+                    if (!DWCi_GetMatchCnt()->distantFriend
+                        && (DWCi_GetMatchCnt()->gt2NumConnection >= 2))
+                    {
+                        if (DWCi_GetMatchCnt()->friendAcceptBit
+                            != (DWCi_GetAIDBitmask(FALSE)
+                                & ~(1
+                                    << DWCi_GetMatchCnt()
+                                           ->aidList[DWCi_GetMatchCnt()
+                                                   ->gt2NumConnection])))
                         {
-                            bitmap
-                                |= 1 << stpMatchCnt->aidList[i];
-                        }
-                        bitmap &= ~(
-                            1 << stpMatchCnt
-                                     ->aidList[stpMatchCnt->gt2NumConnection]);
-                        if (stpMatchCnt->friendAcceptBit != bitmap)
-                        {
-                            DWC_Printf(0x40,
+                            DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
                                 "FRIEND_ACCEPT command droped.\n");
-                            if (stpMatchCnt->qr2MatchType == 2
-                                || stpMatchCnt->qr2MatchType == 3)
-                            {
-                                DWC_Printf(8,
-                                    "DWCi_RestartFromTimeout() "
-                                    "shouldn't be called.\n");
-                                return 1;
-                            }
-                            stpMatchCnt->closeState = 2;
-                            gt2CloseAllConnectionsHard(
-                                *stpMatchCnt->pGt2Socket);
-                            stpMatchCnt->closeState = 0;
-                            DWC_Printf(0x40,
-                                "Closed all connections and restart "
-                                "matching.\n");
-                            DWCi_RestartFromCancel(1);
-                            return 1;
+                            DWCi_RestartFromTimeout();
+                            break;
                         }
                     }
+#endif
                 }
-                if (stpMatchCnt->qr2MatchType != 2)
-                {
-                    clear = TRUE;
-                }
+            }
+
+            if (DWCi_GetMatchCnt()->qr2MatchType != DWC_MATCH_TYPE_SC_SV)
+            {
+                sbClear = TRUE;
             }
         }
-        if (stpMatchCnt->state != 16)
+
+        if (DWCi_GetMatchCnt()->state != DWC_MATCH_STATE_SV_SYN)
         {
-            if (stpMatchCnt->qr2MatchType == 0)
-            {
-                if (DWCi_HandleSBError(DWCi_SendMatchCommand(8,
-                        stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection],
-                        stpMatchCnt->qr2IPList[stpMatchCnt->gt2NumConnection],
-                        stpMatchCnt->qr2PortList[stpMatchCnt->gt2NumConnection], buf,
-                        count))
-                    != 0)
-                {
-                    return 0;
-                }
-            }
-            else if (DWCi_HandleGPError(DWCi_SendMatchCommand(8,
-                         stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection],
-                         stpMatchCnt->qr2IPList[stpMatchCnt->gt2NumConnection],
-                         stpMatchCnt->qr2PortList[stpMatchCnt->gt2NumConnection], buf,
-                         count))
-                != 0)
-            {
-                return 0;
-            }
-            stpMatchCnt->_3E1 = 0;
+            result = DWCi_SendMatchCommand(DWC_MATCH_COMMAND_LINK_CLS_REQ,
+                DWCi_GetMatchCnt()
+                    ->sbPidList[DWCi_GetMatchCnt()->gt2NumConnection],
+                DWCi_GetMatchCnt()
+                    ->qr2IPList[DWCi_GetMatchCnt()->gt2NumConnection],
+                DWCi_GetMatchCnt()
+                    ->qr2PortList[DWCi_GetMatchCnt()->gt2NumConnection],
+                senddata, sendlen);
+            if (DWCi_HandleMatchCommandError(result))
+                return;
+
+            DWCi_GetMatchCnt()->cmdCnt.count = 0;
         }
         break;
 
-    case 1:
-        stpMatchCnt->state = 1;
-        if (stpMatchCnt->qr2MatchType == 3)
+    case DWC_PP_CONNECTION_CL_GT2_CONNECT:
+        DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_WAITING);
+
+        if (DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_SC_CL)
         {
-            stpMatchCnt->cbEventPid
-                = stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection];
+            DWCi_GetMatchCnt()->cbEventPid = DWCi_GetMatchCnt()
+                    ->sbPidList[DWCi_GetMatchCnt()->gt2NumConnection];
         }
-        clear = TRUE;
+
+        sbClear = TRUE;
         break;
 
-    case 2:
-        stpMatchCnt->state = 1;
-        if (stpMatchCnt->qr2MatchType == 0
-            || stpMatchCnt->qr2MatchType == 1)
-        {
-            stpMatchCnt->qr2IsReserved = 1;
-            stpMatchCnt->qr2Reservation = stpMatchCnt->profileID;
-        }
-        stpMatchCnt->clWaitTimeoutCount = 0;
-        stpMatchCnt->clWaitTime = OSGetTime();
-        if (stpMatchCnt->gt2NumConnection > 1)
-        {
-            buf[0] = fn_ByteSwap32(
-                stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection - 1]);
-            if (stpMatchCnt->qr2MatchType == 0)
-            {
-                if (DWCi_HandleSBError(DWCi_SendMatchCommand(9, stpMatchCnt->sbPidList[0],
-                        stpMatchCnt->qr2IPList[0], stpMatchCnt->qr2PortList[0], buf,
-                        1))
-                    != 0)
-                {
-                    return 0;
-                }
-            }
-            else if (DWCi_HandleGPError(DWCi_SendMatchCommand(9,
-                         stpMatchCnt->sbPidList[0], stpMatchCnt->qr2IPList[0],
-                         stpMatchCnt->qr2PortList[0], buf, 1))
-                != 0)
-            {
-                return 0;
-            }
-        }
-        return 1;
+    case DWC_PP_CONNECTION_CL_GT2_ACCEPT:
+        DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_WAITING);
 
-    case 3:
-        stpMatchCnt->state = 1;
-        stpMatchCnt->clWaitTimeoutCount = 0;
-        stpMatchCnt->clWaitTime = OSGetTime();
-        stpMatchCnt->cbEventPid = 0;
-        clear = TRUE;
-        count = 0;
-        return 1;
-
-    case 4:
-        DWC_Printf(0x40, "Completed matching!\n");
-        if (stpMatchCnt->qr2MatchType != 2)
+        if ((DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_ANYBODY)
+            || (DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_FRIEND))
         {
-            DWCi_SetGPStatus(2, "", NULL);
+            DWCi_GetMatchCnt()->qr2IsReserved = 1;
+            DWCi_GetMatchCnt()->qr2Reservation = DWCi_GetMatchCnt()->profileID;
         }
-        stpMatchCnt->matchedCallback(0, FALSE, stpMatchCnt->cbEventPid == 0,
-            FALSE, DWCi_GetFriendListIndex(stpMatchCnt->cbEventPid),
-            stpMatchCnt->matchedParam);
-        if (stpMatchCnt->qr2MatchType == 0
-            || stpMatchCnt->qr2MatchType == 1)
+
+        DWCi_InitClWaitTimeout();
+
+        if (DWCi_GetMatchCnt()->gt2NumConnection > 1)
+        {
+            u32 senddata[1];
+
+            senddata[0] = DWCi_HtoLEl((u32)DWCi_GetMatchCnt()
+                    ->sbPidList[DWCi_GetMatchCnt()->gt2NumConnection - 1]);
+            result = DWCi_SendMatchCommand(DWC_MATCH_COMMAND_LINK_CLS_SUC,
+                DWCi_GetMatchCnt()->sbPidList[0],
+                DWCi_GetMatchCnt()->qr2IPList[0],
+                DWCi_GetMatchCnt()->qr2PortList[0], senddata, 1);
+            if (DWCi_HandleMatchCommandError(result))
+                return;
+        }
+        break;
+
+    case DWC_PP_CONNECTION_CL_FINISH_CONNECT:
+        DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_WAITING);
+        DWCi_InitClWaitTimeout();
+        DWCi_GetMatchCnt()->cbEventPid = 0;
+        sbClear = TRUE;
+        break;
+
+    case DWC_PP_CONNECTION_SYN_FINISH:
+        DWC_Printf(DWC_REPORTFLAG_MATCH_NN, "Completed matching!\n");
+
+        if (DWCi_GetMatchCnt()->qr2MatchType != DWC_MATCH_TYPE_SC_SV)
+        {
+            (void)DWCi_SetGPStatus(DWC_STATUS_PLAYING, "", NULL);
+        }
+
+        DWCi_GetMatchCnt()->matchedCallback(DWC_ERROR_NONE, FALSE,
+            DWCi_GetMatchCnt()->cbEventPid ? FALSE : TRUE, FALSE,
+            DWCi_GetFriendListIndex(DWCi_GetMatchCnt()->cbEventPid),
+            DWCi_GetMatchCnt()->matchedParam);
+
+        if ((DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_ANYBODY)
+            || (DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_FRIEND))
         {
             DWCi_CloseMatching();
         }
         else
         {
-            if (stpMatchCnt->sbObj != NULL)
+#ifndef DWC_BUG_WIFI_DELAY_SEND
+            if (DWCi_GetMatchCnt()->sbObj)
             {
-                ServerBrowserFree(stpMatchCnt->sbObj);
-                stpMatchCnt->sbObj = NULL;
+                ServerBrowserFree(DWCi_GetMatchCnt()->sbObj);
+                DWCi_GetMatchCnt()->sbObj = NULL;
             }
+#endif
+
             NNFreeNegotiateList();
-            if (stpMatchCnt->qr2MatchType == 2)
+
+            if (DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_SC_SV)
             {
-                if (DWCi_HandleGPError(fn_80492BA0()) != 0)
-                {
-                    return 0;
-                }
+                gpResult = DWCi_GPSetServerStatus();
+                if (DWCi_HandleGPError(gpResult))
+                    return;
+
                 if (stOptSCBlock.valid == 1)
                 {
                     stOptSCBlock.lock = 1;
-                    DWC_Printf(4,
+                    DWC_Printf(DWC_REPORTFLAG_DEBUG,
                         "[OPT_SC_BLOCK] Connect block start!\n");
                 }
-                stpMatchCnt->state = 10;
+
+                DWCi_SetMatchStatus(DWC_MATCH_STATE_SV_WAITING);
             }
             else
             {
-                stpMatchCnt->state = 1;
+                DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_WAITING);
             }
-            stpMatchCnt->cbEventPid = 0;
+
+            DWCi_GetMatchCnt()->cbEventPid = 0;
         }
-        stpMatchCnt->cancelState = 0;
-        break;
 
-    default:
+        DWCi_GetMatchCnt()->cancelState = DWC_MATCH_CANCEL_STATE_INIT;
         break;
     }
 
-    if (clear && stpMatchCnt->qr2MatchType != 3)
+#ifndef DWC_BUG_WIFI_DELAY_SEND
+    if (sbClear
+        && (DWCi_GetMatchCnt()->qr2MatchType != DWC_MATCH_TYPE_SC_CL))
     {
-        ServerBrowserClear(stpMatchCnt->sbObj);
+        ServerBrowserClear(DWCi_GetMatchCnt()->sbObj);
     }
-    return 1;
+#endif
 }
 
-void fn_804970B0(void)
+static void DWCi_DoCancelMatching(void)
 {
     DWC_Printf(4, "CANCEL! state %d, numHost nn=%d gt2=%d.\n",
         stpMatchCnt->state, stpMatchCnt->qr2NNFinishCount, stpMatchCnt->gt2NumConnection);
@@ -4310,96 +4558,103 @@ static void DWCi_SendMatchSynPacket(u8 aid, u16 type)
         buf[1] = (stpMatchCnt->baseLatency >> 8) & 0xFF;
         break;
     }
-    fn_8049AE0C(type, aid, buf, 4);
+    DWCi_SendReliable(type, aid, buf, 4);
     stpMatchCnt->lastSynSent = OSGetTime();
 }
 
-int fn_804979F4(void)
+static BOOL DWCi_ProcessMatchSynTimeout(void)
 {
-    s64 elapsed;
+    u64 passTime;
+    int i;
 
-    if (stpMatchCnt->state == 9 || stpMatchCnt->state == 16
-        || stpMatchCnt->state == 17)
+    if (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_CL_SYN
+        || DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_SYN
+        || DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_SYN_WAIT)
     {
-        elapsed = fn_ElapsedMSec(stpMatchCnt->lastSynSent);
+        passTime = DWCi_Np_TicksToMilliSeconds(
+            DWCi_Np_GetTick() - DWCi_GetMatchCnt()->lastSynSent);
     }
     else
     {
-        return 1;
+        return TRUE;
     }
 
-    switch (stpMatchCnt->state)
+    switch (DWCi_GetMatchCnt()->state)
     {
-    case 9:
-        if (elapsed > 6000)
+    case DWC_MATCH_STATE_CL_SYN:
+        if (passTime > DWC_MATCH_SYN_ACK_WAIT_TIME)
         {
-            DWC_Printf(0x80, "[SYN] No ACK from server %d/%d.\n",
-                stpMatchCnt->clWaitTimeoutCount, 5);
+            DWC_Printf(DWC_REPORTFLAG_MATCH_GT2,
+                "[SYN] No ACK from server %d/%d.\n",
+                DWCi_GetMatchCnt()->clWaitTimeoutCount,
+                DWC_MATCH_CMD_RETRY_MAX);
             if (DWC_GetState() == DWC_STATE_MATCHING
-                && stpMatchCnt->clWaitTimeoutCount >= 5)
+                && DWCi_GetMatchCnt()->clWaitTimeoutCount
+                    >= DWC_MATCH_CMD_RETRY_MAX)
             {
-                DWC_Printf(0x80,
+                DWC_Printf(DWC_REPORTFLAG_MATCH_GT2,
                     "Timeout: [SYN] Connection to server was shut down.\n");
-                if (DWCi_CancelPreConnectedClientProcess(stpMatchCnt->sbPidList[0]) == 0)
-                {
-                    return 0;
-                }
+
+                if (!DWCi_CancelPreConnectedClientProcess(
+                        DWCi_GetMatchCnt()->sbPidList[0]))
+                    return FALSE;
             }
             else
             {
-                stpMatchCnt->clWaitTimeoutCount++;
-                DWCi_SendMatchSynPacket(stpMatchCnt->aidList[0],
+                DWCi_GetMatchCnt()->clWaitTimeoutCount++;
+
+                DWCi_SendMatchSynPacket(DWCi_GetMatchCnt()->aidList[0],
                     DWC_SEND_TYPE_MATCH_SYN_ACK);
             }
         }
         break;
 
-    case 16:
-        if (elapsed > 6000)
+    case DWC_MATCH_STATE_SV_SYN:
+        if (passTime > DWC_MATCH_SYN_ACK_WAIT_TIME)
         {
-            stpMatchCnt->synResendCount++;
-            if (stpMatchCnt->synResendCount > 5)
+            DWCi_GetMatchCnt()->synResendCount++;
+            if (DWCi_GetMatchCnt()->synResendCount > DWC_MATCH_CMD_RETRY_MAX)
             {
-                DWC_Printf(0x40,
+                DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
                     "Timeout: wait SYN-ACK (aidbitmap 0x%x). "
                     "Restart matching.\n",
-                    stpMatchCnt->synAckBit);
-                if (stpMatchCnt->qr2MatchType == 0
-                    || stpMatchCnt->qr2MatchType == 1)
+                    DWCi_GetMatchCnt()->synAckBit);
+
+                if (DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_ANYBODY
+                    || DWCi_GetMatchCnt()->qr2MatchType
+                        == DWC_MATCH_TYPE_FRIEND)
                 {
-                    stpMatchCnt->closeState = 2;
-                    gt2CloseAllConnectionsHard(*stpMatchCnt->pGt2Socket);
-                    stpMatchCnt->closeState = 0;
-                    DWCi_RestartFromCancel(1);
+                    DWCi_CloseAllConnectionsByTimeout();
+                    DWCi_RestartFromCancel(DWC_MATCH_RESET_RESTART);
                 }
                 else
                 {
-                    if (DWCi_CloseShutdownClientSC(stpMatchCnt->synAckBit) == 0)
+                    if (!DWCi_CloseShutdownClientSC(
+                            DWCi_GetMatchCnt()->synAckBit))
+                        return FALSE;
+
+                    if (DWCi_GetMatchCnt()->gt2NumConnection != 0)
                     {
-                        return 0;
+                        DWCi_GetMatchCnt()->synResendCount = 0;
+                        DWCi_GetMatchCnt()->lastSynSent = DWCi_Np_GetTick();
                     }
-                    if (stpMatchCnt->gt2NumConnection != 0)
+                    else
                     {
-                        stpMatchCnt->synResendCount = 0;
-                        stpMatchCnt->lastSynSent = OSGetTime();
-                    }
-                    else if (DWCi_CancelPreConnectedServerProcess(stpMatchCnt->cbEventPid) == 0)
-                    {
-                        return 0;
+                        if (!DWCi_CancelPreConnectedServerProcess(
+                                DWCi_GetMatchCnt()->cbEventPid))
+                            return FALSE;
                     }
                 }
             }
             else
             {
-                int i;
-
-                for (i = 1; i <= stpMatchCnt->gt2NumConnection; i++)
+                for (i = 1; i <= DWCi_GetMatchCnt()->gt2NumConnection; i++)
                 {
-                    if ((stpMatchCnt->synAckBit
-                            & (1 << stpMatchCnt->aidList[i]))
-                        == 0)
+                    if (!(DWCi_GetMatchCnt()->synAckBit
+                            & (1 << DWCi_GetMatchCnt()->aidList[i])))
                     {
-                        DWCi_SendMatchSynPacket(stpMatchCnt->aidList[i],
+                        DWCi_SendMatchSynPacket(
+                            DWCi_GetMatchCnt()->aidList[i],
                             DWC_SEND_TYPE_MATCH_SYN);
                     }
                 }
@@ -4407,14 +4662,15 @@ int fn_804979F4(void)
         }
         break;
 
-    case 17:
-        if (elapsed > stpMatchCnt->baseLatency)
+    case DWC_MATCH_STATE_SV_SYN_WAIT:
+        if (passTime > DWCi_GetMatchCnt()->baseLatency)
         {
             DWCi_PostProcessConnection(DWC_PP_CONNECTION_SYN_FINISH);
         }
         break;
     }
-    return 1;
+
+    return TRUE;
 }
 
 static BOOL DWCi_SendCancelMatchSynCommand(int profileID, u8 command)
@@ -4447,177 +4703,180 @@ static BOOL DWCi_SendCancelMatchSynCommand(int profileID, u8 command)
     return TRUE;
 }
 
-static int DWCi_ProcessCancelMatchSynCommand(
+static BOOL DWCi_ProcessCancelMatchSynCommand(
     int profileID, u8 command, u32 data)
 {
-    DWC_Printf(0x80, "Received CANCEL SYN %d command from %u.\n",
-        command - 13, profileID);
+    u8 aid;
+    u32 bitmask;
+    u64 baseTime, latency;
+    int i;
+
+    DWC_Printf(DWC_REPORTFLAG_MATCH_GT2,
+        "Received CANCEL SYN %d command from %u.\n",
+        command - DWC_MATCH_COMMAND_CANCEL_SYN, profileID);
+
     if (DWC_GetState() != DWC_STATE_CONNECTED)
     {
-        DWC_Printf(0x80, "Ignore delayed CANCEL SYN.\n");
-        return 1;
+        DWC_Printf(DWC_REPORTFLAG_MATCH_GT2, "Ignore delayed CANCEL SYN.\n");
+        return TRUE;
     }
 
     switch (command)
     {
-    case 13:
-    {
-        if (stpMatchCnt->state != 8)
+    case DWC_MATCH_COMMAND_CANCEL_SYN:
+        if (DWCi_GetMatchCnt()->state != DWC_MATCH_STATE_CL_CANCEL_SYN)
         {
-            stpMatchCnt->state = 8;
+            DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_CANCEL_SYN);
             DWCi_CloseCancelHostAsync((int)data);
         }
+
         if (!DWCi_SendCancelMatchSynCommand(
                 profileID, DWC_MATCH_COMMAND_CANCEL_SYN_ACK))
-        {
-            return 0;
-        }
+            return FALSE;
         break;
-    }
 
-    case 14:
-        if (stpMatchCnt->state == 14)
+    case DWC_MATCH_COMMAND_CANCEL_SYN_ACK:
+        if (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_CANCEL_SYN)
         {
-            u64 elapsed;
-            u8 aid = 0xFF;
-            int i;
-
-            elapsed = (u64)(OSGetTime() - stpMatchCnt->lastCancelSynSent)
-                / (OS_BUS_CLOCK_SPEED / 4 / 1000) / 2;
-            if (elapsed > 300 && elapsed - 300 > stpMatchCnt->cancelBaseLatency)
+            baseTime = DWCi_Np_GetTick();
+            if ((DWCi_Np_TicksToMilliSeconds(
+                     baseTime - DWCi_GetMatchCnt()->lastCancelSynSent)
+                    >> 1)
+                > DWC_GP_PROCESS_INTERVAL)
             {
-                stpMatchCnt->cancelBaseLatency = elapsed - 300;
-            }
-
-            for (i = 1; i <= stpMatchCnt->gt2NumConnection; i++)
-            {
-                if (stpMatchCnt->sbPidList[i] == profileID)
+                latency = (DWCi_Np_TicksToMilliSeconds(
+                               baseTime - DWCi_GetMatchCnt()->lastCancelSynSent)
+                              >> 1)
+                    - DWC_GP_PROCESS_INTERVAL;
+                if (latency > DWCi_GetMatchCnt()->cancelBaseLatency)
                 {
-                    aid = stpMatchCnt->aidList[i];
-                    break;
+                    DWCi_GetMatchCnt()->cancelBaseLatency = (u16)latency;
                 }
             }
-            if (aid != 0xFF)
+
+            aid = DWCi_GetAIDFromProfileID(profileID, FALSE);
+            if (aid != 0xff)
             {
-                stpMatchCnt->cancelSynAckBit |= 1 << aid;
+                DWCi_GetMatchCnt()->cancelSynAckBit |= 1 << aid;
             }
 
-            if ((stpMatchCnt->validAidBitmap & ~1) == stpMatchCnt->cancelSynAckBit)
+            bitmask = DWCi_GetAIDBitmask(TRUE);
+            if (DWCi_GetMatchCnt()->cancelSynAckBit == bitmask)
             {
-                for (i = 1; i <= stpMatchCnt->gt2NumConnection; i++)
+                for (i = 1; i <= DWCi_GetMatchCnt()->gt2NumConnection; i++)
                 {
                     if (!DWCi_SendCancelMatchSynCommand(
-                            stpMatchCnt->sbPidList[i],
+                            DWCi_GetMatchCnt()->sbPidList[i],
                             DWC_MATCH_COMMAND_CANCEL_ACK))
-                    {
-                        return 0;
-                    }
+                        return FALSE;
                 }
-                stpMatchCnt->state = 15;
-                DWC_Printf(0x80, "Wait max latency %d msec.\n",
-                    stpMatchCnt->cancelBaseLatency);
+
+                DWCi_SetMatchStatus(DWC_MATCH_STATE_SV_CANCEL_SYN_WAIT);
+
+                DWC_Printf(DWC_REPORTFLAG_MATCH_GT2,
+                    "Wait max latency %d msec.\n",
+                    DWCi_GetMatchCnt()->cancelBaseLatency);
             }
         }
         else
         {
             if (!DWCi_SendCancelMatchSynCommand(
                     profileID, DWC_MATCH_COMMAND_CANCEL_ACK))
-            {
-                return 0;
-            }
+                return FALSE;
         }
         break;
 
-    case 15:
-        if (stpMatchCnt->state == 8)
+    case DWC_MATCH_COMMAND_CANCEL_ACK:
+        if (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_CL_CANCEL_SYN)
         {
-            DWCi_RestartFromCancel(2);
+            DWCi_RestartFromCancel(DWC_MATCH_RESET_CONTINUE);
         }
         break;
     }
-    return 1;
+
+    return TRUE;
 }
 
-int fn_8049811C(void)
+static BOOL DWCi_ProcessCancelMatchSynTimeout(void)
 {
-    s64 elapsed;
+    u64 passTime;
+    int i;
 
-    if (stpMatchCnt->state == 8 || stpMatchCnt->state == 14
-        || stpMatchCnt->state == 15)
+    if (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_CL_CANCEL_SYN
+        || DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_CANCEL_SYN
+        || DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_CANCEL_SYN_WAIT)
     {
-        elapsed = fn_ElapsedMSec(stpMatchCnt->lastCancelSynSent);
+        passTime = DWCi_Np_TicksToMilliSeconds(
+            DWCi_Np_GetTick() - DWCi_GetMatchCnt()->lastCancelSynSent);
     }
     else
     {
-        return 1;
+        return TRUE;
     }
 
-    switch (stpMatchCnt->state)
+    switch (DWCi_GetMatchCnt()->state)
     {
-    case 8:
-        if (elapsed > 6000)
+    case DWC_MATCH_STATE_CL_CANCEL_SYN:
+        if (passTime > DWC_MATCH_CANCEL_SYN_ACK_WAIT_TIME)
         {
-            if (!DWCi_SendCancelMatchSynCommand(stpMatchCnt->sbPidList[0],
+            if (!DWCi_SendCancelMatchSynCommand(
+                    DWCi_GetMatchCnt()->sbPidList[0],
                     DWC_MATCH_COMMAND_CANCEL_SYN_ACK))
-            {
-                return 0;
-            }
+                return FALSE;
         }
         break;
 
-    case 14:
-        if (elapsed > 6000)
+    case DWC_MATCH_STATE_SV_CANCEL_SYN:
+        if (passTime > DWC_MATCH_CANCEL_SYN_ACK_WAIT_TIME)
         {
-            stpMatchCnt->cancelSynResendCount++;
-            if (stpMatchCnt->cancelSynResendCount > 5)
+            DWCi_GetMatchCnt()->cancelSynResendCount++;
+            if (DWCi_GetMatchCnt()->cancelSynResendCount
+                > DWC_MATCH_CMD_RETRY_MAX)
             {
-                DWC_Printf(0x40,
+                DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
                     "Timeout: wait cancel SYN-ACK (aidbitmap 0x%x).\n",
-                    stpMatchCnt->cancelSynAckBit);
-                if (DWCi_CloseShutdownClientSC(stpMatchCnt->cancelSynAckBit) == 0)
+                    DWCi_GetMatchCnt()->cancelSynAckBit);
+
+                if (!DWCi_CloseShutdownClientSC(
+                        DWCi_GetMatchCnt()->cancelSynAckBit))
+                    return FALSE;
+
+                if (DWCi_GetMatchCnt()->gt2NumConnection != 0)
                 {
-                    return 0;
-                }
-                if (stpMatchCnt->gt2NumConnection != 0)
-                {
-                    stpMatchCnt->cancelSynResendCount = 0;
-                    stpMatchCnt->lastCancelSynSent = OSGetTime();
+                    DWCi_GetMatchCnt()->cancelSynResendCount = 0;
+                    DWCi_GetMatchCnt()->lastCancelSynSent = DWCi_Np_GetTick();
                 }
                 else
                 {
-                    DWCi_RestartFromCancel(2);
+                    DWCi_RestartFromCancel(DWC_MATCH_RESET_CONTINUE);
                 }
             }
             else
             {
-                int i;
-
-                for (i = 1; i <= stpMatchCnt->gt2NumConnection; i++)
+                for (i = 1; i <= DWCi_GetMatchCnt()->gt2NumConnection; i++)
                 {
-                    if ((stpMatchCnt->cancelSynAckBit
-                            & (1 << stpMatchCnt->aidList[i]))
-                        == 0)
+                    if (!(DWCi_GetMatchCnt()->cancelSynAckBit
+                            & (1 << DWCi_GetMatchCnt()->aidList[i])))
                     {
                         if (!DWCi_SendCancelMatchSynCommand(
-                                stpMatchCnt->sbPidList[i],
+                                DWCi_GetMatchCnt()->sbPidList[i],
                                 DWC_MATCH_COMMAND_CANCEL_SYN))
-                        {
-                            return 0;
-                        }
+                            return FALSE;
                     }
                 }
             }
         }
         break;
 
-    case 15:
-        if (elapsed > stpMatchCnt->cancelBaseLatency)
+    case DWC_MATCH_STATE_SV_CANCEL_SYN_WAIT:
+        if (passTime > DWCi_GetMatchCnt()->cancelBaseLatency)
         {
-            DWCi_RestartFromCancel(2);
+            DWCi_RestartFromCancel(DWC_MATCH_RESET_CONTINUE);
         }
         break;
     }
-    return 1;
+
+    return TRUE;
 }
 
 static void DWCi_CloseAllConnectionsByTimeout(void)
@@ -4783,108 +5042,95 @@ static void DWCi_InitOptMinCompParam(BOOL reset)
     }
 }
 
-void fn_80498440(void)
+static void DWCi_ProcessOptMinComp(void)
 {
-    if (stpOptMinComp == NULL)
-    {
-        return;
-    }
-    if (stpOptMinComp->valid == 0)
-    {
-        return;
-    }
-    if (stpMatchCnt->qr2MatchType == 2)
-    {
-        return;
-    }
-    if (stpMatchCnt->qr2MatchType == 3)
+    u32 bitmask;
+    int result;
+    int i;
+
+    if (!stpOptMinComp || !stpOptMinComp->valid
+        || DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_SC_SV
+        || DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_SC_CL)
     {
         return;
     }
 
-    if (stpMatchCnt->state == 19)
+    if (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_POLL_TIMEOUT)
     {
-        u32 bitmap = 0;
-        int i;
-        GPResult result;
+        bitmask = DWCi_GetAIDBitmask(FALSE);
 
-        for (i = 1; i <= stpMatchCnt->gt2NumConnection; i++)
+        if (stpOptMinComp->recvBit == bitmask)
         {
-            bitmap |= 1 << stpMatchCnt->aidList[i];
-        }
-
-        if (stpOptMinComp->recvBit == bitmap)
-        {
-            if (stpOptMinComp->timeoutBit == bitmap)
+            if (stpOptMinComp->timeoutBit == bitmask)
             {
-                DWC_Printf(0x80,
+                DWC_Printf(DWC_REPORTFLAG_MATCH_GT2,
                     "[OPT_MIN_COMP] Timeout occured in all hosts.\n");
-                stpMatchCnt->qr2NumEntry = stpMatchCnt->gt2NumConnection;
-                stpMatchCnt->clLinkProgress = stpMatchCnt->gt2NumConnection - 1;
+
+                DWCi_GetMatchCnt()->qr2NumEntry
+                    = (u8)DWCi_GetMatchCnt()->gt2NumConnection;
+                DWCi_GetMatchCnt()->clLinkProgress
+                    = (u8)(DWCi_GetMatchCnt()->gt2NumConnection - 1);
+
                 DWCi_PostProcessConnection(DWC_PP_CONNECTION_SV_CONNECT);
             }
             else
             {
-                DWC_Printf(0x80,
+                DWC_Printf(DWC_REPORTFLAG_MATCH_GT2,
                     "[OPT_MIN_COMP] Some clients is in time.\n");
-                stpOptMinComp->lastPollTime = OSGetTime();
+
+                stpOptMinComp->lastPollTime = DWCi_Np_GetTick();
                 stpOptMinComp->recvBit = 0;
-                if (stpMatchCnt->qr2MatchType == 0)
+
+                if (DWCi_GetMatchCnt()->qr2MatchType
+                    == DWC_MATCH_TYPE_ANYBODY)
                 {
-                    stpMatchCnt->state = 3;
-                    stpMatchCnt->sbUpdateFlag = 2;
-                    stpMatchCnt->sbUpdateTick = OSGetTime();
+                    DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_SEARCH_HOST);
+                    DWCi_GetMatchCnt()->sbUpdateFlag
+                        = DWC_SB_UPDATE_INTERVAL_LONG;
+                    DWCi_GetMatchCnt()->sbUpdateTick = DWCi_Np_GetTick();
                 }
                 else
                 {
-                    stpMatchCnt->state = 4;
-                    DWCi_SendResvCommandToFriend(1, 0, 0);
+                    DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_WAIT_RESV);
+                    (void)DWCi_SendResvCommandToFriend(TRUE, FALSE, 0);
                 }
             }
         }
-        else if (fn_ElapsedMSec(stpOptMinComp->lastPollTime)
-            >= stpOptMinComp->retry * 6000)
+        else if (DWCi_Np_TicksToMilliSeconds(
+                     DWCi_Np_GetTick() - stpOptMinComp->lastPollTime)
+            >= DWC_MATCH_CMD_RTT_TIMEOUT * stpOptMinComp->retry)
         {
-            DWC_Printf(4, "[OPT_MIN_COMP] Timeout: wait poll-ACK %d/%d.\n",
-                stpOptMinComp->retry - 1, 5);
-            if (stpOptMinComp->retry > 5)
+            DWC_Printf(DWC_REPORTFLAG_DEBUG,
+                "[OPT_MIN_COMP] Timeout: wait poll-ACK %d/%d.\n",
+                stpOptMinComp->retry - 1,
+                DWC_MATCH_OPT_MIN_COMP_POLL_RETRY_MAX);
+
+            if (stpOptMinComp->retry
+                > DWC_MATCH_OPT_MIN_COMP_POLL_RETRY_MAX)
             {
-                DWC_Printf(4,
+                DWC_Printf(DWC_REPORTFLAG_DEBUG,
                     "[OPT_MIN_COMP] Timeout: aidbitmap 0x%x. "
                     "Restart matching.\n",
                     stpOptMinComp->recvBit);
-                if (stpOptMinComp != NULL && stpOptMinComp->valid != 0)
-                {
-                    stpOptMinComp->recvBit = 0;
-                    stpOptMinComp->timeoutBit = 0;
-                    stpOptMinComp->retry = 0;
-                    stpOptMinComp->lastPollTime = OSGetTime();
-                }
-                stpMatchCnt->closeState = 2;
-                gt2CloseAllConnectionsHard(*stpMatchCnt->pGt2Socket);
-                stpMatchCnt->closeState = 0;
-                DWCi_RestartFromCancel(1);
+
+                DWCi_InitOptMinCompParam(TRUE);
+
+                DWCi_CloseAllConnectionsByTimeout();
+                DWCi_RestartFromCancel(DWC_MATCH_RESET_RESTART);
             }
             else
             {
-                for (i = 1; i <= stpMatchCnt->gt2NumConnection; i++)
+                for (i = 1; i <= DWCi_GetMatchCnt()->gt2NumConnection; i++)
                 {
-                    if ((stpOptMinComp->recvBit
-                            & (1 << stpMatchCnt->aidList[i]))
-                        == 0)
+                    if (!(stpOptMinComp->recvBit
+                            & (1 << DWCi_GetMatchCnt()->aidList[i])))
                     {
-                        result = DWCi_SendMatchCommand(17, stpMatchCnt->sbPidList[i],
-                            stpMatchCnt->qr2IPList[i], stpMatchCnt->qr2PortList[i],
-                            NULL, 0);
-                        if (stpMatchCnt->qr2MatchType == 0)
-                        {
-                            result = DWCi_HandleSBError(result);
-                        }
-                        else
-                        {
-                            result = DWCi_HandleGPError(result);
-                        }
-                        if (result != 0)
+                        result = DWCi_SendMatchCommand(
+                            DWC_MATCH_COMMAND_POLL_TIMEOUT,
+                            DWCi_GetMatchCnt()->sbPidList[i],
+                            DWCi_GetMatchCnt()->qr2IPList[i],
+                            DWCi_GetMatchCnt()->qr2PortList[i], NULL, 0);
+                        if (DWCi_HandleMatchCommandError(result))
                         {
                             return;
                         }
@@ -4894,70 +5140,47 @@ void fn_80498440(void)
             }
         }
     }
-    else if (stpMatchCnt->state == 3 || stpMatchCnt->state == 4)
+    else if ((DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_CL_WAIT_RESV
+                 || DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_CL_SEARCH_HOST)
+        && DWCi_GetMatchCnt()->gt2NumConnection >= stpOptMinComp->minEntry - 1
+        && ((!stpOptMinComp->retry
+                && DWCi_Np_TicksToMilliSeconds(
+                       DWCi_Np_GetTick() - stpOptMinComp->startTime)
+                    >= stpOptMinComp->timeout)
+            || (stpOptMinComp->retry
+                && DWCi_Np_TicksToMilliSeconds(
+                       DWCi_Np_GetTick() - stpOptMinComp->lastPollTime)
+                    >= stpOptMinComp->timeout >> 2)))
     {
-        int i;
-        GPResult result;
-
-        if (stpMatchCnt->gt2NumConnection < stpOptMinComp->minEntry - 1)
+        if (DWCi_GetMatchCnt()->reqProfileID)
         {
-            return;
-        }
-        if (stpOptMinComp->retry != 0
-            || fn_ElapsedMSec(stpOptMinComp->startTime)
-                < stpOptMinComp->timeout)
-        {
-            if (stpOptMinComp->retry == 0)
-            {
-                return;
-            }
-            if (fn_ElapsedMSec(stpOptMinComp->lastPollTime)
-                < stpOptMinComp->timeout / 4)
+            result = DWCi_CancelReservation(DWCi_GetMatchCnt()->reqProfileID);
+            if (DWCi_HandleMatchCommandError(result))
             {
                 return;
             }
         }
 
-        if (stpMatchCnt->reqProfileID != 0)
+        DWCi_SetMatchStatus(DWC_MATCH_STATE_SV_POLL_TIMEOUT);
+
+        DWC_Printf(DWC_REPORTFLAG_MATCH_GT2,
+            "[OPT_MIN_COMP] Poll timeout (my time is %lu).\n",
+            DWCi_Np_TicksToMilliSeconds(
+                DWCi_Np_GetTick() - stpOptMinComp->startTime));
+
+        for (i = 1; i <= DWCi_GetMatchCnt()->gt2NumConnection; i++)
         {
-            result = DWCi_SendMatchCommand(5, stpMatchCnt->reqProfileID,
-                stpMatchCnt->qr2IPList[0], stpMatchCnt->qr2PortList[0], NULL, 0);
-            stpMatchCnt->reqProfileID = 0;
-            if (stpMatchCnt->qr2MatchType == 0)
-            {
-                result = DWCi_HandleSBError(result);
-            }
-            else
-            {
-                result = DWCi_HandleGPError(result);
-            }
-            if (result != 0)
+            result = DWCi_SendMatchCommand(DWC_MATCH_COMMAND_POLL_TIMEOUT,
+                DWCi_GetMatchCnt()->sbPidList[i],
+                DWCi_GetMatchCnt()->qr2IPList[i],
+                DWCi_GetMatchCnt()->qr2PortList[i], NULL, 0);
+            if (DWCi_HandleMatchCommandError(result))
             {
                 return;
             }
         }
 
-        stpMatchCnt->state = 19;
-        DWC_Printf(0x80, "[OPT_MIN_COMP] Poll timeout (my time is %lu).\n",
-            fn_ElapsedMSec(stpOptMinComp->startTime));
-        for (i = 1; i <= stpMatchCnt->gt2NumConnection; i++)
-        {
-            result = DWCi_SendMatchCommand(17, stpMatchCnt->sbPidList[i],
-                stpMatchCnt->qr2IPList[i], stpMatchCnt->qr2PortList[i], NULL, 0);
-            if (stpMatchCnt->qr2MatchType == 0)
-            {
-                result = DWCi_HandleSBError(result);
-            }
-            else
-            {
-                result = DWCi_HandleGPError(result);
-            }
-            if (result != 0)
-            {
-                return;
-            }
-        }
-        stpOptMinComp->lastPollTime = OSGetTime();
+        stpOptMinComp->lastPollTime = DWCi_Np_GetTick();
         stpOptMinComp->retry = 1;
     }
 }
@@ -5142,7 +5365,7 @@ static NegotiateError DWCi_HandleNNError(NegotiateError error)
     return error;
 }
 
-int fn_804990FC(int result)
+static NegotiateResult DWCi_HandleNNResult(NegotiateResult result)
 {
     int type;
     int code;
@@ -5176,7 +5399,7 @@ int fn_804990FC(int result)
     return result;
 }
 
-int fn_8049925C(int error)
+static GT2Result DWCi_HandleGT2Error(GT2Result error)
 {
     int type;
     int code;
@@ -5279,7 +5502,8 @@ static int DWCi_CheckDWCServer(SBServer server)
     return SBServerGetIntValueA(server, "dwc_pid", 0);
 }
 
-void fn_804993C8(ServerBrowser sb, SBCallbackReason reason, SBServer server,
+static void DWCi_SBCallback(ServerBrowser sb, SBCallbackReason reason,
+    SBServer server,
     void* instance)
 {
     int profileID;
@@ -5294,7 +5518,7 @@ void fn_804993C8(ServerBrowser sb, SBCallbackReason reason, SBServer server,
     switch (reason)
     {
     case sbc_serveradded:
-        fn_80499A30(server);
+        DWCi_SBPrintServerData(server);
         stpMatchCnt->sbUpdateRequestTick = OSGetTime()
             + (u64)(OS_BUS_CLOCK_SPEED / 4 / 1000) * 30000;
         break;
@@ -5343,7 +5567,7 @@ void fn_804993C8(ServerBrowser sb, SBCallbackReason reason, SBServer server,
 
         case 3:
             DWCi_EvaluateServers(1);
-            fn_80499E90();
+            DWCi_RandomizeServers();
             if (ServerBrowserCount(sb) != 0)
             {
                 result = DWCi_SendResvCommand(0, FALSE);
@@ -5476,7 +5700,7 @@ void fn_804993C8(ServerBrowser sb, SBCallbackReason reason, SBServer server,
     s_sbCallbackLevel--;
 }
 
-void fn_80499A30(SBServer server)
+static void DWCi_SBPrintServerData(SBServer server)
 {
     int i;
 
@@ -5562,9 +5786,10 @@ static int DWCi_EvaluateServers(int sort)
             }
         }
 
-        if (DWCi_GetMatchCnt()->_488 != NULL)
+        if (DWCi_GetMatchCnt()->evalCallback != NULL)
         {
-            eval = DWCi_GetMatchCnt()->_488(i, DWCi_GetMatchCnt()->_48C);
+            eval = DWCi_GetMatchCnt()->evalCallback(
+                i, DWCi_GetMatchCnt()->evalParam);
 
             if (eval > 0)
             {
@@ -5603,7 +5828,7 @@ static int DWCi_EvaluateServers(int sort)
     return 1;
 }
 
-void fn_80499E90(void)
+static void DWCi_RandomizeServers(void)
 {
     u32 rand;
     int maxEval = 0;
@@ -5625,7 +5850,7 @@ void fn_80499E90(void)
         {
             maxEval = value;
         }
-        total += lbl_804F31F8[i];
+        total += stEvalRate[i];
     }
 
     rand = DWCi_GetMathRand32(0x64);
@@ -5636,7 +5861,7 @@ void fn_80499E90(void)
             cumulative[i] = 100;
             break;
         }
-        cumulative[i] = lbl_804F31F8[i] * 100 / total
+        cumulative[i] = stEvalRate[i] * 100 / total
             + (i > 0 ? cumulative[i - 1] : 0);
         if (rand < cumulative[i])
         {
@@ -5815,7 +6040,7 @@ static void DWCi_QR2NatnegCallback(int cookie, void* userdata)
     stpMatchCnt->nnFailedTime = 0;
     if (DWCi_HandleNNError(DWCi_NNStartupAsync(1, cookie, NULL)) == 0)
     {
-        stpMatchCnt->_3E0 = 0xFF;
+        stpMatchCnt->cmdCnt.command = DWC_MATCH_COMMAND_DUMMY;
     }
 }
 
@@ -5878,188 +6103,158 @@ static void DWCi_NNProgressCallback(NegotiateState state, void* userdata)
 static void DWCi_NNCompletedCallback(NegotiateResult result, SOCKET gamesocket,
     struct sockaddr_in* remoteaddr, void* userdata)
 {
-    DWCNNInfo* info = (DWCNNInfo*)userdata;
+#pragma unused(gamesocket)
+    char pidStr[12];
+    int index;
+    NegotiateError nnError;
+    NegotiateResult nnResult;
+    GT2Result gt2Result;
+    DWCNNInfo* nnInfo = (DWCNNInfo*)userdata;
 
-    DWC_Printf(0x40, "NN, Complete NAT Negotiation. result : %d\n", result);
-    if (info != NULL)
+    DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+        "NN, Complete NAT Negotiation. result : %d\n",
+        result);
+    if (nnInfo)
     {
-        DWC_Printf(0x40, "NN cookie = %x.\n", info->cookie);
+        DWC_Printf(DWC_REPORTFLAG_MATCH_NN, "NN cookie = %x.\n", nnInfo->cookie);
     }
-    if ((stpMatchCnt->state != 6 && stpMatchCnt->state != 11)
-        || info == NULL)
+
+    if (((DWCi_GetMatchCnt()->state != DWC_MATCH_STATE_CL_NN)
+            && (DWCi_GetMatchCnt()->state != DWC_MATCH_STATE_SV_OWN_NN))
+        || !nnInfo)
     {
-        DWC_Printf(4, "Ignore delayed NN after cancel.\n");
+        DWC_Printf(DWC_REPORTFLAG_DEBUG,
+            "Ignore delayed NN after cancel.\n");
         return;
     }
 
     if (result == nr_success)
     {
-        int count;
-
-        if (remoteaddr != NULL)
+        if (remoteaddr)
         {
-            DWC_Printf(0x40, "NN, remote address : %s\n",
+            DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                "NN, remote address : %s\n",
                 gt2AddressToString(remoteaddr->sin_addr.addr,
-                    SONtoHs(remoteaddr->sin_port), NULL));
+                    SO_NtoHs(remoteaddr->sin_port),
+                    NULL));
         }
-        info->cookie = 0;
-        stpMatchCnt->qr2NNFinishCount++;
-        count = stpMatchCnt->qr2NNFinishCount;
-        if (info->isQR2 != 0)
-        {
-            GT2Result res;
-            char buf[0xC];
 
-            stpMatchCnt->ipList[count] = remoteaddr->sin_addr.addr;
-            stpMatchCnt->portList[count] = SONtoHs(remoteaddr->sin_port);
-            DWC_Printf(0x40, "NN child finished Nat Negotiation.\n");
-            stpMatchCnt->nnRecvCount = 0;
-            stpMatchCnt->nnLastCookie = 0;
-            stpMatchCnt->nnFailedTime = 0;
-            if (stpMatchCnt->state == 11)
+        nnInfo->cookie = 0;
+
+        DWCi_GetMatchCnt()->qr2NNFinishCount++;
+        index = DWCi_GetMatchCnt()->qr2NNFinishCount;
+
+        if (nnInfo->isQR2)
+        {
+            DWCi_GetMatchCnt()->ipList[index] = remoteaddr->sin_addr.addr;
+            DWCi_GetMatchCnt()->portList[index]
+                = SO_NtoHs(remoteaddr->sin_port);
+
+            DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                "NN child finished Nat Negotiation.\n");
+
+            DWCi_GetMatchCnt()->nnRecvCount = 0;
+            DWCi_GetMatchCnt()->nnLastCookie = 0;
+            DWCi_GetMatchCnt()->nnFailedTime = 0;
+
+            if (DWCi_GetMatchCnt()->state == DWC_MATCH_STATE_SV_OWN_NN)
             {
-                stpMatchCnt->state = 12;
+                DWCi_SetMatchStatus(DWC_MATCH_STATE_SV_OWN_GT2);
             }
             else
             {
-                stpMatchCnt->state = 7;
+                DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_GT2);
             }
-            stpMatchCnt->gt2ConnectCount = 0;
-            DWC_Printf(0x80, "gt2Connect() to pidList[%d] (%s)\n", count,
-                gt2AddressToString(stpMatchCnt->ipList[count],
-                    stpMatchCnt->portList[count], NULL));
-            snprintf(buf, sizeof(buf), "%u", stpMatchCnt->profileID);
-            res = gt2Connect(*stpMatchCnt->pGt2Socket, NULL,
-                gt2AddressToString(stpMatchCnt->ipList[count],
-                    stpMatchCnt->portList[count], NULL),
-                (const GT2Byte*)buf, -1, 5000, stpMatchCnt->gt2Callbacks,
-                GT2False);
-            if (res == GT2OutOfMemory)
+
+            DWCi_GetMatchCnt()->gt2ConnectCount = 0;
+
+            DWC_Printf(DWC_REPORTFLAG_MATCH_GT2,
+                "gt2Connect() to pidList[%d] (%s)\n",
+                index,
+                gt2AddressToString(DWCi_GetMatchCnt()->ipList[index],
+                    DWCi_GetMatchCnt()->portList[index],
+                    NULL));
+
+            (void)snprintf(pidStr, sizeof(pidStr), "%u", DWCi_GetMatchCnt()->profileID);
+            gt2Result = gt2Connect(*DWCi_GetMatchCnt()->pGt2Socket, NULL, gt2AddressToString(DWCi_GetMatchCnt()->ipList[index], DWCi_GetMatchCnt()->portList[index], NULL), (GT2Byte*)pidStr, -1, DWC_GT2_CONNECT_TIMEOUT, DWCi_GetMatchCnt()->gt2Callbacks, GT2False);
+            if (gt2Result == GT2OutOfMemory)
             {
-                fn_8049925C(res);
+                DWCi_HandleGT2Error(gt2Result);
                 return;
             }
-            if (res != GT2Success)
+            else if (gt2Result == GT2Success)
             {
-                if (DWCi_CancelPreConnectedServerProcess(stpMatchCnt->sbPidList[count]) == 0)
-                {
-                    return;
-                }
+            }
+            else if (!DWCi_CancelPreConnectedServerProcess(
+                         DWCi_GetMatchCnt()->sbPidList[index]))
+            {
+                return;
             }
         }
         else
         {
-            DWC_Printf(0x40, "NN parent finished Nat Negotiation.\n");
-            if (remoteaddr != NULL)
+            DWC_Printf(DWC_REPORTFLAG_MATCH_NN,
+                "NN parent finished Nat Negotiation.\n");
+
+            if (remoteaddr)
             {
-                stpMatchCnt->ipList[count - 1] = remoteaddr->sin_addr.addr;
-                stpMatchCnt->portList[count - 1]
-                    = SONtoHs(remoteaddr->sin_port);
+                DWCi_GetMatchCnt()->ipList[index - 1]
+                    = remoteaddr->sin_addr.addr;
+                DWCi_GetMatchCnt()->portList[index - 1]
+                    = SO_NtoHs(remoteaddr->sin_port);
             }
-            stpMatchCnt->nnFinishTime = OSGetTime();
-            stpMatchCnt->state = 7;
+
+            DWCi_GetMatchCnt()->nnFinishTime = DWCi_Np_GetTick();
+            DWCi_SetMatchStatus(DWC_MATCH_STATE_CL_GT2);
         }
     }
     else
     {
-        int level;
-
-        if (info->cookie == 0)
+        if (!nnInfo->cookie)
         {
-            DWC_Printf(4, "Ignore delayed NN error after cancel.\n");
-            return;
-        }
-        level = fn_804990FC(result);
-        if (level != 2 && level != 1)
-        {
+            DWC_Printf(DWC_REPORTFLAG_DEBUG,
+                "Ignore delayed NN error after cancel.\n");
             return;
         }
 
-        if (info->isQR2 == 0)
+        nnResult = DWCi_HandleNNResult(result);
+
+        if ((nnResult != nr_inittimeout)
+            && (nnResult != nr_deadbeatpartner))
         {
-            DWC_Printf(0x40, "Failed %d/%d NN send.\n", info->retryCount,
-                1);
-            if (level == 1 || (level == 2 && info->retryCount >= 1))
+            return;
+        }
+
+        if (!nnInfo->isQR2)
+        {
+            DWC_Printf(DWC_REPORTFLAG_MATCH_NN, "Failed %d/%d NN send.\n", nnInfo->retryCount, DWC_MAX_MATCH_NN_RETRY);
+
+            if ((nnResult == nr_deadbeatpartner)
+                || ((nnResult == nr_inittimeout)
+                    && (nnInfo->retryCount >= DWC_MAX_MATCH_NN_RETRY)))
             {
-                DWC_Printf(0x40, "Abort NN.\n");
-                info->cookie = 0;
-                if (stpMatchCnt->qr2MatchType != 3)
-                {
-                    stpMatchCnt->nnFailureCount++;
-                    DWC_Printf(0x40, "NN failure %d/%d.\n",
-                        stpMatchCnt->nnFailureCount, 5);
-                }
-                if (stpMatchCnt->qr2MatchType == 3
-                    || stpMatchCnt->nnFailureCount >= 5)
-                {
-                    if (stpMatchCnt != NULL)
-                    {
-                        BOOL isServer;
-                        BOOL self;
+                DWC_Printf(DWC_REPORTFLAG_MATCH_NN, "Abort NN.\n");
 
-                        stpMatchCnt->closeState = 2;
-                        gt2CloseAllConnectionsHard(*stpMatchCnt->pGt2Socket);
-                        stpMatchCnt->closeState = 0;
-                        DWCi_SetError(DWC_ERROR_NETWORK, DWC_ECODE_SEQ_MATCH + DWC_ECODE_GS_NN - 420);
-                        DWCi_SetGPStatus(1, "", NULL);
-                        {
-                            DWCMatchControl* control = stpMatchCnt;
+                nnInfo->cookie = 0;
 
-                            isServer = control->qr2MatchType == 2;
-                            self = control->cbEventPid == 0;
-                            control->matchedCallback(DWC_ERROR_NETWORK, FALSE, self, isServer,
-                                DWCi_GetFriendListIndex(control->cbEventPid), control->matchedParam);
-                        }
-                        DWCi_CloseMatching();
-                    }
+                if (!DWCi_ProcessNNFailure(FALSE))
+                {
                     return;
                 }
-                if (DWCi_CancelPreConnectedClientProcess(
-                        stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection])
-                    == 0)
+
+                if (!DWCi_CancelPreConnectedClientProcess(
+                        DWCi_GetMatchCnt()
+                            ->sbPidList[DWCi_GetMatchCnt()->gt2NumConnection]))
                 {
                     return;
                 }
             }
             else
             {
-                int res = 0;
-                int retry;
+                nnInfo->retryCount++;
 
-                info->retryCount++;
-                if (info->isQR2 == 0
-                    && DWCi_HandleSBError(
-                           ServerBrowserSendNatNegotiateCookieToServerA(
-                               stpMatchCnt->sbObj,
-                               gt2AddressToString(info->ip, 0, NULL),
-                               info->port, info->cookie))
-                        != 0)
-                {
-                    res = 2;
-                }
-                else
-                {
-                    if (info->isQR2 == 0)
-                    {
-                        DWC_Printf(0x40, "Send NN cookie = %x.\n",
-                            info->cookie);
-                    }
-                    for (retry = 0; retry < 5; retry++)
-                    {
-                        res = NNBeginNegotiationWithSocket(
-                            gt2GetSocketSOCKET(*stpMatchCnt->pGt2Socket),
-                            info->cookie, info->isQR2, DWCi_NNProgressCallback,
-                            DWCi_NNCompletedCallback, info);
-                        if (res == 0 || res != 3)
-                        {
-                            break;
-                        }
-                        DWC_Printf(4,
-                            " dns error occurs when NatNegotiation "
-                            "begin... retry\n");
-                    }
-                }
-                if (DWCi_HandleNNError(res) == 0)
+                nnError = DWCi_DoNatNegotiationAsync(nnInfo);
+                if (DWCi_HandleNNError(nnError))
                 {
                     return;
                 }
@@ -6067,60 +6262,77 @@ static void DWCi_NNCompletedCallback(NegotiateResult result, SOCKET gamesocket,
         }
         else
         {
-            DWC_Printf(0x40, "Failed %d/%d NN recv.\n", stpMatchCnt->nnRecvCount,
-                1);
-            stpMatchCnt->nnFailedTime = OSGetTime();
-            if (level == 1 || (level == 2 && stpMatchCnt->nnRecvCount >= 1))
+            DWC_Printf(DWC_REPORTFLAG_MATCH_NN, "Failed %d/%d NN recv.\n", DWCi_GetMatchCnt()->nnRecvCount, DWC_MAX_MATCH_NN_RETRY);
+
+            DWCi_GetMatchCnt()->nnFailedTime = DWCi_Np_GetTick();
+
+            if ((nnResult == nr_deadbeatpartner)
+                || ((nnResult == nr_inittimeout)
+                    && (DWCi_GetMatchCnt()->nnRecvCount
+                        >= DWC_MAX_MATCH_NN_RETRY)))
             {
-                DWC_Printf(0x40, "Abort NN.\n");
-                info->cookie = 0;
-                if (stpMatchCnt->qr2MatchType != 3
-                    && stpMatchCnt->qr2MatchType != 2)
+                DWC_Printf(DWC_REPORTFLAG_MATCH_NN, "Abort NN.\n");
+
+                nnInfo->cookie = 0;
+
+                if ((DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_SC_CL)
+                    || (DWCi_GetMatchCnt()->qr2MatchType
+                        == DWC_MATCH_TYPE_SC_SV))
                 {
-                    if (stpMatchCnt->qr2MatchType != 3)
+                    if (!DWCi_ProcessNNFailure(TRUE))
                     {
-                        stpMatchCnt->nnFailureCount++;
-                        DWC_Printf(0x40, "NN failure %d/%d.\n",
-                            stpMatchCnt->nnFailureCount, 5);
-                    }
-                    if (stpMatchCnt->qr2MatchType == 3
-                        || stpMatchCnt->nnFailureCount >= 5)
-                    {
-                        if (stpMatchCnt != NULL)
-                        {
-                            BOOL isServer;
-                            BOOL self;
-
-                            stpMatchCnt->closeState = 2;
-                            gt2CloseAllConnectionsHard(*stpMatchCnt->pGt2Socket);
-                            stpMatchCnt->closeState = 0;
-                            DWCi_SetError(DWC_ERROR_NETWORK, DWC_ECODE_SEQ_MATCH + DWC_ECODE_GS_NN - 420);
-                            DWCi_SetGPStatus(1, "", NULL);
-                            {
-                                DWCMatchControl* control = stpMatchCnt;
-
-                                isServer = control->qr2MatchType == 2;
-                                self = control->cbEventPid == 0;
-                                control->matchedCallback(DWC_ERROR_NETWORK, FALSE, self, isServer,
-                                    DWCi_GetFriendListIndex(control->cbEventPid), control->matchedParam);
-                            }
-                            DWCi_CloseMatching();
-                        }
                         return;
                     }
                 }
-                stpMatchCnt->nnRecvCount = 0;
-                stpMatchCnt->nnLastCookie = 0;
-                stpMatchCnt->nnFailedTime = 0;
-                if (DWCi_CancelPreConnectedServerProcess(
-                        stpMatchCnt->sbPidList[stpMatchCnt->gt2NumConnection + 1])
-                    == 0)
+                else
+                {
+                    if (!DWCi_ProcessNNFailure(FALSE))
+                    {
+                        return;
+                    }
+                }
+
+                DWCi_GetMatchCnt()->nnRecvCount = 0;
+                DWCi_GetMatchCnt()->nnLastCookie = 0;
+                DWCi_GetMatchCnt()->nnFailedTime = 0;
+
+                if (!DWCi_CancelPreConnectedServerProcess(
+                        DWCi_GetMatchCnt()
+                            ->sbPidList[DWCi_GetMatchCnt()->gt2NumConnection
+                                        + 1]))
                 {
                     return;
                 }
             }
         }
     }
+}
+
+static BOOL DWCi_ProcessNNFailure(BOOL ignoreError)
+{
+    if (ignoreError)
+    {
+        return TRUE;
+    }
+
+    if (DWCi_GetMatchCnt()->qr2MatchType != DWC_MATCH_TYPE_SC_CL)
+    {
+        DWCi_GetMatchCnt()->nnFailureCount++;
+
+        DWC_Printf(DWC_REPORTFLAG_MATCH_NN, "NN failure %d/%d.\n", DWCi_GetMatchCnt()->nnFailureCount, DWC_MATCH_NN_FAILURE_MAX);
+    }
+
+    if ((DWCi_GetMatchCnt()->qr2MatchType == DWC_MATCH_TYPE_SC_CL)
+        || (DWCi_GetMatchCnt()->nnFailureCount
+            >= DWC_MATCH_NN_FAILURE_MAX))
+    {
+        DWCi_StopMatching(DWC_ERROR_NETWORK,
+            DWC_ECODE_SEQ_MATCH + DWC_ECODE_GS_NN
+                + DWC_ECODE_TYPE_MUCH_FAILURE);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 static DWCMatchControl* DWCi_GetMatchCnt(void)

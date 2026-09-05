@@ -24,9 +24,7 @@ extern "C"
     typedef void (*DWCUpdateServersCallback)(int error, BOOL isChanged,
         void* param);
     typedef void (*DWCDeleteFriendListCallback)(int deletedIndex,
-        int sourceIndex, void* param);
-    typedef void (*DWCStorageLoginCallback)(DWCError error, void* param);
-
+        int srcIndex, void* param);
     typedef enum DWCFriendState
     {
         DWC_FRIEND_STATE_INIT,
@@ -46,14 +44,6 @@ extern "C"
 
     enum
     {
-        DWC_PERS_STATE_INIT,
-        DWC_PERS_STATE_LOGIN,
-        DWC_PERS_STATE_CONNECTED,
-        DWC_PERS_STATE_NUM
-    };
-
-    enum
-    {
         DWC_STATUS_OFFLINE,
         DWC_STATUS_ONLINE,
         DWC_STATUS_PLAYING,
@@ -67,7 +57,16 @@ extern "C"
     u8 DWC_GetFriendStatus(const DWCFriendData* friendData, char* statusString);
     u8 DWC_GetFriendStatusSC(const DWCFriendData* friendData, u8* maxEntry,
         u8* numEntry, char* statusString);
+    u8 DWC_GetFriendStatusData(const DWCFriendData* friendData,
+        char* statusData, int* size);
+    u8 DWC_GetFriendStatusDataSC(const DWCFriendData* friendData, u8* maxEntry,
+        u8* numEntry, char* statusData, int* size);
+    int DWC_GetNumFriend(const DWCFriendData friendList[], int friendListLen);
+    BOOL DWC_SetOwnStatusString(const char* statusString);
+    BOOL DWC_GetOwnStatusString(char* statusString);
     BOOL DWC_SetOwnStatusData(const char* statusData, u32 size);
+    int DWC_GetOwnStatusData(char* statusData);
+    BOOL DWC_CanChangeFriendList(void);
     void DWC_DeleteBuddyFriendData(DWCFriendData* friendData);
     BOOL DWC_SetBuddyFriendCallback(DWCBuddyFriendCallback callback, void* param);
     BOOL DWC_SetFriendStatusCallback(DWCFriendStatusCallback callback, void* param);
@@ -75,13 +74,16 @@ extern "C"
         DWCUpdateServersCallback updateCallback, void* updateParam,
         DWCFriendStatusCallback statusCallback, void* statusParam,
         DWCDeleteFriendListCallback deleteCallback, void* deleteParam);
-    void DWCi_StopFriendProcess(int error, int errorCode);
+    void DWCi_StopFriendProcess(DWCError error, int errorCode);
     void DWCi_FriendProcess(void);
+    int DWCi_GetProfileIDFromList(int index);
+    int DWCi_GetFriendListLen(void);
     void DWCi_UpdateServersAsync(const char* authToken,
         const char* partnerChallenge, DWCUpdateServersCallback updateCallback,
         void* updateParam, DWCFriendStatusCallback statusCallback,
         void* statusParam, DWCDeleteFriendListCallback deleteCallback,
         void* deleteParam);
+    int DWCi_GetFriendListIndex(int profileID);
 
 #ifdef __cplusplus
 }

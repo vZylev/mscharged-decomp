@@ -29,10 +29,7 @@ public:
     void fn_80271768();
 
     /* 0x01C */ unsigned int mUnidentified01C;
-    /* 0x020 */ void* mUnidentified020;
-    /* 0x024 */ void* mUnidentified024;
-    /* 0x028 */ void* mUnidentified028;
-    /* 0x02C */ void* mUnidentified02C;
+    /* 0x020 */ int mUnidentified020[4];
     /* 0x030 */ bool mUnidentified030;
     /* 0x031 */ bool mUnidentified031;
     /* 0x032 */ unsigned char mPadding032[2];
@@ -45,11 +42,10 @@ public:
     /* 0x17C */ bool mUnidentified17C;
     /* 0x17D */ unsigned char mPadding17D[3];
     /* 0x180 */ int mUnidentified180;
-    /* 0x184 */ unsigned int mUnidentified184;
-    /* 0x188 */ unsigned int mUnidentified188;
+    /* 0x184 */ unsigned int mUnidentified184[2];
     /* 0x18C */ TU80219248Component mUnidentified18C[2];
     /* 0x2F4 */ TLComponentInstance* mUnidentified2F4[2];
-    /* 0x2FC */ unsigned char mUnidentified2FC[4];
+    /* 0x2FC */ TLComponentInstance* mUnidentified2FC;
     /* 0x300 */ bool mUnidentified300;
 }; // size 0x304
 

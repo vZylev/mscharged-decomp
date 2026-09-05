@@ -344,7 +344,7 @@ extern "C" PlaybackObject_802F2C3C* fn_802F3114(
                                       + selectedIndex * 0x1C);
 }
 
-extern "C" int fn_802F32A0(PlaybackObject_802F2C3C* object)
+extern "C" int fn_802F32A0(PlaybackObject_802F2C3C* object, float)
 {
     if (object->backend != 0)
         object->backend->fn_8035F30C();
@@ -496,7 +496,7 @@ extern "C" bool fn_802F3838(
     return false;
 }
 
-extern "C" int fn_802F38A8(PlaybackObject_802F2C3C* object)
+extern "C" int fn_802F38A8(PlaybackObject_802F2C3C* object, float)
 {
     if (object->state == 2)
         object->state = 3;
@@ -511,7 +511,7 @@ extern "C" int fn_802F38A8(PlaybackObject_802F2C3C* object)
     return object->state;
 }
 
-extern "C" int fn_802F3938(PlaybackObject_802F2C3C* object)
+extern "C" int fn_802F3938(PlaybackObject_802F2C3C* object, float)
 {
     if (object->state == 2)
         object->state = 3;
