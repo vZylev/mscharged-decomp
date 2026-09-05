@@ -51,11 +51,11 @@ extern "C"
     void fn_801A6074(KoopaShellObject* pObject, float fDeltaT);
     void fn_801A65F8(KoopaShellObject* pObject);
 
-    State_8019A710* fn_8019A710(State_8019A710* pObject,
+    BulletBillObject* fn_8019A710(BulletBillObject* pObject,
         void* pDrawable, unsigned int nIndex, float fRadius, float fParam);
-    State_8019A710* fn_8019A7E4(State_8019A710* pObject, int bDelete);
-    void fn_8019A854(State_8019A710* pObject, float fDeltaT);
-    void fn_8019AD18(State_8019A710* pObject);
+    BulletBillObject* fn_8019A7E4(BulletBillObject* pObject, int bDelete);
+    void fn_8019A854(BulletBillObject* pObject, float fDeltaT);
+    void fn_8019AD18(BulletBillObject* pObject);
 
     UnidentifiedNPCConfig_801B532C* fn_801B532C(int* pIndex);
     SkinAnimatedNPC* fn_801B43F8(SkinAnimatedNPC* pObject,
@@ -262,19 +262,19 @@ DaisyFistObject* NPCManager::fn_801A9CA4(int nIndex)
     return 0;
 }
 
-State_8019A710* NPCManager::fn_801A9D10(int nIndex)
+BulletBillObject* NPCManager::fn_801A9D10(int nIndex)
 {
     return mUnidentified058[nIndex];
 }
 
-State_8019A710* NPCManager::fn_801A9D20()
+BulletBillObject* NPCManager::fn_801A9D20()
 {
-    State_8019A710* pObject = 0;
+    BulletBillObject* pObject = 0;
     for (unsigned int i = 0; i < 6; ++i)
     {
         if (mUnidentified058[i] == 0)
         {
-            pObject = (State_8019A710*)nlMalloc(0x48, 8, false);
+            pObject = (BulletBillObject*)nlMalloc(0x48, 8, false);
             if (pObject != 0)
             {
                 pObject = fn_8019A710(pObject, fn_80276360(1, i), i, lbl_806E5210, lbl_806E5214);

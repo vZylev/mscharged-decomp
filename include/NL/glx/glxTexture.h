@@ -130,6 +130,7 @@ struct TextureManager_802CDF0C
 
 extern TextureManager_802CDF0C* lbl_806E1F08;
 
+extern "C" void fn_802CDEC0(unsigned long);
 TextureManager_802CDF0C* fn_802CDF0C();
 PlatTexture* fn_802CE294(
     TextureManager_802CDF0C* manager, const unsigned long* texture);

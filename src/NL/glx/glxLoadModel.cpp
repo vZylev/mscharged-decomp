@@ -6,6 +6,7 @@
 #include "Game/SHierarchy.h"
 #include "NL/gl/glLoadModel.h"
 #include "NL/gl/glModel.h"
+#include "NL/gl/glPlat.h"
 #include "NL/nlFile.h"
 #include "NL/nlMemory.h"
 #include "NL/nlRing.h"
@@ -16,7 +17,6 @@
 extern "C"
 {
     void* fn_802CC0A4(unsigned long size, int memoryType, void* allocator);
-    void fn_8036E438(glModelPacket* packet, bool permanent, void* allocator);
     void DCFlushRange(void* address, unsigned long size);
 }
 

@@ -34,6 +34,7 @@
 #include "NL/MemAlloc.h"
 #include "NL/gl/gl.h"
 #include "NL/gl/glMemory.h"
+#include "NL/gl/tu_80368E00.h"
 #include "NL/globalpad.h"
 #include "NL/nlBind.h"
 #include "NL/nlConfig.h"
@@ -74,11 +75,6 @@ private:
     u32 mSampleCount;
 }; // size 0x28
 
-struct PlatformFileSystemConfig
-{
-    u32 values[5];
-};
-
 struct UnidentifiedWarbleSource
 {
     u8 mPadding[0xBC];
@@ -101,7 +97,6 @@ struct UnidentifiedWarbleVertexList
 extern "C"
 {
     u32 SCGetSimpleAddressID();
-    bool fn_80368E00(const PlatformFileSystemConfig*);
     void fn_801BF87C(int);
     void fn_801BFA84(int);
     void fn_802C7018(void*, char*, u32, const char*);
@@ -149,7 +144,11 @@ extern "C" u8 fn_802C2C84(const char*, u8);
 volatile int g_Region = 3;
 static u32 sPreviousTaskState = 1;
 
-static u32 sPlatformFileSystemConfig[6] = { 4, 0, 3, 0, 0, 0 };
+static UnidentifiedMemoryRequirement_80376664 lbl_80509540[3] = {
+    { GLM_TextureData, 0 },
+    { GLM_VertexData, 0 },
+    { GLM_Header, 0 },
+};
 
 static u32 sCountryCode;
 GameAudio_800EB6AC* g_pGameAudio;
@@ -312,12 +311,12 @@ void UnidentifiedMemCheckTask::Run(float)
 
 static void PreInitFS()
 {
-    PlatformFileSystemConfig config;
-    config.values[0] = 0x80000;
-    config.values[1] = 0x233333;
-    config.values[2] = (u32)sPlatformFileSystemConfig;
-    config.values[3] = 3;
-    config.values[4] = 1000;
+    UnidentifiedConfiguration_80368E00 config;
+    config.mUnidentified00 = 0x80000;
+    config.mUnidentified04 = 0x233333;
+    config.mUnidentified08 = lbl_80509540;
+    config.mUnidentified0C = 3;
+    config.mUnidentified10 = 1000;
     if (!fn_80368E00(&config))
     {
         nlBreak();

@@ -1,6 +1,7 @@
 #include "NL/gl/glMatrix.h"
 #include "NL/gl/glMemory.h"
 #include "NL/gl/glModel.h"
+#include "NL/gl/glPlat.h"
 #include "NL/glx/glxDisplayList.h"
 
 void glplatGetMatrix(unsigned long matrix, nlMatrix4& m)

@@ -1,5 +1,7 @@
 #include "Game/AI/UnidentifiedAvoidanceObject.h"
 #include "Game/AI/Fielder.h"
+#include "Game/AI/FielderInput.h"
+#include "Game/BulletBill.h"
 
 #include "Game/Render/RLView.h"
 
@@ -1026,7 +1028,7 @@ void cFielder::ActionIdleTurn(float fDeltaT)
 
 void cFielder::InitActionLateOneTimerFromVolley()
 {
-    mActionShotVars.bIsChipShot = false;
+    bIsModified = false;
 
     DoResetShotMeter(0.0f);
 
@@ -1404,7 +1406,7 @@ void cFielder::InitActionLooseBallPass(cFielder* pPassTarget, bool bVolleyPass)
             InitDesire(FIELDERDESIRE_FINISH_ACTION, 0.5f, -1.0f, fvNotSet,
                 fvNotSet);
             SetAction(ACTION_LOOSE_BALL_SHOT);
-            mActionShotVars.bIsChipShot = false;
+            bIsModified = false;
             SetNoPickUpTime(3.0f);
 
             bool bUnidentified = fn_8001E168(this);
@@ -1421,7 +1423,7 @@ void cFielder::InitActionLooseBallPass(cFielder* pPassTarget, bool bVolleyPass)
         InitDesire(
             FIELDERDESIRE_FINISH_ACTION, 0.5f, -1.0f, fvNotSet, fvNotSet);
         SetAction(ACTION_LOOSE_BALL_PASS);
-        mActionShotVars.bIsChipShot = bVolleyPass;
+        bIsModified = bVolleyPass;
         m_bCanTestController = false;
         SetNoPickUpTime(3.0f);
     }
@@ -1430,11 +1432,11 @@ void cFielder::InitActionLooseBallPass(cFielder* pPassTarget, bool bVolleyPass)
 void cFielder::fn_80048484(float fDeltaT)
 {
     bool bIsChipShot = false;
-    if (mActionShotVars.bIsChipShot || fn_80035F34(this))
+    if (bIsModified || fn_80035F34(this))
     {
         bIsChipShot = true;
     }
-    mActionShotVars.bIsChipShot = bIsChipShot;
+    bIsModified = bIsChipShot;
 
     if (m_pCurrentAnimController->TestTrigger(mUnidentified368))
     {
@@ -1456,7 +1458,7 @@ void cFielder::InitActionLooseBallShot(bool bIsChipShot)
         InitDesire(
             FIELDERDESIRE_FINISH_ACTION, 0.5f, -1.0f, fvNotSet, fvNotSet);
         SetAction(ACTION_LOOSE_BALL_SHOT);
-        mActionShotVars.bIsChipShot = bIsChipShot;
+        bIsModified = bIsChipShot;
         SetNoPickUpTime(lbl_806E35E0);
 
         bool bUnidentified = fn_8001E168(this);
@@ -1472,11 +1474,11 @@ void cFielder::InitActionLooseBallShot(bool bIsChipShot)
 void cFielder::fn_800486DC(float fDeltaT)
 {
     bool bIsChipShot = false;
-    if (mActionShotVars.bIsChipShot || fn_80035F34(this))
+    if (bIsModified || fn_80035F34(this))
     {
         bIsChipShot = true;
     }
-    mActionShotVars.bIsChipShot = bIsChipShot;
+    bIsModified = bIsChipShot;
 
     if (m_pCurrentAnimController->TestTrigger(mUnidentified368))
     {
@@ -2099,7 +2101,7 @@ extern "C" float fn_80049CC0(cFielder* pFielder, int nParam)
 void cFielder::InitActionOneTimer(int animID, nlVector3& targetPos,
     float fAdjustEndTime, bool bIsChipShot, s16 nTurnAdjust)
 {
-    mActionShotVars.bIsChipShot = bIsChipShot;
+    bIsModified = bIsChipShot;
     SetAction(ACTION_ONETIMER);
     mUnidentified368 = fAdjustEndTime;
     SetAnimState(animID, false, fAdjustEndTime * lbl_806DB990, false, false);
@@ -2123,11 +2125,11 @@ void cFielder::InitActionOneTimer(int animID, nlVector3& targetPos,
 void cFielder::fn_80049EA0(float fDeltaT)
 {
     bool bIsChipShot = false;
-    if (mActionShotVars.bIsChipShot || fn_80035F34(this))
+    if (bIsModified || fn_80035F34(this))
     {
         bIsChipShot = true;
     }
-    mActionShotVars.bIsChipShot = bIsChipShot;
+    bIsModified = bIsChipShot;
 
     if (m_pCurrentAnimController->TestTrigger(mUnidentified368))
     {
@@ -2144,11 +2146,11 @@ void cFielder::fn_80049EA0(float fDeltaT)
 void cFielder::InitActionOneTouchPassFromVolley(cPlayer* pPlayer, bool bParam)
 {
     bool bIsChipShot = false;
-    if (mActionShotVars.bIsChipShot || fn_80035F34(this))
+    if (bIsModified || fn_80035F34(this))
     {
         bIsChipShot = true;
     }
-    mActionShotVars.bIsChipShot = bIsChipShot;
+    bIsModified = bIsChipShot;
 
     InitDesire(FIELDERDESIRE_FINISH_ACTION, 0.5f, -1.0f, fvNotSet, fvNotSet);
     SetAction(ACTION_ONETOUCH_PASS_FROM_VOLLEY);
@@ -2269,7 +2271,7 @@ bool cFielder::InitActionPass(
         }
     }
 
-    mActionShotVars.bIsChipShot = bVolleyPass;
+    bIsModified = bVolleyPass;
     mUnidentified36C = pPassTarget;
     mUnidentified370 = nParam == 0;
     mUnidentified371 = bParam;
@@ -2282,12 +2284,12 @@ void cFielder::ActionPass(float fDeltaT)
     {
         float fA = fn_8002CFC4(fn_8003E6E4(this));
         float fB = fn_8002C730(fn_8003E6E4(this));
-        if (!mActionShotVars.bIsChipShot)
+        if (!bIsModified)
         {
             fA = fn_8002C6E8(fn_8003E6E4(this));
             fB = fn_8002C678(fn_8003E6E4(this));
         }
-        fn_80097858(this, mUnidentified36C, mActionShotVars.bIsChipShot,
+        fn_80097858(this, mUnidentified36C, bIsModified,
             mUnidentified370, false, false, fA, fB);
     }
 
@@ -2386,18 +2388,18 @@ void cFielder::asmRunningWB(float fDeltaT)
         {
         default:
         {
-            if (mUnidentified385)
+            if (mActionRunningWBVars.bWaitForAnimToFinish)
             {
                 bool bAnimFinished = m_pCurrentAnimController->m_ePlayMode == PM_HOLD
                     && m_pCurrentAnimController->m_fTime == 1.0f;
                 if (bAnimFinished
                     || m_fDesiredSpeed >= fIdleToRunWBDesiredSpeed)
                 {
-                    mUnidentified385 = false;
+                    mActionRunningWBVars.bWaitForAnimToFinish = false;
                 }
             }
 
-            if (mUnidentified385)
+            if (mActionRunningWBVars.bWaitForAnimToFinish)
             {
                 break;
             }
@@ -2561,7 +2563,7 @@ void cFielder::asmRunningWB(float fDeltaT)
             {
                 if (m_fDesiredSpeed < fn_8002CE14(fn_8003E6E4(this)))
                 {
-                    if (mUnidentified384)
+                    if (mActionRunningWBVars.bCuePitch)
                     {
                         fn_8004B148();
                     }
@@ -2582,7 +2584,7 @@ void cFielder::asmRunningWB(float fDeltaT)
         {
             if (ShouldStartCrossBlend(0xF))
             {
-                if (mUnidentified384)
+                if (mActionRunningWBVars.bCuePitch)
                 {
                     fn_8004B148();
                 }
@@ -3088,7 +3090,7 @@ void cFielder::asmRunning()
 
 bool cFielder::fn_800447C0(unsigned short aDirection)
 {
-    if (mUnidentified444 != 0)
+    if (mtPostDekeTimer.m_uPackedTime != 0)
     {
         return false;
     }
@@ -4220,11 +4222,11 @@ void cFielder::ActionRunning(float dt)
     if (m_pBall != 0)
     {
         SetAction(ACTION_RUNNING_WB);
-        mUnidentified385 = false;
-        mUnidentified384 = false;
+        mActionRunningWBVars.bWaitForAnimToFinish = false;
+        mActionRunningWBVars.bCuePitch = false;
         mUnidentified37C = 0;
         m_aActualMovementDirection = m_aActualFacingDirection;
-        mActionShotVars.bIsChipShot = false;
+        bIsModified = false;
         mUnidentified374 = UnidentifiedFielderPair374();
     }
     else
@@ -4245,11 +4247,11 @@ void cFielder::ActionRunning(float dt)
         {
             PickupBall(g_pBall);
             SetAction(ACTION_RUNNING_WB);
-            mUnidentified385 = false;
-            mUnidentified384 = false;
+            mActionRunningWBVars.bWaitForAnimToFinish = false;
+            mActionRunningWBVars.bCuePitch = false;
             mUnidentified37C = 0;
             m_aActualMovementDirection = m_aActualFacingDirection;
-            mActionShotVars.bIsChipShot = false;
+            bIsModified = false;
             mUnidentified374 = UnidentifiedFielderPair374();
         }
     }
@@ -4258,11 +4260,11 @@ void cFielder::ActionRunning(float dt)
 void cFielder::InitActionRunningWB(bool bWaitForAnimToFinish)
 {
     SetAction(ACTION_RUNNING_WB);
-    mUnidentified385 = bWaitForAnimToFinish;
-    mUnidentified384 = false;
+    mActionRunningWBVars.bWaitForAnimToFinish = bWaitForAnimToFinish;
+    mActionRunningWBVars.bCuePitch = false;
     mUnidentified37C = 0;
     m_aActualMovementDirection = m_aActualFacingDirection;
-    mActionShotVars.bIsChipShot = false;
+    bIsModified = false;
     mUnidentified374 = UnidentifiedFielderPair374();
 }
 
@@ -4485,7 +4487,7 @@ bool cFielder::fn_8004B86C(bool bIsChipShot, bool bParam)
         InitDesire(
             FIELDERDESIRE_FINISH_ACTION, 0.5f, -1.0f, fvNotSet, fvNotSet);
         SetAction(ACTION_UNKNOWN_15);
-        mActionShotVars.bIsChipShot = bIsChipShot;
+        bIsModified = bIsChipShot;
 
         switch (m_eAnimID)
         {
@@ -5343,8 +5345,8 @@ void cFielder::fn_8004EAB4(float fDeltaT)
 {
     if (m_eCharacterClass == (eCharacterClass)0x13)
     {
-        mUnidentified420->mUnidentified10 = GetJointPosition(m_nBallJointIndex);
-        mUnidentified420->mUnidentified1C = m_v3Velocity;
+        mUnidentified420->position = GetJointPosition(m_nBallJointIndex);
+        mUnidentified420->velocity = m_v3Velocity;
     }
 
     if (ShouldStartCrossBlend(4))
@@ -5369,7 +5371,7 @@ void cFielder::fn_8004EC40()
     {
         fn_80038158(this, 0);
 
-        if (mUnidentified420->mUnidentified38)
+        if (mUnidentified420->active)
         {
             UnidentifiedSkillshotNode* pNode;
             lbl_805712F8.Allocate(pNode);
@@ -5392,8 +5394,8 @@ void cFielder::fn_8004ED64()
     SetAction((eFielderActionState)0x21);
     InitMovementCoast();
 
-    mUnidentified410 = m_v3Position;
-    mUnidentified41C = true;
+    mUnidentified410.mUnidentified00 = m_v3Position;
+    mUnidentified410.mUnidentified0C = true;
 
     g_pBall->m_tNoPickupTimer.SetSeconds(0.5f);
     SetNoPickUpTime(0.5f);
@@ -5408,7 +5410,7 @@ void cFielder::fn_8004ED64()
 
 void cFielder::fn_8004EE48(float fDeltaT)
 {
-    if (mUnidentified41C)
+    if (mUnidentified410.mUnidentified0C)
     {
         float fGoalLineX = cField::GetGoalLineX(1U) - 0.5f;
 
@@ -5416,8 +5418,8 @@ void cFielder::fn_8004EE48(float fDeltaT)
         float fAbsX = (float)fabs(v3BallPos.x);
 
         nlVector3 v3Delta;
-        v3Delta.y = mUnidentified410.y - v3BallPos.y;
-        v3Delta.x = mUnidentified410.x - v3BallPos.x;
+        v3Delta.y = mUnidentified410.mUnidentified00.y - v3BallPos.y;
+        v3Delta.x = mUnidentified410.mUnidentified00.x - v3BallPos.x;
         float fDistSq
             = v3Delta.x * v3Delta.x + v3Delta.y * v3Delta.y;
 
@@ -5428,7 +5430,7 @@ void cFielder::fn_8004EE48(float fDeltaT)
             return;
         }
 
-        mUnidentified41C = false;
+        mUnidentified410.mUnidentified0C = false;
         SetAnimState(0x81, true, 0.2f, false, false);
         InitMovementFromAnim(0, v3Zero, 1.0f, false);
         fn_801B75C8(this, 1, 0, 0, 0);

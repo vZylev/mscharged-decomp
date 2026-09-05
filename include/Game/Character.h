@@ -19,6 +19,7 @@ class cPoseAccumulator;
 class cPoseNode;
 class glModel;
 struct CharacterInfo;
+class RunningChecksum;
 
 enum eCharacterClass
 {
@@ -82,8 +83,8 @@ public:
     virtual void SetPosition(const nlVector3& position);
     virtual void Update(float fDeltaT);
     virtual void Unknown10();
-    virtual void Unknown11();
-    virtual void Unknown12();
+    virtual void Unknown11(void* pParam, void* pParam2);
+    virtual void Unknown12(RunningChecksum* pChecksum);
 
     void SetAnimState(int animID, bool useBlendTime, float nonDefaultBlendTime,
         bool restartCyclic, bool forceMirrorSwap);

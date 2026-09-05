@@ -1,4 +1,5 @@
 #include "Game/AI/FuzzyAIRuntime.h"
+#include "Game/AI/FielderInput.h"
 
 #include "Game/AI/Desire.h"
 #include "Game/AI/UnidentifiedStringHash.h"
@@ -110,8 +111,7 @@ UnidentifiedFuzzyRuntimeBase::UnidentifiedFuzzyRuntimeBase(
 
     if (mValue != 0)
     {
-        mValue->mUnidentified14 =
-            (UnidentifiedFielderInputOwner*)this;
+        mValue->mUnidentified14 = this;
     }
 
     if (lbl_806E20A0 != 0)

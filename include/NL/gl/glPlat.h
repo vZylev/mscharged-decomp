@@ -22,7 +22,10 @@ struct GXRenderModeObj
 };
 #endif
 
+struct glModelPacket;
+
 extern GXRenderModeObj glx_rmode;
+extern "C" void fn_8036E438(glModelPacket* packet, bool permanent, void* allocator);
 
 bool glplatPreStartup();
 bool glplatStartup(gl_ScreenInfo* screenInfo);

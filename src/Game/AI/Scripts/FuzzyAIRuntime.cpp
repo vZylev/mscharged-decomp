@@ -1,5 +1,6 @@
 #include "Game/Ball.h"
 #include "Game/AI/Fielder.h"
+#include "Game/AI/FielderInput.h"
 #include "Game/AI/FuzzyAIRuntime.h"
 #include "Game/AI/FuzzyVariant.h"
 #include "Game/AI/TeamPlayMachine.h"
@@ -22,18 +23,6 @@ struct UnidentifiedRuntimeCollection
 {
     u8 mUnidentified000[0x18];
     UnidentifiedVariantCollection mCollection;
-};
-
-class UnidentifiedFuzzyRuntime : public UnidentifiedFuzzyRuntimeBase
-{
-public:
-    UnidentifiedFuzzyRuntime();
-    virtual ~UnidentifiedFuzzyRuntime();
-    virtual void DoFunctionCall(unsigned int);
-    virtual float UnidentifiedVirtual8();
-    virtual UnidentifiedVariant_80054AB8* UnidentifiedVirtual9();
-    virtual void UnidentifiedVirtual12(UnidentifiedVariant_80054AB8*);
-    virtual void UnidentifiedVirtual15();
 };
 
 struct UnidentifiedFielderIterator

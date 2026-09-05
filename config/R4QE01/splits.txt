@@ -2361,7 +2361,7 @@ NL/glx/GXMaterialProgram_802A7820.cpp:
 	.data       start:0x8052AC48 end:0x8052AC80
 	.sbss       start:0x806E1D58 end:0x806E1D60
 
-unclassified/tu_802A7C90.cpp:
+Game/GL/GLCompactColourMeshWriter.cpp:
 	.text       start:0x802A7C90 end:0x802A7F60
 
 unclassified/tu_802A7F80.cpp:
@@ -3570,10 +3570,18 @@ NL/plat/tu_80365488.cpp:
 	.sbss       start:0x806E2290 end:0x806E22A0
 	.sdata2     start:0x806E6CD0 end:0x806E6CE8
 
+NL/plat/tu_80365E84.cpp:
+	.text       start:0x80365E84 end:0x80366994
+	.ctors      start:0x804DBB40 end:0x804DBB44
+	.data       start:0x80535238 end:0x805352A0
+	.bss        start:0x80589360 end:0x80589410
+	.sdata      start:0x806DFA48 end:0x806DFA50
+	.sbss       start:0x806E22B0 end:0x806E22B8
+
 NL/nlFileGC.cpp:
-	.text       start:0x803663C8 end:0x80368360
+	.text       start:0x80366994 end:0x80368360
 	.ctors      start:0x804DBB44 end:0x804DBB48
-	.data       start:0x8053524C end:0x805352E8
+	.data       start:0x805352A0 end:0x805352E8
 	.bss        start:0x80589410 end:0x80589DA8
 	.sdata      start:0x806DFA50 end:0x806DFA58
 	.sbss       start:0x806E22B8 end:0x806E22E0
@@ -3586,6 +3594,10 @@ NL/plat/platqmath.cpp:
 NL/plat/platvmath.cpp:
 	.text       start:0x80368784 end:0x80368E00
 	.sdata2     start:0x806E6D08 end:0x806E6D14
+
+NL/gl/tu_80368E00.cpp:
+	.text       start:0x80368E00 end:0x80368E64
+	.sdata      start:0x806DFA58 end:0x806DFA60
 
 NL/gc/gcSwizzler.cpp:
 	.text       start:0x80368E64 end:0x80369394
