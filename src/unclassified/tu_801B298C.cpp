@@ -8,6 +8,8 @@
 #include "Game/Physics/PhysicsObject.h"
 #include "Game/Team.h"
 #include "NL/gl/glState.h"
+#include "NL/gl/tu_802CC370.h"
+#include "NL/glx/glxTexture.h"
 #include "NL/nlMath.h"
 #include "ode/objects.h"
 #include "unclassified/tu_80176EF4.h"
@@ -50,14 +52,6 @@ extern "C"
     extern const nlVector4 lbl_804DCFC8 = { 0.1f, 0.08f, 0.0f, 0.0f };
 
     RenderObject* fn_80276360(int, int);
-    void* fn_802CDF0C();
-    unsigned long fn_802CE1B8(void*, unsigned long);
-    bool fn_802CC8FC(glModelPacket*, unsigned long);
-    unsigned long fn_802CC7E4(glModelPacket*, unsigned long);
-    void fn_802CC458(
-        glModelPacket*, unsigned long, unsigned long);
-    void fn_802CC4FC(
-        glModelPacket*, unsigned long, const unsigned long*);
     UnidentifiedThwompMember_801B2EAC* fn_8000E110(
         void*, int, const nlVector3*, float, float);
     EmissionController* fn_802E7DC4(

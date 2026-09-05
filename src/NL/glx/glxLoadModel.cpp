@@ -16,7 +16,6 @@
 extern "C"
 {
     void* fn_802CC0A4(unsigned long size, int memoryType, void* allocator);
-    void* fn_802CB7D0(void* resource);
     void fn_8036E438(glModelPacket* packet, bool permanent, void* allocator);
     void DCFlushRange(void* address, unsigned long size);
 }
@@ -144,7 +143,8 @@ void RLGReader_80369E5C::fn_8036A138()
             ++packetIndex)
         {
             glModelPacket* packet = &model->packets[packetIndex];
-            packet->unknown10 = fn_802CB7D0(packet->unknown10);
+            packet->unknown10 =
+                fn_802CB7D0((unsigned long)packet->unknown10);
 
             if (HasStream(packet, 7))
             {

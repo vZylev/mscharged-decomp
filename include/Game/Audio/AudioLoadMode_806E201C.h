@@ -115,4 +115,7 @@ public:
 
 extern AudioLoadMode_806E201C* lbl_806E201C;
 
+
+void fn_802EC8A0(AudioLoadMode_806E201C* audio, bool param2, bool param3);
+
 #endif // GAME_AUDIO_AUDIO_LOAD_MODE_806E201C_H

@@ -4,6 +4,7 @@
 
 #include "Game/AI/FielderActions.h"
 #include "Game/AI/Fuzzy.h"
+#include "Game/AI/TeamPlayMachine.h"
 #include "Game/AnimInventory.h"
 #include "Game/AI/FuzzyVariant.h"
 #include "Game/AI/HeadTrack.h"
@@ -80,7 +81,6 @@ extern "C" void fn_800EDCE8(cPlayer* pPlayer);
 extern "C" cFielder* fn_80096F54(cPlayer* pPlayer, bool bParam);
 extern "C" bool fn_80035F34(cFielder* pFielder);
 extern "C" bool fn_8003881C(cFielder* pFielder);
-extern "C" void* fn_8002E1A4(cFielder* pFielder);
 extern "C" void* fn_80319FC0(void* pParam, int nParam);
 extern "C" void fn_80316968(void* pParam);
 extern "C" float fn_8002E1B0(cFielder* pFielder);
@@ -101,7 +101,6 @@ extern "C" float fn_8002CFB0(PlayerTweaks* pTweaks);
 extern "C" float fn_8002C328(PlayerTweaks* pTweaks);
 extern "C" void fn_8005F03C(void* pParam, cFielder** ppFielder);
 extern "C" void fn_8005CBF0(void* pParam);
-extern "C" float fn_800155A0(cBall* pBall, int nParam);
 extern "C" void fn_801B9C90(const char* pName);
 extern "C" float fn_8002C5A4(PlayerTweaks* pTweaks);
 extern "C" float fn_8002C180(PlayerTweaks* pTweaks);
@@ -186,7 +185,6 @@ extern "C" void fn_801BB5DC(cFielder* pFielder, int nParam);
 extern "C" void fn_801BB640(cFielder* pFielder, int nParam);
 extern "C" void fn_8001458C(cBall* pBall);
 extern "C" float fn_800A6388(cTeam* pTeam);
-extern "C" cAIPad* fn_80007C3C(int nIndex);
 extern "C" bool fn_80038918(cFielder* pFielder);
 
 struct UnidentifiedTornado806E0C94

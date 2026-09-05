@@ -37,13 +37,11 @@ nlVector2 lbl_80578460[4];
 bool lbl_806E18B4[4];
 extern bool lbl_806E18B8;
 extern bool g_bEnableGamecubePadMonkey;
-extern void* lbl_806E1E28;
 extern void* lbl_806E2478;
 extern int lbl_806E227C;
 extern int lbl_806E228C;
 extern unsigned int nlDefaultSeed;
 
-extern "C" cGlobalPad* fn_802C082C(void* owner, int pad);
 extern "C" bool fn_80273B00();
 extern "C" int fn_80364630(
     UnidentifiedPointerData* data, nlVector2* position, u16* angle);

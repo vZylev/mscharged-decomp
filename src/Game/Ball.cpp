@@ -41,6 +41,7 @@
 #include "unclassified/tu_80199E84.h"
 #include "unclassified/tu_801A5F10.h"
 #include "Game/DB/StadiumInfo.h"
+#include "unclassified/tu_80276264.h"
 
 struct UnidentifiedBallRuntime
 {
@@ -197,7 +198,6 @@ extern "C" void fn_802ECC54(void*, void*);
 extern "C" void fn_802B5370(
     nlQuaternion&, const nlVector3&, unsigned short);
 extern "C" DrawableObject* fn_8027638C(unsigned int);
-extern "C" DrawableObject* fn_8027725C(unsigned long);
 extern "C" UnidentifiedBallRuntime* fn_802ECB68(void*);
 float Exp(float);
 
@@ -2833,7 +2833,7 @@ extern "C" void fn_80017F18(cBall* pBall)
     fn_801B7A28(pBall);
 }
 
-extern "C" float fn_800155A0(cBall* pBall, int nParam)
+float fn_800155A0(cBall* pBall, int nParam)
 {
     if (nParam != 0)
     {
@@ -3529,7 +3529,7 @@ LiveBallTrail::~LiveBallTrail()
     }
 }
 
-extern "C" LiveBallTrail* fn_8001B284(unsigned int nIndex)
+LiveBallTrail* fn_8001B284(unsigned int nIndex)
 {
     return &lbl_8056B518[nIndex];
 }
@@ -3732,7 +3732,7 @@ extern "C" void fn_8001B298(float fParam)
     }
 }
 
-extern "C" unsigned int fn_8001B30C()
+unsigned int fn_8001B30C()
 {
     return lbl_806E0C10;
 }

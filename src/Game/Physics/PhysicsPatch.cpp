@@ -59,21 +59,18 @@ SlotPool<PhysicsPatch> PhysicsPatch::lbl_805705D0(16, 16);
 
 static void fn_8017498C(EmissionController& controller)
 {
-    if (g_pGame != 0)
+    if (g_pGame == 0 || g_pGame->m_eGameState == 4)
     {
-        if (g_pGame->m_eGameState == 4)
+        return;
+    }
+
+    if (controller.m_GlView == 0)
+    {
+        PhysicsPatch* patch = (PhysicsPatch*)controller.m_uUserData;
+        if (patch->m_bVisible == true)
         {
-            return;
-        }
-        if (controller.m_GlView == 0)
-        {
-            PhysicsPatch* patch
-                = (PhysicsPatch*)controller.m_uUserData;
-            if (patch->m_bVisible == true)
-            {
-                controller.SetPosition(patch->mUnidentified9C);
-                controller.SetVelocity(patch->m_Velocity);
-            }
+            controller.SetPosition(patch->mUnidentified9C);
+            controller.SetVelocity(patch->m_Velocity);
         }
     }
 }

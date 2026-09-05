@@ -164,17 +164,17 @@ static inline void ClearXFBInline(void* framebuffer)
     DCFlushRange(framebuffer, glx_FBSize);
 }
 
-extern "C" u32 fn_80369394()
+u32 fn_80369394()
 {
     return glx_rmode.fbWidth;
 }
 
-extern "C" u32 fn_803693A4()
+u32 fn_803693A4()
 {
     return glx_rmode.efbHeight;
 }
 
-extern "C" s32 fn_803693B4()
+s32 fn_803693B4()
 {
     return glx_VideoMode;
 }
@@ -493,12 +493,12 @@ extern "C" u32 fn_80369D54()
     return 448;
 }
 
-extern "C" u32 fn_80369D5C()
+u32 fn_80369D5C()
 {
     return 640;
 }
 
-extern "C" u32 fn_80369D64()
+u32 fn_80369D64()
 {
     return 480;
 }

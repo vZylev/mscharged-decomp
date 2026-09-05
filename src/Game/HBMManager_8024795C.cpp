@@ -1,5 +1,7 @@
 #include "Game/HBMManager_8024795C.h"
 
+#include "unclassified/tu_80284A58.h"
+
 #include "Game/BaseGameSceneManager.h"
 #include "Game/Event.h"
 #include "Game/EventDataTypes.h"
@@ -74,12 +76,6 @@ struct UnidentifiedHBMGameState
     bool mBlocked;
 };
 
-struct UnidentifiedHBMDisplayState
-{
-    u8 mPad00[0x0C];
-    bool mEnabled;
-};
-
 struct UnidentifiedPadUpdateState
 {
     u8 mPad00[0x2F4];
@@ -89,18 +85,14 @@ struct UnidentifiedPadUpdateState
 class TU80252180Scene;
 
 extern UnidentifiedHBMGameState* lbl_806E0C94;
-extern BaseGameSceneManager* lbl_806E1838;
-extern BaseGameSceneManager* lbl_806E1860;
 extern void* lbl_806E2020;
 extern UnidentifiedPadUpdateState* lbl_806E2478;
 
 extern "C"
 {
-    UnidentifiedHBMDisplayState* fn_80271960();
     void fn_802719A0(UnidentifiedHBMDisplayState* state);
     void fn_80271A00(UnidentifiedHBMDisplayState* state);
     bool fn_80273B00();
-    void* fn_80284A58();
     bool fn_80285E20(void* presentation);
     void fn_801FC444();
     void fn_801FC454();

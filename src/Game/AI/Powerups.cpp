@@ -21,8 +21,8 @@
 #include "NL/nlPrint.h"
 #include "NL/nlSlotPool.h"
 #include "NL/nlString.h"
+#include "unclassified/tu_80276264.h"
 
-extern "C" DrawableObject* fn_8027725C(unsigned long);
 extern "C" void fn_802772A4(DrawableObject*);
 extern "C" bool fn_8003877C(cFielder*);
 extern "C" unsigned int fn_800387CC(cFielder*);

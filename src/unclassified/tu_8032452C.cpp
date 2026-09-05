@@ -59,7 +59,6 @@ extern bool lbl_806E20E9;
 
 extern "C"
 {
-    int fn_8004F594(int channel, const char* format, ...);
     void fn_802B77B0(UnidentifiedTransportLogWriter* writer);
     void fn_802B77D4(UnidentifiedTransportLogWriter* writer, void* file,
         bool buffered, unsigned int bufferSize,

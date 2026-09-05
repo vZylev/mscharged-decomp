@@ -3287,6 +3287,26 @@ Game/Transitions/ScriptedTransition.cpp:
 	.sdata      start:0x806DF810 end:0x806DF840
 	.sdata2     start:0x806E69A8 end:0x806E69D8
 
+Game/Transitions/TransitionSequence.cpp:
+	.text       start:0x8033F900 end:0x80340550
+	.data       start:0x80534208 end:0x80534268
+	.sdata      start:0x806DF840 end:0x806DF868
+	.sdata2     start:0x806E69D8 end:0x806E69E8
+
+Game/world.cpp:
+	.text       start:0x8034056C end:0x80341EC8
+	.data       start:0x80534268 end:0x80534340
+	.sdata2     start:0x806E69E8 end:0x806E69F0
+
+Game/World/worldanim.cpp:
+	.text       start:0x80341EE8 end:0x80344814
+	.ctors      start:0x804DBAF8 end:0x804DBAFC
+	.data       start:0x80534340 end:0x805344D8
+	.bss        start:0x80584BC8 end:0x80584C08
+	.sdata      start:0x806DF868 end:0x806DF870
+	.sbss       start:0x806E2188 end:0x806E2198
+	.sdata2     start:0x806E69F0 end:0x806E6A20
+
 ode/collision_kernel.cpp:
 	.text       start:0x80344814 end:0x80345C44
 	.data       start:0x805344D8 end:0x80534548
@@ -3388,6 +3408,15 @@ ode/NLGAdditions.cpp:
 	.text       start:0x80358E7C end:0x8035952C
 	.data       start:0x80534738 end:0x80534750
 	.sdata2     start:0x806E6B88 end:0x806E6BA0
+
+Game/Audio/tu_8035952C.cpp:
+	.text       start:0x8035952C end:0x80359D74
+	.ctors      start:0x804DBAFC end:0x804DBB00
+	.data       start:0x80534750 end:0x805347C0
+	.bss        start:0x80585360 end:0x805853F0
+	.sdata      start:0x806DF910 end:0x806DF918
+	.sbss       start:0x806E21C0 end:0x806E21C8
+	.sdata2     start:0x806E6BA0 end:0x806E6BB8
 
 Game/Audio/AudioResourcePlatform_8035DE28.cpp:
 	.text       start:0x8035DE28 end:0x8035EA28

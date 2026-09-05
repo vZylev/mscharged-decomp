@@ -6,7 +6,7 @@
 typedef void* (*SlotPoolAllocatorFunc)(unsigned long size);
 typedef void (*SlotPoolFreeFunc)(void* data);
 
-extern "C" void fn_802B467C(void* pool);
+void fn_802B467C(void* pool);
 
 struct SlotPoolBlock;
 struct SlotPoolEntry;

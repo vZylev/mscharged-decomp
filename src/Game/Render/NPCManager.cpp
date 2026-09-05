@@ -1,5 +1,7 @@
 #include "Game/Render/NPCManager.h"
 
+#include "NL/gl/gl.h"
+#include "NL/gl/glMemory.h"
 #include "unclassified/tu_8019D6B4.h"
 #include "Game/GameTweaks.h"
 #include "Game/Render/ChainChomp.h"
@@ -74,15 +76,8 @@ extern "C"
         unsigned int nChunkSize, void* pReadBuffer0,
         void* pReadBuffer1, void* pParam, unsigned long nParam,
         MemoryAllocator* pAllocator);
-    bool fn_802C8200(const char* pPath, LoadAsyncCallback pCallback,
-        void* pUserData, void* pContext);
-    bool fn_802C8204(const char* pPath, LoadAsyncCallback pCallback,
-        void* pUserData, void* pContext);
-    MemoryAllocator* fn_802CC094();
     bool fn_802CDD78(void* pData, unsigned long nSize,
         MemoryAllocator* pAllocator, int nParam);
-    unsigned int* fn_802C81FC(void* pData, unsigned long nSize,
-        unsigned long* pNumModels, void* pContext);
 }
 
 extern MemoryAllocator* AllocatorStack[16];
@@ -439,7 +434,7 @@ extern "C" void fn_801AA8E0(
         = (NPCTemplate*)pUserData;
     pTemplate->mUnidentified010 = fn_802CC094();
     pManager->mUnidentified01C->mUnidentified003 = true;
-    fn_802CDD78(pData, nSize, fn_802CC094(), 0);
+    fn_802CDD78(pData, nSize, (MemoryAllocator*)fn_802CC094(), 0);
     nlFree(pData);
 }
 
@@ -450,7 +445,7 @@ extern "C" void fn_801AA960(
         = (NPCTemplate*)pUserData;
     pTemplate->mUnidentified010 = fn_802CC094();
     unsigned long nNumModels = 0;
-    unsigned int* pModel = fn_802C81FC(
+    unsigned int* pModel = (unsigned int*)fn_802C81FC(
         pData, nSize, &nNumModels, fn_802CC094());
     pTemplate->modelID = *pModel;
     nlFree(pData);

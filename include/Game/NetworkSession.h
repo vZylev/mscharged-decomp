@@ -541,4 +541,7 @@ extern "C" s8 fn_80338C20(UnidentifiedNetworkSessionData* session);
 extern "C" void fn_80338C2C(UnidentifiedNetworkSessionData* session,
     int machineCount, int playerCount);
 
+
+void fn_8032C7D0();
+
 #endif // GAME_NETWORK_SESSION_H

@@ -57,7 +57,6 @@ extern "C" void fn_80314444();
 extern "C" void fn_803140CC();
 extern "C" bool fn_800A3350(
     void*, unsigned long, float*, cFielder*);
-extern "C" void* fn_800A636C(cTeam*);
 extern "C" float* fn_800A3404(void*);
 extern "C" void* fn_80312E0C(void*, const Variant&);
 extern "C" int fn_802DF9FC(InterpreterCore*);

@@ -86,7 +86,7 @@ static inline void* ReadPointer(const void* object, unsigned int offset)
     return *(void* const*)((const char*)object + offset);
 }
 
-extern "C" void fn_80142A1C()
+void fn_80142A1C()
 {
     for (int i = 0; i < 100; ++i)
     {

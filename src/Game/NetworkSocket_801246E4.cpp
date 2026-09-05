@@ -125,7 +125,8 @@ int NetworkSocket_801246E4::SendDatagram(
     }
 
     int aid = address[3];
-    if (!DWC_SendUnreliable(aid, buffer, size))
+    bool sent = DWC_SendUnreliable(aid, buffer, size);
+    if (!sent)
     {
         fn_8004F594(0x10,
             "Failed to send message of size %d to aid %d.\n", size, aid);
