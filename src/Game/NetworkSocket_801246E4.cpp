@@ -100,18 +100,19 @@ void NetworkSocket_801246E4::ReliableCallbackVirtual08()
 }
 
 void NetworkSocket_801246E4::ReliableCallbackVirtual0C(
-    int source, void* buffer, int size, bool reliable)
+    u32 connection, void* buffer, int size, bool reliable)
 {
-    mListener->ListenerVirtual04(source, buffer, size, reliable);
+    mListener->ListenerVirtual04(connection, buffer, size, reliable);
 }
 
-void NetworkSocket_801246E4::ReliableCallbackVirtual10()
+void NetworkSocket_801246E4::ReliableCallbackVirtual10(
+    u32 connection, void* buffer, int size)
 {
     mListener->ListenerVirtual18();
 }
 
 void NetworkSocket_801246E4::ReliableCallbackVirtual14(
-    u32 connection, u8* address)
+    u32 connection, u8* address, int a, int b, int c)
 {
     mListener->ListenerVirtual08(connection, address);
 }
@@ -267,9 +268,10 @@ void NetworkSocket_801246E4::RejectConnection(u32 connection)
     fn_8032540C(&mReliableSocket, connection);
 }
 
-void NetworkSocket_801246E4::SocketVirtual24(void* a, void* b)
+void NetworkSocket_801246E4::SocketVirtual24(
+    UnidentifiedTransportConnection* connection, bool immediate)
 {
-    fn_80324A1C(&mReliableSocket, a, b);
+    fn_80324A1C(&mReliableSocket, connection, immediate);
 }
 
 void* NetworkSocket_801246E4::FindConnection(const u8* address)

@@ -49,6 +49,17 @@ types and entry points the SDK's WPAD and WUD headers refer to (`BD_ADDR`,
 `BT_HDR`, `GKI_getbuf`, and the `BTA_Hh*` calls). Their names and widths follow
 Broadcom's published BTE/Bluedroid headers.
 
+`Game/Effects/EmitterCallbacks.cpp` contains the emitter updates at
+`0x801BE428..0x801BEF44`. The predecessor's `Game/CharacterTriggers.cpp`
+supplies the names `UpdateEmitterFromCharacter`,
+`UpdateEmitterPoseFromCharacter`, and `UpdateEmitterFromBall`. The filename
+and other callback names are descriptive reconstructions from R4QE01 behavior
+and callers, rather than recovered retail symbols. These callbacks follow
+replay characters, ball trails, ball landing positions, character joints, and
+impostor models. The backward and forward character callbacks are used by
+`wario_ignition` and `bowserjr_shriek_mouth`, respectively; the head callback
+updates `bowser_smoke`.
+
 `src/RVL_SDK/bte/` and `libs/RVL_SDK/include/private/bte/` do vendor Broadcom
 source. Both trees carry Broadcom's original copyright notice and its
 Apache-2.0 licence header, and each file records the Bluedroid path it came

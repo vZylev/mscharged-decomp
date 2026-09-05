@@ -9,6 +9,7 @@
 #include "Game/Field.h"
 #include "Game/GameInfo.h"
 #include "Game/Goalie.h"
+#include "Game/MathHelpers.h"
 #include "Game/Net.h"
 #include "Game/Physics/PhysicsCharacter.h"
 #include "Game/SAnim/pnSAnimController.h"
@@ -36,6 +37,8 @@ extern "C" UnidentifiedPadAction* fn_80319FC0(void* pParam, int nAction);
 extern "C" UnidentifiedPadAction* fn_80319F94(void* pParam, int nAction);
 extern "C" bool fn_80319FEC(void* pParam, int nAction);
 extern "C" float fn_8002BFA8(PlayerTweaks* pTweaks, float fTime);
+extern "C" float fn_8002D020(PlayerTweaks* pTweaks);
+extern "C" float fn_8002D050(PlayerTweaks* pTweaks);
 extern "C" bool fn_8002F310(cFielder* pFielder);
 extern "C" void fn_8001DCCC(
     cFielder* pFielder, unsigned short aParam, bool bParam);
@@ -661,6 +664,79 @@ void cFielder::CollideWithWallCallback(
     }
 }
 
+const LooseBallContactAnimInfo* cFielder::fn_80038230(
+    const LooseBallContactAnimInfo* pBallContactAnimInfo,
+    int nNumContactAnims, unsigned short aFutureFacingDirection,
+    const nlVector3& v3FuturePosition, const nlVector3& v3OneTimerTarget,
+    float fAngle)
+{
+    nlVector3 v3Unidentified;
+    nlVec3Sub(v3Unidentified, v3OneTimerTarget, v3FuturePosition);
+    u16 aNetAngle = nlVector3ToAngle(v3Unidentified) - aFutureFacingDirection;
+
+    const LooseBallContactAnimInfo* pBestBallContactAnimInfo = NULL;
+    for (int i = 0; i < nNumContactAnims; i++)
+    {
+        if (pBallContactAnimInfo[i].aIncomingAngleMin
+            < pBallContactAnimInfo[i].aIncomingAngleMax)
+        {
+            if (aNetAngle >= pBallContactAnimInfo[i].aIncomingAngleMin
+                && aNetAngle <= pBallContactAnimInfo[i].aIncomingAngleMax)
+            {
+                pBestBallContactAnimInfo = &pBallContactAnimInfo[i];
+            }
+        }
+        else if (aNetAngle >= pBallContactAnimInfo[i].aIncomingAngleMin
+            || aNetAngle <= pBallContactAnimInfo[i].aIncomingAngleMax)
+        {
+            pBestBallContactAnimInfo = &pBallContactAnimInfo[i];
+        }
+    }
+    return pBestBallContactAnimInfo;
+}
+
+bool cFielder::fn_80038918() const
+{
+    UnidentifiedPadAction* pAction
+        = fn_80319FC0(mUnidentified428->mUnidentified18, 0x1D);
+    bool bActionActive = false;
+    if (pAction != 0 && pAction->mUnidentified08
+        && pAction->mUnidentifiedA4 != 0)
+    {
+        bActionActive = true;
+    }
+    return bActionActive;
+}
+
+bool cFielder::IsHitting() const
+{
+    const cPN_SAnimController* pAnimController = m_pCurrentAnimController;
+    const float fAnimTime
+        = pAnimController->m_fTime * pAnimController->m_pSAnim->m_nNumKeys;
+
+    bool bUnidentified0 = false;
+    if (m_eCharacterClass != TOAD && !fn_80038918())
+    {
+        bUnidentified0 = true;
+    }
+    bool bUnidentified1 = false;
+    if (bUnidentified0 && m_eActionState == ACTION_HIT)
+    {
+        bUnidentified1 = true;
+    }
+    bool bUnidentified2 = false;
+    if (bUnidentified1 && fAnimTime >= fn_8002D020(m_pTweaks))
+    {
+        bUnidentified2 = true;
+    }
+    bool isHitting = false;
+    if (bUnidentified2 && fAnimTime <= fn_8002D050(m_pTweaks))
+    {
+        isHitting = true;
+    }
+    return isHitting;
+}
+
 bool cFielder::IsFallenDown() const
 {
     if (m_tFireTimer.m_uPackedTime != 0)
@@ -814,5 +890,15 @@ void cFielder::ShootBallDueToContact(const nlVector3& v3IncomingVelocity)
         nlRecipSqrt(nlVec3LengthSquared(v3ReleaseVelocity), true));
     nlVec3Scale(v3ReleaseVelocity, v3ReleaseVelocity, 2.0f + m_fActualSpeed);
     v3ReleaseVelocity.z = 0.5f;
+    g_pBall->ShootRelease(v3ReleaseVelocity, SPINTYPE_NONE);
+}
+
+void cFielder::ShootBallDueToContact(unsigned short aShootDirection)
+{
+    nlVector3 v3ReleaseVelocity;
+    nlPolarToCartesian(v3ReleaseVelocity.x, v3ReleaseVelocity.y,
+        aShootDirection, 2.0f + m_fActualSpeed);
+    v3ReleaseVelocity.z = 0.5f;
+
     g_pBall->ShootRelease(v3ReleaseVelocity, SPINTYPE_NONE);
 }

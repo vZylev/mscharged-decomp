@@ -1444,7 +1444,7 @@ Game/WorldTriggers.cpp:
 	.data       start:0x80515CA8 end:0x80515CB8
 	.sdata2     start:0x806E5460 end:0x806E5464
 
-unclassified/tu_801BE428.cpp:
+Game/Effects/EmitterCallbacks.cpp:
 	.text       start:0x801BE428 end:0x801BEF44
 	.rodata     start:0x804DCFE8 end:0x804DCFF4
 	.sdata2     start:0x806E5468 end:0x806E5474
@@ -3226,6 +3226,13 @@ unclassified/tu_803263E4.cpp:
 	.ctors      start:0x804DBAC8 end:0x804DBACC
 	.bss        start:0x805847E0 end:0x80584808
 
+unclassified/tu_80326844.cpp:
+	.text       start:0x80326844 end:0x8032B6D4
+	.ctors      start:0x804DBACC end:0x804DBAD0
+	.data       start:0x80531DE0 end:0x80532378
+	.bss        start:0x80584808 end:0x80584830
+	.sdata      start:0x806DF6F8 end:0x806DF708
+
 unclassified/tu_8032B6D4.cpp:
 	.text       start:0x8032B6D4 end:0x8032C7D0
 	.ctors      start:0x804DBAD0 end:0x804DBAD4
@@ -3538,6 +3545,30 @@ NL/plat/cPlatPad.cpp:
 	.bss        start:0x80585FF0 end:0x805860E0
 	.sbss       start:0x806E2260 end:0x806E2270
 	.sdata2     start:0x806E6CA8 end:0x806E6CB0
+
+NL/plat/tu_803648EC.cpp:
+	.text       start:0x803648EC end:0x80364E5C
+	.ctors      start:0x804DBB30 end:0x804DBB34
+	.data       start:0x805350F0 end:0x80535148
+	.bss        start:0x805860E0 end:0x80586F70
+	.sbss       start:0x806E2270 end:0x806E2280
+	.sdata2     start:0x806E6CB0 end:0x806E6CB8
+
+NL/plat/tu_80364E5C.cpp:
+	.text       start:0x80364E5C end:0x80365488
+	.ctors      start:0x804DBB34 end:0x804DBB38
+	.data       start:0x80535148 end:0x805351A0
+	.bss        start:0x80586F70 end:0x80587F00
+	.sbss       start:0x806E2280 end:0x806E2290
+	.sdata2     start:0x806E6CB8 end:0x806E6CD0
+
+NL/plat/tu_80365488.cpp:
+	.text       start:0x80365488 end:0x80365D90
+	.ctors      start:0x804DBB38 end:0x804DBB3C
+	.data       start:0x805351A0 end:0x80535238
+	.bss        start:0x80587F00 end:0x80588F70
+	.sbss       start:0x806E2290 end:0x806E22A0
+	.sdata2     start:0x806E6CD0 end:0x806E6CE8
 
 NL/nlFileGC.cpp:
 	.text       start:0x803663C8 end:0x80368360

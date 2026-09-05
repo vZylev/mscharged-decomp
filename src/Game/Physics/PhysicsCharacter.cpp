@@ -23,7 +23,6 @@ extern "C" bool fn_800344DC(cFielder*, const nlVector3*);
 extern "C" bool fn_800345EC(cFielder*, cFielder*);
 extern "C" bool fn_80034894(cFielder*, cFielder*);
 extern "C" bool fn_8003886C(cFielder*);
-extern "C" bool fn_80038918(cFielder*);
 extern "C" bool fn_8003E74C(cCharacter*);
 extern "C" bool fn_8003E948(cFielder*);
 extern "C" bool fn_800976F8(cFielder*, float);
@@ -484,8 +483,8 @@ ContactType PhysicsCharacter::Contact(PhysicsObject* other,
                 {
                     contactType = ONE_WAY_CONTACT_THIS;
                 }
-                else if (fn_80038918(fielder)
-                         && fn_80038918(otherFielder))
+                else if (fielder->fn_80038918()
+                         && otherFielder->fn_80038918())
                 {
                     contactType = NO_CONTACT;
                 }

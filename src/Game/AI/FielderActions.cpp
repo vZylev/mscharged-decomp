@@ -85,10 +85,6 @@ extern "C" void* fn_80319FC0(void* pParam, int nParam);
 extern "C" void fn_80316968(void* pParam);
 extern "C" float fn_8002E1B0(cFielder* pFielder);
 extern "C" bool fn_8002D2C4(nlVector3* v3Position, float fParam, int nParam);
-extern "C" const LooseBallContactAnimInfo* fn_80038230(cFielder* pFielder,
-    const LooseBallContactAnimInfo* pAnimInfoList, int nNumAnims,
-    unsigned short aFacingDirection, const nlVector3* v3Position,
-    const nlVector3* v3Target, float fAngle);
 extern "C" void fn_80036594(cPlayer* pAttacker, cFielder* pVictim, int nParam);
 extern "C" void fn_80097358(cPlayer* pPlayer, float fParam);
 extern "C" void fn_8009591C(cPlayer* pPlayer, bool bParam);
@@ -185,7 +181,6 @@ extern "C" void fn_801BB5DC(cFielder* pFielder, int nParam);
 extern "C" void fn_801BB640(cFielder* pFielder, int nParam);
 extern "C" void fn_8001458C(cBall* pBall);
 extern "C" float fn_800A6388(cTeam* pTeam);
-extern "C" bool fn_80038918(cFielder* pFielder);
 
 struct UnidentifiedTornado806E0C94
 {
@@ -590,7 +585,7 @@ void cFielder::fn_8004643C(float fDeltaT)
                     {
                         bool bOtherHasPad = pOther->GetGlobalPad() != 0;
                         if (bOtherHasPad
-                            && (fn_800344B0(pOther) || fn_80038918(pOther)))
+                            && (fn_800344B0(pOther) || pOther->fn_80038918()))
                         {
                             SetAIPad(pOther->m_pController);
                             m_bCanTestController = false;
@@ -1302,8 +1297,8 @@ bool cFielder::DoCommonInitActionLooseBall(
     v3BallToSelf.z = m_v3Position.z - g_pBall->m_v3Position.z;
 
     const LooseBallContactAnimInfo* pBestBallContactAnimInfo
-        = fn_80038230(this, pAnimInfoList, nNumAnims,
-            m_aActualFacingDirection, &m_v3Position, &rv3OneTimerTarget,
+        = fn_80038230(pAnimInfoList, nNumAnims,
+            m_aActualFacingDirection, m_v3Position, rv3OneTimerTarget,
             nlATan2f(v3BallToSelf.y, v3BallToSelf.x));
 
     v3ToTarget.y = rv3OneTimerTarget.y - m_v3Position.y;
@@ -3928,7 +3923,7 @@ void cFielder::fn_80045C74(float fDeltaT)
                     {
                         bool bOtherHasPad = pOther->GetGlobalPad() != 0;
                         if (bOtherHasPad
-                            && (fn_800344B0(pOther) || fn_80038918(pOther)))
+                            && (fn_800344B0(pOther) || pOther->fn_80038918()))
                         {
                             SetAIPad(pOther->m_pController);
                             m_bCanTestController = false;

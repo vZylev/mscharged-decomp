@@ -173,6 +173,13 @@ public:
     void DoResetShotMeter(float fTime);
     bool IsActionDone() const;
     bool IsFallenDown() const;
+    const LooseBallContactAnimInfo* fn_80038230(
+        const LooseBallContactAnimInfo* pBallContactAnimInfo,
+        int nNumContactAnims, unsigned short aFutureFacingDirection,
+        const nlVector3& v3FuturePosition, const nlVector3& v3OneTimerTarget,
+        float fAngle);
+    bool IsHitting() const;
+    bool fn_80038918() const;
     eFielderDesireState fn_8002E060();
     bool fn_8003E6FC() const;
     bool fn_800470B4(cFielder* pFielder, cPlayer* pAttacker);

@@ -145,7 +145,7 @@ public:
     {
         this->m_Delta = delta;
         this->m_Initial = initial;
-        if (this->m_Initial == 0)
+        if (this->m_Delta == 0)
         {
             SlotPoolBase::BaseAddNewBlock(this, sizeof(T));
         }

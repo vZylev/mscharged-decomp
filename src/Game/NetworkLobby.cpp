@@ -368,7 +368,8 @@ void NetworkLobby_80133634::CloseConnections()
         u32 connection = mPlayers[i].mConnection;
         if (connection != (u32)-1 && connection != 0)
         {
-            socket->SocketVirtual24((void*)connection, (void*)1);
+            socket->SocketVirtual24(
+                (UnidentifiedTransportConnection*)connection, true);
         }
     }
 
@@ -437,7 +438,8 @@ static void ConnectionClosedCallback_801346D8(
     void* connection = socket->FindConnection(address);
     if (connection != 0 && connection != (void*)-1)
     {
-        socket->SocketVirtual24(connection, (void*)1);
+        socket->SocketVirtual24(
+            (UnidentifiedTransportConnection*)connection, true);
     }
 }
 
