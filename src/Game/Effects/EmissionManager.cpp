@@ -653,12 +653,21 @@ extern "C" void fn_802E97C0(EmissionManager* manager)
 {
     nlDLListIterator<EmissionController*> iterator
         = manager->mControllers.Begin();
-    while (iterator.hasNext())
+    DLListEntry<EmissionController*>* head = iterator.m_Head;
+    DLListEntry<EmissionController*>* current = iterator.m_Curr;
+    while (current != 0)
     {
-        EmissionController* current = *iterator;
-        fn_802E4358(current);
-        current->Die();
-        iterator.Step();
+        EmissionController* controller = current->entry;
+        fn_802E4358(controller);
+        controller->Die();
+        if (nlDLRingIsEnd(head, current) || current == 0)
+        {
+            current = 0;
+        }
+        else
+        {
+            current = current->m_next;
+        }
     }
 }
 
@@ -688,11 +697,19 @@ void EmissionManager::SetContext(void* context)
     mContext = context;
     nlDLListIterator<EmissionController*> iterator
         = mControllers.Begin();
-    while (iterator.hasNext())
+    DLListEntry<EmissionController*>* head = iterator.m_Head;
+    DLListEntry<EmissionController*>* current = iterator.m_Curr;
+    while (current != 0)
     {
-        EmissionController* current = *iterator;
-        current->m_pContext = context;
-        iterator.Step();
+        current->entry->m_pContext = context;
+        if (nlDLRingIsEnd(head, current) || current == 0)
+        {
+            current = 0;
+        }
+        else
+        {
+            current = current->m_next;
+        }
     }
 }
 
