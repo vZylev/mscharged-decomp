@@ -430,10 +430,8 @@ extern "C" void fn_802EF5D0(SliderState_802EE964* slider)
 extern "C" float fn_802EF634(SliderState_802EE964* slider)
 {
     float value = slider->duration + slider->value;
-    if (value < -96.0f)
-        value = -96.0f;
-    if (value > 6.0f)
-        value = 6.0f;
+    value = (value >= -96.0f) ? value : -96.0f;
+    value = (value <= 6.0f) ? value : 6.0f;
     return value;
 }
 

@@ -1770,8 +1770,10 @@ void cFielder::ShootBallDueToContact(const nlVector3& v3IncomingVelocity)
 void cFielder::ShootBallDueToContact(unsigned short aShootDirection)
 {
     nlVector3 v3ReleaseVelocity;
+    float fRadius = m_fActualSpeed;
+    fRadius = 2.0f + fRadius;
     nlPolarToCartesian(v3ReleaseVelocity.x, v3ReleaseVelocity.y,
-        aShootDirection, 2.0f + m_fActualSpeed);
+        aShootDirection, fRadius);
     v3ReleaseVelocity.z = 0.5f;
 
     g_pBall->ShootRelease(v3ReleaseVelocity, SPINTYPE_NONE);

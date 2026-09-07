@@ -190,12 +190,13 @@ extern "C" void fn_802D4484(ImpostorSprite_802D4290* sprite,
 
 extern "C" void fn_802D47F8(ImpostorSprite_802D4290* sprite)
 {
+    GLView* view;
     unsigned long width =
         sprite->mUnidentified078 ? sprite->mUnidentified050 : 0;
     unsigned long height =
         sprite->mUnidentified078 ? sprite->mUnidentified054 : 0;
 
-    GLView* view = sprite->mUnidentified068;
+    view = sprite->mUnidentified068;
     view->m_ViewportX = 0;
     view->m_ViewportY = 0;
     view->m_ViewportWidth = width;

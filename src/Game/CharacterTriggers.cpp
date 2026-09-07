@@ -63,8 +63,9 @@ void EmitStar(cFielder* pFielder, bool bParam)
 
     if (!bParam)
     {
+        const char* groupName = "star";
         EffectsGroup* pGroup = fn_802E7CDC(
-            EmissionManager::Instance(), "star");
+            EmissionManager::Instance(), groupName);
         EmissionController* pController = fn_802E7FE4(
             EmissionManager::Instance(), pGroup, 3, true, false);
         SetDefaultVelocity(pController);
@@ -103,8 +104,9 @@ void KillMushroom(cFielder* pFielder)
 
 void EmitMushroom(cFielder* pFielder, bool bParam)
 {
+    const char* groupName = "mushroom";
     EffectsGroup* pGroup = fn_802E7CDC(
-        EmissionManager::Instance(), "mushroom");
+        EmissionManager::Instance(), groupName);
     EmissionController* pController = fn_802E7FE4(
         EmissionManager::Instance(), pGroup, 3, true, false);
     SetDefaultVelocity(pController);

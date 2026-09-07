@@ -81,7 +81,8 @@ extern "C" void fn_80332EDC()
 
 extern "C" UnidentifiedInputRouter* fn_803330AC()
 {
-    if (g_pNetworkSessionBase->OnlineVirtual0C() == 0)
+    UnidentifiedNetworkOnlineInterface& online = *g_pNetworkSessionBase;
+    if (online.OnlineVirtual0C() == 0)
     {
         return lbl_806E2150;
     }

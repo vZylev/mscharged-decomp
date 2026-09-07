@@ -256,22 +256,31 @@ int NetworkLobby_80133634::GetPlayerCount()
     return 0;
 }
 
-bool NetworkLobby_80133634::AreAllConnectionsReady()
+bool NetworkLobby_80133634::AllMachineInfoReceived()
 {
-    if (mState != 2 || mMachineCount <= 0)
+    if (mMachineCount <= 0)
     {
         return false;
     }
 
-    bool ready = true;
+    bool received = true;
     for (int i = 0; i < mMachineCount; ++i)
     {
         if (!mMachineInfoReceived[i])
         {
-            ready = false;
+            received = false;
         }
     }
-    return ready;
+    return received;
+}
+
+bool NetworkLobby_80133634::AreAllConnectionsReady()
+{
+    if (mState == 2 && AllMachineInfoReceived())
+    {
+        return true;
+    }
+    return false;
 }
 
 void NetworkLobby_80133634::DebugDraw(int column, int* row)
@@ -691,24 +700,6 @@ void NetworkLobby_80133634::Update(float dt)
 void NetworkLobby_80133634::MarkGameStarted()
 {
     mGameStarted = 1;
-}
-
-bool NetworkLobby_80133634::AllMachineInfoReceived()
-{
-    if (mMachineCount <= 0)
-    {
-        return false;
-    }
-
-    bool received = true;
-    for (int i = 0; i < mMachineCount; ++i)
-    {
-        if (!mMachineInfoReceived[i])
-        {
-            received = false;
-        }
-    }
-    return received;
 }
 
 UnidentifiedDraftEntry* NetworkLobby_80133634::GetLocalMachineInfo()

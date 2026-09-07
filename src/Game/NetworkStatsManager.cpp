@@ -719,10 +719,10 @@ void NetworkStatsManager_8012F378::ResetPregameDisconnectState()
     mGameResultReported = false;
     mDisconnectPending = false;
     mUnidentifiedC41C = 0;
-    mUnidentifiedC420 = 0;
-    mUnidentifiedC424 = 0;
     mDisconnectLossPending[0] = false;
+    mUnidentifiedC420 = 0;
     mDisconnectLossPending[1] = false;
+    mUnidentifiedC424 = 0;
     mDisconnectLossPending[2] = false;
     if (fn_8025BD88())
     {
