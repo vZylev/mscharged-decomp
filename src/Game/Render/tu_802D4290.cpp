@@ -1,4 +1,5 @@
 #include "Game/Render/ImpostorCharacter.h"
+#include "Game/Sys/debug.h"
 
 #include "Game/GL/GLCompactColourMeshWriter.h"
 #include "Game/Render/Impostor.h"
@@ -13,7 +14,6 @@
 #include "NL/platvmath.h"
 
 extern "C" int nlSNPrintf(char*, unsigned long, const char*, ...);
-extern "C" void fn_8004F594(int category, const char* format, ...);
 
 static int lbl_8052E778[6] = { 0, 1, 2, 0, 2, 3 };
 static char lbl_8052E790[] = "global/checkers";
@@ -417,12 +417,12 @@ extern "C" int fn_802D4AEC(ImpostorSprite_802D4290* sprite,
         }
         else
         {
-            fn_8004F594(3, lbl_8052E7A0);
+            tDebugPrintManager::Print(DC_RENDER, lbl_8052E7A0);
         }
     }
     else
     {
-        fn_8004F594(3, lbl_8052E7C8);
+        tDebugPrintManager::Print(DC_RENDER, lbl_8052E7C8);
     }
 
     if (skipCapture)
