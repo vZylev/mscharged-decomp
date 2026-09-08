@@ -139,6 +139,9 @@ template <typename T>
 void* UnidentifiedTypedEvent<T>::sType;
 
 template <typename T>
+UnidentifiedTypedEvent<T>* UnidentifiedFindEvent(const char* name, int length);
+
+template <typename T>
 class UnidentifiedEvent : public UnidentifiedTypedEvent<T>
 {
     typedef UnidentifiedListener<T> Listener;

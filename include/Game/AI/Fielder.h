@@ -77,6 +77,7 @@ struct LooseBallContactAnimInfo
 }; // total size: 0xC
 
 class cFielder;
+class ChainChomp;
 extern "C" bool fn_800344DC(cFielder*, const nlVector3*);
 class cSHierarchy;
 class AnimRetargetList;
@@ -185,6 +186,7 @@ class cFielder : public cPlayer
 
 public:
     PlayerTweaks* GetTweaks() const;
+    float GetSpeedPowerupAdjusted(float fSpeed);
 
     unsigned int IsFrozen();
     unsigned int IsShattered();
@@ -235,6 +237,11 @@ public:
     bool CanReceivePass();
     bool fn_8003E8F4() const;
     bool fn_8003E74C() const;
+    bool CollideWithFreezeCallback();
+    bool CollideWithBananaCallback(const nlVector3& rv3BananaPosition);
+    bool CollideWithShellCallback(ePowerupSize eSize, bool bUnknown, const nlVector3& rv3Pos1, const nlVector3& rv3Pos2);
+    bool CollideWithBobombCallback(const nlVector3& v3CollisionLocation, float fBombRadius);
+    void CollideWithChainCallback(ChainChomp* pChainChomp);
     bool fn_8003E7F8() const;
     bool fn_8003E84C() const;
     bool fn_8003E9F0() const;
@@ -257,6 +264,11 @@ public:
         bool result = false;
         if (!IsStuck() && (muInvincibleStatus & 0x1F) == 0x1F)
             result = true;
+        return result;
+    }
+    bool UnidentifiedInvinciblePowerups() const
+    {
+        bool result = !IsStuck() && (muInvincibleStatus & 8);
         return result;
     }
     bool IsInvincibleChars() const

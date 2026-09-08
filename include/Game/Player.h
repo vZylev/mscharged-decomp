@@ -17,7 +17,7 @@ class cSHierarchy;
 class AnimRetargetList;
 class CharacterPhysicsData;
 class SpaceSearch;
-class UnidentifiedPlayerRadius;
+class AvoidableObject;
 struct CollisionPlayerPlayerData;
 struct CollisionPlayerWallData;
 struct UnidentifiedEventData24;
@@ -163,7 +163,7 @@ public:
 
 public:
     /* 0x31C */ SpaceSearch* m_pSpaceSearch;
-    /* 0x320 */ UnidentifiedPlayerRadius* mUnidentified320;
+    /* 0x320 */ AvoidableObject* mUnidentified320;
 
 public:
     /* 0x324 */ PlayerTweaks* m_pTweaks;

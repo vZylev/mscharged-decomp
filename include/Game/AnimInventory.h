@@ -18,6 +18,24 @@ public:
         return m_pSAnims[i];
     }
 
+    ePlayMode GetPlayMode(int i)
+    {
+        return m_pAnimProperties[i].playMode;
+    }
+    int GetEndPhase(int i)
+    {
+        return m_pAnimProperties[i].endPhase;
+    }
+    u8 GetMatchCharacterSpeed(int i)
+    {
+        return m_pAnimProperties[i].matchCharacterSpeed;
+    }
+
+    float GetBlendTime(int i)
+    {
+        return m_pAnimProperties[i].blendAmount;
+    }
+
     bool GetMirrored(int i)
     {
         return m_pAnimProperties[i].mirror;

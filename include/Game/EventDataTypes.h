@@ -17,6 +17,43 @@ class cBall;
 class cCharacter;
 class cFielder;
 class cPlayer;
+struct KoopaShellObject;
+
+struct CharacterImpactEvent
+{
+    nlVector3 v3Position;
+    float fMagnitude;
+    cCharacter* pCharacter;
+};
+
+struct GoalScoredData
+{
+    /* 0x00 */ u32 mUnidentified000;
+    /* 0x04 */ nlVector3 v3ShotPosition;
+    /* 0x10 */ cPlayer* pScorer;
+}; // total size: 0x14
+
+struct MegaStrikeEndData
+{
+    /* 0x00 */ cPlayer* pPlayer;
+    /* 0x04 */ s8 attempts;
+    /* 0x05 */ s8 goals;
+    /* 0x06 */ s8 defendingSide;
+    /* 0x07 */ s8 goalValue;
+};
+
+enum eReceiveBallResult
+{
+    RECEIVEBALL_LOOSE_PICKUP = 0,
+    RECEIVEBALL_PASS_COMPLETE = 1,
+    RECEIVEBALL_PASS_INTERCEPT = 2,
+};
+
+struct ReceiveBallData
+{
+    /* 0x00 */ cPlayer* pReceiver;
+    /* 0x04 */ eReceiveBallResult eResult;
+}; // total size: 0x08
 
 struct CollisionPlayerPlayerData
 {
@@ -125,13 +162,13 @@ struct CollisionPlayerBallData
 
 struct CollisionKoopaShellGoalieData
 {
-    /* 0x00 */ void* shell;
+    /* 0x00 */ KoopaShellObject* shell;
     /* 0x04 */ cCharacter* goalie;
 }; // total size: 0x8
 
 struct CollisionKoopaShotBallPlayerData
 {
-    /* 0x00 */ void* shell;
+    /* 0x00 */ KoopaShellObject* shell;
     /* 0x04 */ cFielder* player;
 }; // total size: 0x8
 
@@ -179,7 +216,7 @@ struct CollisionPlayerShellData
     /* 0x00 */ cFielder* pPlayer;
     /* 0x04 */ cFielder* pThrower;
     /* 0x08 */ u8 nThrowerPadID;
-    /* 0x09 */ bool bIsExploder;
+    /* 0x09 */ u8 bIsExploder;
     /* 0x0C */ int eSize;
     /* 0x10 */ nlVector3 v3CollisionLocation;
     /* 0x1C */ nlVector3 v3CollisionVelocity;
@@ -205,7 +242,7 @@ struct UnidentifiedEventData_80066A04
 {
     /* 0x00 */ cPlayer* mUnidentified00;
     /* 0x04 */ int mUnidentified04;
-    /* 0x08 */ void* mUnidentified08;
+    /* 0x08 */ cPlayer* mUnidentified08;
     /* 0x0C */ int mUnidentified0C;
 }; // total size: 0x10
 typedef UnidentifiedEventData_80066A04 CollisionPowerupStatsData;
@@ -287,6 +324,8 @@ extern SlotPool<NISData> g_NISDataPool;
 extern SlotPool<PowerupUsedEventData> g_PowerupUsedEventDataPool;
 extern SlotPool<PowerupHitPlayerEventData> g_PowerupHitPlayerEventDataPool;
 
+extern "C" void fn_80025A14(CollisionPowerupStatsData* data);
+
 void FreeEventDataPools();
 
 struct UnidentifiedEventData_800673FC
@@ -295,28 +334,16 @@ struct UnidentifiedEventData_800673FC
 }; // total size: 0x4
 
 struct UnidentifiedEventData00;
-struct UnidentifiedEventData02;
-struct UnidentifiedEventData03;
 struct UnidentifiedEventData04;
-struct UnidentifiedEventData05;
-struct UnidentifiedEventData06;
-struct UnidentifiedEventData07;
-struct UnidentifiedEventData08;
-struct UnidentifiedEventData09;
-struct UnidentifiedEventData10;
-struct UnidentifiedEventData11;
 struct UnidentifiedEventData12;
-struct UnidentifiedEventData13;
-struct UnidentifiedEventData14;
 struct UnidentifiedEventData15;
-struct UnidentifiedEventData16;
+struct UnidentifiedEventData16
+{
+    /* 0x00 */ cFielder* pFielder;
+    /* 0x04 */ cBall* pBall;
+};
 struct UnidentifiedEventData17;
-struct UnidentifiedEventData18;
 struct UnidentifiedEventData19;
-struct UnidentifiedEventData20;
-struct UnidentifiedEventData21;
-struct UnidentifiedEventData22;
-struct UnidentifiedEventData23;
 struct UnidentifiedEventData24
 {
     /* 0x00 */ unsigned char mUnidentified00[0x0C];
@@ -341,6 +368,7 @@ struct UnidentifiedEventData33;
 struct UnidentifiedEventData34;
 struct UnidentifiedEventData35;
 struct UnidentifiedEventData36;
+struct UnidentifiedEventData37;
 
 struct UnidentifiedEventData38
 {
