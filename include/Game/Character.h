@@ -104,6 +104,7 @@ public:
     void KillEffect(const EffectsGroup* effectGroup);
     void PerformBlinking(GLSkinMesh* skinMesh, glModel* model) const;
     void UpdateBlinking(float fDeltaT);
+    void StopPlayingAllTrackedSFX();
     void SetVelocity(const nlVector3& velocity);
     void SetFacingDirection(
         unsigned short dir, bool bSetMovementDirection);

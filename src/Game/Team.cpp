@@ -525,6 +525,20 @@ bool cTeam::CalculateFormationPosition(nlVector3& v3DestPosition,
 }
 
 /**
+ * Offset/Address/Size: 0x1C64 | 0x800A7998 | size: 0x70
+ */
+void cTeam::fn_800A7998()
+{
+    s32 side = m_nSide;
+    s32 i_player = 0;
+    do
+    {
+        g_pTeams[side]->m_pPlayers[i_player]->StopPlayingAllTrackedSFX();
+        i_player++;
+    } while (i_player < 5);
+}
+
+/**
  * Offset/Address/Size: 0x2174 | 0x800A7EA8 | size: 0x50
  */
 extern "C" int fn_800A7EA8(const void* a, const void* b)
