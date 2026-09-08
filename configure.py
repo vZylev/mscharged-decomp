@@ -791,7 +791,7 @@ config.libs = [
             Object(NonMatching, "unclassified/tu_801B369C.cpp"),
             Object(Matching, "Game/DB/StadiumInfo.cpp"),
             Object(Matching, "Game/Triggers/AnimTrigger.cpp", cflags=cflags_game_deferred),
-            Object(NonMatching, "Game/CharacterTriggers.cpp", cflags=cflags_game_deferred),
+            Object(NonMatching, "Game/CharacterTriggers.cpp", cflags=cflags_game),
             Object(NonMatching, "Game/Render/Presentation.cpp"),
             Object(NonMatching, "Game/Drawable/DrawableThwomp.cpp"),
             Object(NonMatching, "Game/Blinker.cpp", cflags=cflags_game_deferred),

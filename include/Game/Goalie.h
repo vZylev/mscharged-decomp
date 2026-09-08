@@ -159,6 +159,7 @@ public:
     inline void InitActionPursueRecover();
     void CleanupStun();
     void ChooseSwatAnim(int nParam);
+    void DoPassRelease();
     void ExecutePounce(cPlayer* pPlayer, bool bCheckHitDistance);
     PhysicsGoalie* GetPhysicsGoalie();
     void SetDesiredSaveFacing(const nlVector3& v3BallPosition);
