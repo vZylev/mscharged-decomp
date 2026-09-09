@@ -16,7 +16,6 @@ struct PlayerAttackData;
 struct UnidentifiedEventData_80066A04;
 struct UnidentifiedEventData_80066B08;
 struct CollisionChainPlayerData;
-struct UnidentifiedEventData_80066D10;
 struct UnidentifiedEventData_80066E14;
 struct UnidentifiedEventData_80066F18;
 struct UnidentifiedEventData_8006701C;

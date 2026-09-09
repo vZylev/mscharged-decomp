@@ -7,7 +7,7 @@
 
 class GameplayCamera;
 class cFielder;
-struct UnidentifiedEventData32;
+struct CollisionThwompPlayerData;
 struct GoalScoredData;
 struct UnidentifiedEventData_8006649C;
 struct PlayerAttackData;
@@ -46,7 +46,7 @@ public:
         UnidentifiedEventData_8006701C* eventData);
     void OnMegaStrikeMeterEnd();
     void OnGoalieSave(UnidentifiedEventData_8006649C* eventData);
-    void OnCollisionThwompPlayer(UnidentifiedEventData32* eventData);
+    void OnCollisionThwompPlayer(CollisionThwompPlayerData* eventData);
     void OnGoalieDekeAttackAttempt(
         PlayerAttackData* eventData);
     void OnGoalieDekeAttackSuccess(

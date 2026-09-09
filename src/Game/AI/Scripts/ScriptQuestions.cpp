@@ -150,7 +150,7 @@ float LastBallOwner(cPlayer* player)
         return 0.0f;
     }
 
-    if (g_pScriptBall->m_pPrevOwner == player)
+    if (g_pBall->m_pPrevOwner == player)
     {
         return 1.0f;
     }
@@ -477,8 +477,7 @@ float UserControlledT(cTeam* team)
         return 0.0f;
     }
 
-    bool bHasAssignedController = team->GetNumAssignedControllers() > 0;
-    if (bHasAssignedController)
+    if (team->GetNumAssignedControllers() > 0)
     {
         return 1.0f;
     }

@@ -260,15 +260,29 @@ extern float lbl_806DB538;
 extern float lbl_806DB53C;
 extern float lbl_806DB540;
 extern unsigned char lbl_806DB544;
-extern unsigned char lbl_806DB500;
+bool lbl_806DB500 = true;
+bool lbl_806DB501 = true;
 extern float lbl_806DB504;
 extern float lbl_806DB508;
 extern float lbl_806DB50C;
 extern float lbl_806DB510;
 extern float lbl_806DB548;
 extern float lbl_806DB54C;
-extern float lbl_806DB558;
-extern float lbl_806DB55C;
+float lbl_806DB558 = 10.0f;
+float lbl_806DB55C = 10.0f;
+
+static TweakValueBoolImpl_804F4538 sUnidentifiedTweak_8056B478(
+    "gbUsePassCharging", "Game/Gameplay/Charging/Pass", &lbl_806DB500, true);
+static TweakValueBoolImpl_804F4538 sUnidentifiedTweak_8056B498(
+    "gbUseShotCharging", "Game/Gameplay/Charging/Shot", &lbl_806DB501, true);
+static TweakValueImpl_804F4DC8 sUnidentifiedTweak_8056B4B8(
+    "gfShotClockTime", "Game/Gameplay/Charging/Shot Clock", &lbl_806DB558, true);
+static TweakValueImpl_804F4DC8 sUnidentifiedTweak_8056B4D8(
+    "gfShotClockFrozenTime", "Game/Gameplay/Charging/Shot Clock", &lbl_806DB55C, true);
+static TweakValueBoolImpl_804F4538 sUnidentifiedTweak_8056B4F8(
+    "gbUseShotClock", "Game/Gameplay/Charging/Shot Clock", &lbl_806E0BDC, true);
+LiveBallTrail lbl_8056B518[10];
+
 extern float lbl_806DB560;
 extern float lbl_806DB564;
 extern float lbl_806DB568;

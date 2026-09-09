@@ -123,7 +123,7 @@ public:
     UnidentifiedQueuedEvent<UnidentifiedEventData26> mEvent46;
     UnidentifiedQueuedEvent<UnidentifiedEventData27> mEvent47;
     UnidentifiedQueuedEvent<UnidentifiedEventData28> mEvent48;
-    UnidentifiedQueuedEvent<UnidentifiedEventData32> mEvent49;
+    UnidentifiedQueuedEvent<CollisionThwompPlayerData> mEvent49;
     UnidentifiedQueuedEvent<UnidentifiedEventData33> mEvent50;
     UnidentifiedQueuedEvent<UnidentifiedEventData28> mEvent51;
     UnidentifiedQueuedEvent<UnidentifiedEventData34> mEvent52;
@@ -675,9 +675,9 @@ extern "C" void fn_8016A850(CollisionBulletBillData*);
 extern "C" void fn_8016A868(void*);
 void FreeCollisionChainPowerupData(CollisionChainPowerupData*);
 extern "C" void fn_8016A898(void*);
-extern "C" void fn_8016A8B0(void*);
-extern "C" void fn_8016A8C8(void*);
-extern "C" void fn_8016A8E0(void*);
+extern "C" void fn_8016A8B0(UnidentifiedEventData26*);
+extern "C" void fn_8016A8C8(CollisionThwompPlayerData*);
+extern "C" void fn_8016A8E0(UnidentifiedEventData34*);
 extern "C" void fn_8016A8F8(void*);
 
 extern "C" void fn_80145C9C()
@@ -915,13 +915,13 @@ extern "C" void fn_80148BD8(UnidentifiedEventData31* data)
 extern "C" void fn_80148D14(UnidentifiedEventData26* data)
 {
     lbl_806E11F0->mEvent44.Queue(
-        data, Function<UnidentifiedEventData26*>((void (*)(UnidentifiedEventData26*))fn_8016A8B0));
+        data, Function<UnidentifiedEventData26*>(fn_8016A8B0));
 }
 
 extern "C" void fn_80148E5C(UnidentifiedEventData26* data)
 {
     lbl_806E11F0->mEvent46.Queue(
-        data, Function<UnidentifiedEventData26*>((void (*)(UnidentifiedEventData26*))fn_8016A8B0));
+        data, Function<UnidentifiedEventData26*>(fn_8016A8B0));
 }
 
 extern "C" void fn_80148FA4(UnidentifiedEventData27* data)
@@ -964,7 +964,7 @@ extern "C" void fn_80149848(UnidentifiedEventData28* data)
     lbl_806E11F0->mEvent48.Queue(data, Function<UnidentifiedEventData28*>());
 }
 
-extern "C" void fn_80149984(void* source, void* target)
+extern "C" void fn_80149984(void* source, cCharacter* target)
 {
     CollisionThwompPlayerData* data = 0;
     g_CollisionThwompPlayerDataPool.Allocate(data);
@@ -972,8 +972,8 @@ extern "C" void fn_80149984(void* source, void* target)
     data->sourceValue = *(void**)source;
     data->target = target;
     lbl_806E11F0->mEvent49.Queue(
-        (UnidentifiedEventData32*)data,
-        Function<UnidentifiedEventData32*>((void (*)(UnidentifiedEventData32*))fn_8016A8C8));
+        data,
+        Function<CollisionThwompPlayerData*>(fn_8016A8C8));
 }
 
 extern "C" void fn_80149B30(UnidentifiedEventData33* data)
@@ -984,19 +984,19 @@ extern "C" void fn_80149B30(UnidentifiedEventData33* data)
 extern "C" void fn_80149C6C(UnidentifiedEventData34* data)
 {
     lbl_806E11F0->mEvent52.Queue(
-        data, Function<UnidentifiedEventData34*>((void (*)(UnidentifiedEventData34*))fn_8016A8E0));
+        data, Function<UnidentifiedEventData34*>(fn_8016A8E0));
 }
 
 extern "C" void fn_80149DB4(UnidentifiedEventData34* data)
 {
     lbl_806E11F0->mEvent53.Queue(
-        data, Function<UnidentifiedEventData34*>((void (*)(UnidentifiedEventData34*))fn_8016A8E0));
+        data, Function<UnidentifiedEventData34*>(fn_8016A8E0));
 }
 
 extern "C" void fn_80149EFC(UnidentifiedEventData34* data)
 {
     lbl_806E11F0->mEvent56.Queue(
-        data, Function<UnidentifiedEventData34*>((void (*)(UnidentifiedEventData34*))fn_8016A8E0));
+        data, Function<UnidentifiedEventData34*>(fn_8016A8E0));
 }
 
 extern "C" void fn_8014A044(UnidentifiedNPC_801B43F8* data)
@@ -1020,19 +1020,9 @@ EventDispatcher::EventDispatcher(const char*)
 {
 }
 
-struct UnidentifiedPooledData20
-{
-    unsigned char data[0x20];
-};
-
 struct UnidentifiedPooledData08
 {
     unsigned char data[0x08];
-};
-
-struct UnidentifiedPooledData14B
-{
-    unsigned char data[0x14];
 };
 
 struct UnidentifiedPooledData0C
@@ -1040,10 +1030,10 @@ struct UnidentifiedPooledData0C
     unsigned char data[0x0C];
 };
 
-static SlotPool<UnidentifiedPooledData20> lbl_80570110(16, 16);
+static SlotPool<UnidentifiedEventData26> lbl_80570110(16, 16);
 SlotPool<UnidentifiedEventData24> lbl_80570138(16, 16);
 static SlotPool<UnidentifiedPooledData08> lbl_80570160(16, 16);
-static SlotPool<UnidentifiedPooledData14B> lbl_80570188(16, 16);
+static SlotPool<UnidentifiedEventData34> lbl_80570188(16, 16);
 static SlotPool<UnidentifiedPooledData0C> lbl_805701B0(16, 16);
 
 PhysicsEventQueue* lbl_806E11F0;
@@ -1221,19 +1211,19 @@ extern "C" void fn_8016A898(void* data)
     lbl_80570160.Free((UnidentifiedPooledData08*)data);
 }
 
-extern "C" void fn_8016A8B0(void* data)
+extern "C" void fn_8016A8B0(UnidentifiedEventData26* data)
 {
-    lbl_80570110.Free((UnidentifiedPooledData20*)data);
+    lbl_80570110.Free(data);
 }
 
-extern "C" void fn_8016A8C8(void* data)
+extern "C" void fn_8016A8C8(CollisionThwompPlayerData* data)
 {
-    g_CollisionThwompPlayerDataPool.Free((CollisionThwompPlayerData*)data);
+    g_CollisionThwompPlayerDataPool.Free(data);
 }
 
-extern "C" void fn_8016A8E0(void* data)
+extern "C" void fn_8016A8E0(UnidentifiedEventData34* data)
 {
-    lbl_80570188.Free((UnidentifiedPooledData14B*)data);
+    lbl_80570188.Free(data);
 }
 
 extern "C" void fn_8016A8F8(void* data)

@@ -90,7 +90,8 @@ public:
     void fn_800A607C();
     void fn_800A6248();
     void fn_800A7998();
-    void fn_800A8900(void* checksum, DebugWriteCache* cache);
+    void fn_800A8098();
+    void fn_800A8900(void* context, DebugWriteCache* cache);
     void fn_800A8DE8(RunningChecksum* runningChecksum);
     float fn_800A8EC0();
     float fn_800A8F20();

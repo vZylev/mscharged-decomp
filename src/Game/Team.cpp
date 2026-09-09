@@ -14,12 +14,15 @@
 #include "Game/DB/CharacterInfo.h"
 #include "Game/DB/GameProgress.h"
 #include "Game/DB/StadiumInfo.h"
+#include "Game/DetInput.h"
+#include "Game/DebugWriteCache.h"
 #include "Game/Formation.h"
 #include "Game/Field.h"
 #include "Game/Game.h"
 #include "Game/GameInfo.h"
 #include "Game/GameTweaks.h"
 #include "Game/Goalie.h"
+#include "Game/MathHelpers.h"
 #include "Game/Net.h"
 #include "Game/OverlayHandlerHUD.h"
 #include "Game/Player.h"
@@ -41,8 +44,42 @@ cTeam* g_pTeams[2] = { NULL, NULL };
 cTeam* g_pCurrentlyUpdatingTeam;
 float lbl_806DBEF0 = 0.5f;
 float lbl_806DBEF4 = 7.5f;
+u16 lbl_806DBF04 = 0xFFFF;
+u16 lbl_806DBF06 = 0xFFFF;
+char lbl_806DBF08[] = "m_nSide";
+char lbl_806DBF10[] = "DetTeam";
 bool lbl_806E0E04;
 unsigned long lbl_806E0E08[2];
+
+char lbl_80500A10[] = "PLAYER %d DONE\n\n";
+char lbl_80500A24[] = "m_nTeamPlayTransFunc";
+char lbl_80500A3C[] = "BallIntOrdFs[]";
+char lbl_80500A4C[] = "m_nAIOrdFs[]";
+char lbl_80500A5C[] = "m_nPowerups[]";
+char lbl_80500A6C[] = "m_ePowupType[]";
+char lbl_80500A7C[] = "GenDetTeam";
+char lbl_80500A88[] = "mpBestBallInterceptor";
+char lbl_80500AA0[] = "mvBallInterceptPosition[]";
+char lbl_80500AC0[] = "mfBallInTimes[]";
+char lbl_80500AD0[] = "mtToggleTimer";
+char lbl_80500AE0[] = "mtDefensiveZoneTimer";
+char lbl_80500AF8[] = "mtRoleTimer";
+char lbl_80500B04[] = "mtMarkTimer";
+char lbl_80500B10[] = "mtTeamStyleTimer";
+char lbl_80500B24[] = "meCurrentTeamStyle";
+char lbl_80500B38[] = "meCurrentSituation";
+char lbl_80500B4C[] = "mfPowerupTimer";
+char lbl_80500B5C[] = "mfPowerupMeter";
+char lbl_80500B6C[] = "m_nScore";
+
+struct GenDetTeam
+{
+    ePowerUpType m_ePowupType[2];
+    int m_nPowerups[2];
+    int m_nAIOrdFs[4];
+    int BallIntOrdFs[4];
+    u32 m_nTeamPlayTransFunc;
+};
 
 static const unsigned short g_aAdvantagePlayerFacingDirections[5] = {
     0,
@@ -78,8 +115,9 @@ static inline float WeightedScore2(float fScoreA, float fWeightA,
 extern "C" void fn_800A6C94(cTeam*, float);
 extern "C" unsigned long fn_800A6EE0(cTeam*);
 extern "C" void fn_800A701C(cTeam*);
-extern "C" void fn_800A8098(cTeam*);
 extern "C" void fn_800A83CC(cTeam*, bool);
+extern "C" float fn_800A0508(cFielder*, bool, bool);
+extern "C" float fn_80034F98(cFielder*, float);
 extern "C" void fn_80015B38(cBall*, bool);
 extern "C" float fn_8002E1B0(cFielder*);
 extern "C" float fn_800394A8(cFielder*, int);
@@ -729,7 +767,7 @@ void cTeam::Update(float fDeltaT)
     }
 
     UpdateTeamAI(fDeltaT);
-    fn_800A8098(this);
+    fn_800A8098();
     fn_800A701C(this);
 }
 
@@ -1308,6 +1346,69 @@ void cTeam::UpdateTeamAI(float fDeltaT)
 }
 
 /**
+ * Offset/Address/Size: 0x2364 | 0x800A8098 | size: 0x1EC
+ */
+void cTeam::fn_800A8098()
+{
+    if (g_pBall->GetOwnerFielder() != NULL)
+    {
+        cPlayer* pCaptain = m_pPlayers[0];
+        if (pCaptain->IsOnSameTeam(g_pBall->GetOwnerFielder()))
+        {
+            bool bIsChipShot = g_pBall->GetOwnerFielder()->bIsModified;
+            if (g_pBall->GetOwnerFielder()->GetGlobalPad() != NULL)
+            {
+                bIsChipShot = fn_80331C04(
+                    g_pBall->GetOwnerFielder()->GetGlobalPad(), 0x17, true);
+            }
+
+            float fScoreValue = fn_800A0508(
+                g_pBall->GetOwnerFielder(), bIsChipShot, false);
+            mUnidentified010 = fScoreValue;
+            mUnidentified00C = nlMinEquals(
+                nlMaxEquals(
+                    fn_80034F98(g_pBall->GetOwnerFielder(),
+                        fScoreValue)
+                        / 100.0f,
+                    0.0f),
+                1.0f);
+        }
+    }
+    else
+    {
+        bool bUnidentified = false;
+        if (g_pBall->meBallState == 5
+            || g_pBall->meBallState == 3)
+        {
+            if (g_pBall->m_pPassTarget != NULL)
+            {
+                bUnidentified = true;
+            }
+        }
+        if (bUnidentified
+            && g_pBall->GetPassTargetFielder() != NULL)
+        {
+            cPlayer* pCaptain = m_pPlayers[0];
+            if (pCaptain->IsOnSameTeam(
+                    g_pBall->GetPassTargetFielder()))
+            {
+                float fScoreValue = fn_800A0508(
+                    g_pBall->GetPassTargetFielder(),
+                    g_pBall->GetPassTargetFielder()->bIsModified, false);
+                mUnidentified010 = fScoreValue;
+                mUnidentified00C = nlMinEquals(
+                    nlMaxEquals(
+                        fn_80034F98(g_pBall->GetPassTargetFielder(),
+                            fScoreValue)
+                            / 100.0f,
+                        0.0f),
+                    1.0f);
+            }
+        }
+    }
+}
+
+/**
  * Offset/Address/Size: 0x2550 | 0x800A8284 | size: 0x148
  */
 bool cTeam::AssignSituation()
@@ -1356,6 +1457,49 @@ bool cTeam::AssignSituation()
     }
 
     return eLastSituation != mpCurrentSituation;
+}
+
+/**
+ * Offset/Address/Size: 0x2698 | 0x800A83CC | size: 0xD0
+ */
+extern "C" void fn_800A83CC(cTeam* pTeam, bool bSituationChanged)
+{
+    if (pTeam->mtRoleTimer.m_uPackedTime == 0 || bSituationChanged)
+    {
+        unsigned int* pFielderFormationPos
+            = pTeam->m_pFormationManager->fn_80052034();
+        if (pFielderFormationPos != NULL)
+        {
+            switch (pTeam->mpCurrentSituation)
+            {
+            case SITUATION_OFFENSE:
+            case SITUATION_DEFENSE:
+            case SITUATION_LOOSE:
+                unsigned int posIndex = pFielderFormationPos[0];
+                cFielder* pFielder = (cFielder*)pTeam->m_pPlayers[0];
+                pTeam->m_pAIOrderedFielders[posIndex] = pFielder;
+                pFielder->m_eRole = (eRole)posIndex;
+
+                posIndex = pFielderFormationPos[1];
+                pFielder = (cFielder*)pTeam->m_pPlayers[1];
+                pTeam->m_pAIOrderedFielders[posIndex] = pFielder;
+                pFielder->m_eRole = (eRole)posIndex;
+
+                posIndex = pFielderFormationPos[2];
+                pFielder = (cFielder*)pTeam->m_pPlayers[2];
+                pTeam->m_pAIOrderedFielders[posIndex] = pFielder;
+                pFielder->m_eRole = (eRole)posIndex;
+
+                posIndex = pFielderFormationPos[3];
+                pFielder = (cFielder*)pTeam->m_pPlayers[3];
+                pTeam->m_pAIOrderedFielders[posIndex] = pFielder;
+                pFielder->m_eRole = (eRole)posIndex;
+                break;
+            }
+
+            pTeam->mtRoleTimer.SetSeconds(0.33f);
+        }
+    }
 }
 
 /**
@@ -1516,6 +1660,107 @@ cFielder* cTeam::GetRearMostFielder()
     }
 
     return pRearMostFielder;
+}
+
+/**
+ * Offset/Address/Size: 0x2BCC | 0x800A8900 | size: 0x4E8
+ */
+void cTeam::fn_800A8900(void* context, DebugWriteCache* cache)
+{
+    if (lbl_806DBF06 == 0xFFFF)
+    {
+        lbl_806DBF06 = fn_80338EBC(cache, lbl_806DBF10);
+        fn_80338F88(cache, 8, lbl_80533C98[8].size, 0, lbl_806DBF08);
+        fn_80338F88(cache, 8, lbl_80533C98[8].size,
+            (u8*)&m_nScore - (u8*)this, lbl_80500B6C);
+        fn_80338F88(cache, 17, lbl_80533C98[17].size,
+            (u8*)&mfPowerupMeter - (u8*)this, lbl_80500B5C);
+        fn_80338F88(cache, 17, lbl_80533C98[17].size,
+            (u8*)&mfPowerupTimer - (u8*)this, lbl_80500B4C);
+        fn_80338F88(cache, 14, lbl_80533C98[14].size,
+            (u8*)&mpCurrentSituation - (u8*)this, lbl_80500B38);
+        fn_80338F88(cache, 14, lbl_80533C98[14].size,
+            (u8*)&meCurrentTeamStyle - (u8*)this, lbl_80500B24);
+        fn_80338F88(cache, 20, lbl_80533C98[20].size,
+            (u8*)&mtTeamStyleTimer - (u8*)this, lbl_80500B10);
+        fn_80338F88(cache, 20, lbl_80533C98[20].size,
+            (u8*)&mtMarkTimer - (u8*)this, lbl_80500B04);
+        fn_80338F88(cache, 20, lbl_80533C98[20].size,
+            (u8*)&mtRoleTimer - (u8*)this, lbl_80500AF8);
+        fn_80338F88(cache, 20, lbl_80533C98[20].size,
+            (u8*)&mtDefensiveZoneTimer - (u8*)this, lbl_80500AE0);
+        fn_80338F88(cache, 20, lbl_80533C98[20].size,
+            (u8*)&mtToggleTimer - (u8*)this, lbl_80500AD0);
+        fn_80339090(cache, 17, lbl_80533C98[17].size, 4,
+            (u8*)&mfBallInTimes - (u8*)this, lbl_80500AC0);
+        fn_80339090(cache, 22, lbl_80533C98[22].size, 4,
+            (u8*)&mvBallInterceptPosition - (u8*)this,
+            lbl_80500AA0);
+        fn_80338F88(cache, 15, lbl_80533C98[15].size,
+            (u8*)&mpBestBallInterceptor - (u8*)this, lbl_80500A88);
+        fn_80338F78(cache);
+    }
+
+    cTeam* copy = (cTeam*)fn_8033930C(
+        cache, lbl_806DBF06, this, offsetof(cTeam, m_ePowerupList));
+    if (copy != NULL)
+    {
+        *(int*)&copy->mpBestBallInterceptor = mpBestBallInterceptor == NULL
+            ? -1
+            : mpBestBallInterceptor->mUnidentified120;
+        fn_80339450(cache, lbl_806DBF06, copy, context);
+    }
+
+    GenDetTeam data;
+    for (int i = 0; i < 2; i++)
+    {
+        data.m_ePowupType[i] = m_ePowerupList[i].eType;
+        data.m_nPowerups[i] = m_ePowerupList[i].nnumOfPowerups;
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        data.m_nAIOrdFs[i] = m_pAIOrderedFielders[i] == NULL
+            ? -1
+            : m_pAIOrderedFielders[i]->mUnidentified120;
+        data.BallIntOrdFs[i]
+            = m_pBallInterceptOrderedFielders[i] == NULL
+            ? -1
+            : m_pBallInterceptOrderedFielders[i]->mUnidentified120;
+    }
+    data.m_nTeamPlayTransFunc
+        = mUnidentified0F0->mUnidentified18->mUnidentified00C.mUnidentifiedHash;
+
+    if (lbl_806DBF04 == 0xFFFF)
+    {
+        lbl_806DBF04 = fn_80338EBC(cache, lbl_80500A7C);
+        fn_80339090(cache, 8, lbl_80533C98[8].size, 2, 0,
+            lbl_80500A6C);
+        fn_80339090(cache, 8, lbl_80533C98[8].size, 2,
+            (u8*)&data.m_nPowerups - (u8*)&data,
+            lbl_80500A5C);
+        fn_80339090(cache, 8, lbl_80533C98[8].size, 4,
+            (u8*)&data.m_nAIOrdFs - (u8*)&data,
+            lbl_80500A4C);
+        fn_80339090(cache, 8, lbl_80533C98[8].size, 4,
+            (u8*)&data.BallIntOrdFs - (u8*)&data,
+            lbl_80500A3C);
+        fn_80338F88(cache, 2, lbl_80533C98[2].size,
+            (u8*)&data.m_nTeamPlayTransFunc - (u8*)&data,
+            lbl_80500A24);
+        fn_80338F78(cache);
+    }
+
+    fn_80339450(cache, lbl_806DBF04, &data, context);
+    fn_8033930C(cache, lbl_806DBF04, &data, sizeof(data));
+
+    for (int i = 0; i < 5; i++)
+    {
+        m_pPlayers[i]->Unknown11(context, cache);
+        char buffer[32];
+        nlSNPrintf(buffer, sizeof(buffer), lbl_80500A10,
+            i + m_nSide * 5);
+        fn_8033919C(cache, buffer);
+    }
 }
 
 /**

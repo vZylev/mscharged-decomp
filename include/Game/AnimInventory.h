@@ -22,9 +22,9 @@ public:
     {
         return m_pAnimProperties[i].playMode;
     }
-    int GetEndPhase(int i)
+    eFootPhase GetEndPhase(int animID)
     {
-        return m_pAnimProperties[i].endPhase;
+        return m_pAnimProperties[animID].endPhase;
     }
     u8 GetMatchCharacterSpeed(int i)
     {

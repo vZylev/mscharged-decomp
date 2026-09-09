@@ -81,7 +81,7 @@ struct CollisionThwompPlayerData
 {
     /* 0x00 */ void* source;
     /* 0x04 */ void* sourceValue;
-    /* 0x08 */ void* target;
+    /* 0x08 */ cCharacter* target;
 }; // total size: 0xC
 
 struct CollisionBulletBillData
@@ -352,20 +352,29 @@ struct UnidentifiedEventData24
 }; // total size: 0x14
 
 struct UnidentifiedEventData25;
-struct UnidentifiedEventData26;
+struct UnidentifiedEventData26
+{
+    /* 0x00 */ nlVector3 v3Position;
+    /* 0x0C */ nlVector3 v3Velocity;
+    /* 0x18 */ void* mUnidentified18;
+    /* 0x1C */ cFielder* pFielder;
+}; // total size: 0x20
 struct UnidentifiedEventData27;
 struct UnidentifiedEventData28;
 struct UnidentifiedEventData29;
 struct UnidentifiedEventData30;
 struct UnidentifiedEventData31;
-struct UnidentifiedEventData32
-{
-    void* source;
-    void* sourceValue;
-    void* target;
-};
 struct UnidentifiedEventData33;
-struct UnidentifiedEventData34;
+class UnidentifiedObject_801B535C;
+
+struct UnidentifiedEventData34
+{
+    /* 0x00 */ cPlayer* mUnidentified00;
+    /* 0x04 */ cFielder* mUnidentified04;
+    /* 0x08 */ UnidentifiedObject_801B535C* mUnidentified08;
+    /* 0x0C */ u32 mUnidentified0C;
+    /* 0x10 */ u32 mUnidentified10;
+}; // total size: 0x14
 struct UnidentifiedEventData35;
 struct UnidentifiedEventData36;
 struct UnidentifiedEventData37;

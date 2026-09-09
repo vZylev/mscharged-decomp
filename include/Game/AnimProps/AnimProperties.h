@@ -3,6 +3,14 @@
 
 #include "Game/SAnim.h"
 
+enum eFootPhase
+{
+    REGULAR_FOOT = 0,
+    GOOFY_FOOT = 1,
+    LEFT_FOOT_DOWN = 2,
+    RIGHT_FOOT_DOWN = 3,
+};
+
 struct AnimProperties
 {
     const char* enumName;
@@ -11,7 +19,7 @@ struct AnimProperties
     float blendAmount;
     bool mirror;
     int ballRotationMode;
-    int endPhase;
+    eFootPhase endPhase;
     u8 matchCharacterSpeed;
 };
 

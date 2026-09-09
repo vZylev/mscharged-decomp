@@ -27,10 +27,9 @@ nlMatrix4& nlMultMatrices(nlMatrix4& out, const nlMatrix4& a, const nlMatrix4& b
 inline void nlMultVectorMatrix(nlVector3& v_out, const nlVector3& v_in, const nlMatrix3& m)
 {
     nlVector3 t;
-    nlVec3Set(t,
-        m.e2[0][0] * v_in.x + m.e2[1][0] * v_in.y + m.e2[2][0] * v_in.z,
-        m.e2[0][1] * v_in.x + m.e2[1][1] * v_in.y + m.e2[2][1] * v_in.z,
-        m.e2[0][2] * v_in.x + m.e2[1][2] * v_in.y + m.e2[2][2] * v_in.z);
+    t.x = m.e2[0][0] * v_in.x + m.e2[1][0] * v_in.y + m.e2[2][0] * v_in.z;
+    t.y = m.e2[0][1] * v_in.x + m.e2[1][1] * v_in.y + m.e2[2][1] * v_in.z;
+    t.z = m.e2[0][2] * v_in.x + m.e2[1][2] * v_in.y + m.e2[2][2] * v_in.z;
     v_out = t;
 }
 

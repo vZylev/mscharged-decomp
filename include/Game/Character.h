@@ -187,6 +187,7 @@ public:
 
     void UpdateMovementState(float fDeltaT);
     void UnidentifiedSetScale(float unidentifiedScale);
+    void fn_80022D58(float fDeltaT);
 
     void SetElectrocutionTextureEnabled(bool isEnabled);
     void fn_8001F1D8();
@@ -234,7 +235,11 @@ public:
     void fn_8001C510(int modelType);
     bool fn_8001C534(int modelType);
     void fn_8001C574();
+    void fn_80022DAC(unsigned long uTextureID);
+    void fn_80022DE8(unsigned long uTextureID);
+    void fn_80022E24(unsigned long uTextureID);
     void fn_80022E60();
+    void fn_80022D3C(float fParam0, float fParam1);
     void fn_8001EF78(float fParam);
     void AddRandomDirt();
     void fn_8001F1C0(int nParam);

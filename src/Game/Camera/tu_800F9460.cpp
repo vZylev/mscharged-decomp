@@ -181,7 +181,7 @@ void UnidentifiedCameraEffects::OnGoalieDekeAttackAttempt(
 }
 
 void UnidentifiedCameraEffects::OnCollisionThwompPlayer(
-    UnidentifiedEventData32* eventData)
+    CollisionThwompPlayerData* eventData)
 {
     if (g_pGame->m_eGameState == 3)
     {
@@ -789,10 +789,10 @@ void UnidentifiedCameraEffects::RegisterEventListeners()
         GetGoalieSaveEvent("GoalieSave", -1)->Add(callback, 0, -1);
     }
     {
-        Function<UnidentifiedEventData32*> callback(Bind<void>(
+        Function<CollisionThwompPlayerData*> callback(Bind<void>(
             MemFun(&UnidentifiedCameraEffects::OnCollisionThwompPlayer),
             this, placeholder0));
-        UnidentifiedFindEvent<UnidentifiedEventData32>("CollisionThwompPlayer", -1)->Add(callback, 0, -1);
+        UnidentifiedFindEvent<CollisionThwompPlayerData>("CollisionThwompPlayer", -1)->Add(callback, 0, -1);
     }
     {
         Function<PlayerAttackData*> callback(Bind<void>(

@@ -78,6 +78,8 @@ struct LooseBallContactAnimInfo
 
 class cFielder;
 class ChainChomp;
+class UnidentifiedNPC_801B43F8;
+struct CollisionThwompPlayerData;
 extern "C" bool fn_800344DC(cFielder*, const nlVector3*);
 class cSHierarchy;
 class AnimRetargetList;
@@ -242,6 +244,8 @@ public:
     bool CollideWithShellCallback(ePowerupSize eSize, bool bUnknown, const nlVector3& rv3Pos1, const nlVector3& rv3Pos2);
     bool CollideWithBobombCallback(const nlVector3& v3CollisionLocation, float fBombRadius);
     void CollideWithChainCallback(ChainChomp* pChainChomp);
+    void fn_8003295C(UnidentifiedNPC_801B43F8* pDebris);
+    void fn_80032CB8(CollisionThwompPlayerData*);
     bool fn_8003E7F8() const;
     bool fn_8003E84C() const;
     bool fn_8003E9F0() const;
@@ -319,7 +323,6 @@ public:
     void fn_80048484(float fDeltaT);
     void InitActionLooseBallShot(bool bIsChipShot);
     void fn_800486DC(float fDeltaT);
-    void fn_80048918();
     void fn_800489C0();
     float fn_800489C4();
     float fn_80048A08();

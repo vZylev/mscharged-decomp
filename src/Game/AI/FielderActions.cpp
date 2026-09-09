@@ -1480,7 +1480,7 @@ void fn_80048870(cFielder* pFielder)
     }
 }
 
-void cFielder::fn_80048918()
+void UnFreezeEveryoneButCaptain(cFielder* pCaptain)
 {
     lbl_806DB5A8 = true;
 
@@ -1490,7 +1490,7 @@ void cFielder::fn_80048918()
         for (int j = 0; j < 4; j++)
         {
             cFielder* pFielder = pTeam->GetFielder(j);
-            if (this != pFielder && fn_8003881C(pFielder)
+            if (pCaptain != pFielder && fn_8003881C(pFielder)
                 && g_pGame->mUnidentified030 == 0)
             {
                 fn_80316968(fn_80319FC0(fn_8002E1A4(pFielder), 0x1D));

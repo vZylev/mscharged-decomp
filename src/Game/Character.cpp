@@ -25,6 +25,8 @@
 #include "Game/CharacterTweaks.h"
 #include "Game/Ball.h"
 #include "Game/BirdoEggObject.h"
+#include "unclassified/tu_801B535C.h"
+#include "Game/Physics/PhysicsSphere_801798A8.h"
 #include "Game/BulletBill.h"
 #include "unclassified/tu_80175F8C.h"
 #include "unclassified/tu_801A5F10.h"
@@ -67,6 +69,47 @@
 extern PhysicsWorld* g_PhysicsWorld;
 
 static const nlVector3 v3Zero = { 0.0f, 0.0f, 0.0f };
+
+void cCharacter::fn_80022D3C(float fParam0, float fParam1)
+{
+    mUnidentified1A4 = fParam0;
+    mUnidentified1AC = fParam1;
+    if (fParam0 == 0.0f)
+    {
+        mUnidentified1A8 = fParam1;
+    }
+}
+
+void cCharacter::fn_80022D58(float fDeltaT)
+{
+    mUnidentified1A8 += mUnidentified1A4 * fDeltaT;
+    if (mUnidentified1A4 > 0.0f && mUnidentified1A8 > mUnidentified1AC)
+    {
+        mUnidentified1A8 = mUnidentified1AC;
+    }
+    if (mUnidentified1A4 < 0.0f && mUnidentified1A8 < mUnidentified1AC)
+    {
+        mUnidentified1A8 = mUnidentified1AC;
+    }
+}
+
+void cCharacter::fn_80022DAC(unsigned long uTextureID)
+{
+    mUnidentified100 = uTextureID;
+    mUnidentified10C.value = glGetTextureManager()->GetTextureIndex(mUnidentified100);
+}
+
+void cCharacter::fn_80022DE8(unsigned long uTextureID)
+{
+    mUnidentified104 = uTextureID;
+    mUnidentified110.value = glGetTextureManager()->GetTextureIndex(mUnidentified104);
+}
+
+void cCharacter::fn_80022E24(unsigned long uTextureID)
+{
+    mUnidentified108 = uTextureID;
+    mUnidentified114.value = glGetTextureManager()->GetTextureIndex(mUnidentified108);
+}
 
 struct UnidentifiedCharacterObject_8001C158
 {
@@ -757,8 +800,23 @@ extern "C" void fn_80022968(CollisionChainPlayerData* pEventData)
         }
     }
 }
-extern "C" void fn_800229F0(UnidentifiedEventData_80066D10*);
-extern "C" void fn_80022A78(UnidentifiedEventData32*);
+extern "C" void fn_800229F0(CollisionWindDebrisPlayerData* pEventData)
+{
+    if (pEventData->pFielder != NULL && pEventData->pDebris != NULL)
+    {
+        if (!pEventData->pFielder->UnidentifiedInvinciblePowerups())
+        {
+            pEventData->pFielder->fn_8003295C(pEventData->pDebris);
+        }
+    }
+}
+extern "C" void fn_80022A78(CollisionThwompPlayerData* pEventData)
+{
+    if (pEventData->target->m_eClassType == FIELDER)
+    {
+        ((cFielder*)pEventData->target)->fn_80032CB8(pEventData);
+    }
+}
 extern "C" void fn_80020B8C(cFielder* pFielder)
 {
     pFielder->fn_80047240(pFielder,
@@ -1288,7 +1346,7 @@ extern "C" void fn_80020E20(ReceiveBallData* pEventData)
     if (pReceiver->IsOnSameTeam(g_pBall->m_pPrevOwner))
         return;
 
-    cTeam* pTeam = pReceiver->m_pTeam;
+    cTeam* pTeam = pReceiver->GetTeam();
     pTeam->mtMarkTimer.UnidentifiedClear();
     pTeam->mtRoleTimer.UnidentifiedClear();
     cTeam* pOtherTeam = pTeam->GetOtherTeam();
@@ -1425,13 +1483,80 @@ extern "C" void fn_80020BB0(PlayerAttackData* pEventData)
         }
     }
 }
-extern "C" void fn_80022B1C(UnidentifiedEventData26*);
+extern "C" void fn_80022B1C(UnidentifiedEventData26* pEventData)
+{
+    cCharacter* pCharacter = (cCharacter*)pEventData->mUnidentified18;
+    if (pCharacter->m_eClassType == FIELDER)
+    {
+        cFielder* pFielder = (cFielder*)pCharacter;
+        if (!pFielder->IsFallenDown())
+        {
+            pFielder->fn_8004D480(v3Zero);
+        }
+        PlaySound(pEventData->pFielder->mUnidentified318, 0x52641B7BUL, NULL, NULL);
+    }
+    else if (pCharacter->m_eClassType == GOALIE)
+    {
+        Goalie* pGoalie = (Goalie*)pCharacter;
+        if (pGoalie->mGoalieActionState != GOALIEACTION_UNIDENTIFIED_32)
+        {
+            pGoalie->fn_80090320(0.0f);
+            PlaySound(pEventData->pFielder->mUnidentified318, 0xFD0DC03DUL, NULL, NULL);
+        }
+    }
+}
 extern "C" void fn_80022B04(UnidentifiedEventData24* pEventData)
 {
     pEventData->mUnidentified0C->fn_80099074(pEventData);
 }
-extern "C" void fn_80022A98(UnidentifiedEventData26*);
-extern "C" void fn_80022BD8(UnidentifiedEventData34*);
+float lbl_806DB5F4 = 1.5f;
+extern "C" void fn_80060FF4(cGame*, const CharacterImpactEvent*);
+extern "C" void fn_800367B4(cFielder*);
+extern "C" void fn_80022A98(UnidentifiedEventData26* pEventData)
+{
+    CharacterImpactEvent event;
+    event.v3Position = pEventData->v3Position;
+    event.v3Position.z = 0.0f;
+    event.fMagnitude = lbl_806DB5F4;
+    event.pCharacter = pEventData->pFielder;
+    fn_80060FF4(g_pGame, &event);
+    fn_800367B4(pEventData->pFielder);
+}
+extern "C" void fn_801BAF0C(cPlayer* pCharacter);
+
+extern "C" void fn_80022BD8(UnidentifiedEventData34* pEventData)
+{
+    cPlayer* pPlayer = pEventData->mUnidentified00;
+    if (pPlayer->m_eClassType == FIELDER)
+    {
+        cFielder* pFielder = (cFielder*)pPlayer;
+        if (pFielder->IsInvincible())
+        {
+            fn_8002E5F4(pEventData->mUnidentified04, 0);
+        }
+        else if (!pFielder->IsFallenDown())
+        {
+            if (pFielder->fn_8003E74C())
+            {
+                pFielder->InitActionShellReact(pEventData->mUnidentified08->mUnidentified10,
+                    pEventData->mUnidentified04->mUnidentified024.m_v3Velocity);
+            }
+            else if (pFielder->IsCharacterInAir(pEventData->mUnidentified08->mUnidentified2C->GetRadius())
+                || (pFielder->m_eActionState == 0x1D && pFielder->mUnidentified024.m_eCharacterClass == HAMMERBROS)
+                || (pFielder->m_eActionState == 1 && pFielder->mUnidentified024.m_eCharacterClass == PEACH)
+                || (pFielder->m_eActionState == 1 && pFielder->mUnidentified024.m_eCharacterClass == WALUIGI)
+                || (pFielder->m_eActionState == 1 && pFielder->mUnidentified024.m_eCharacterClass == 13))
+            {
+                pFielder->InitActionBombReact(pEventData->mUnidentified08->mUnidentified10, 0.0f);
+                fn_801BAF0C(pFielder);
+            }
+            else
+            {
+                pFielder->fn_8004D480(pEventData->mUnidentified04->mUnidentified024.m_v3Velocity);
+            }
+        }
+    }
+}
 extern "C" void fn_80098750();
 
 extern "C" void fn_8001FE80()
@@ -1442,13 +1567,13 @@ extern "C" void fn_8001FE80()
             "CollisionChainPlayer", -1)->Add(callback, 0, -1);
     }
     {
-        Function<UnidentifiedEventData_80066D10*> callback(fn_800229F0);
-        UnidentifiedFindEvent<UnidentifiedEventData_80066D10>(
+        Function<CollisionWindDebrisPlayerData*> callback(fn_800229F0);
+        UnidentifiedFindEvent<CollisionWindDebrisPlayerData>(
             "CollisionWindDebrisPlayer", -1)->Add(callback, 0, -1);
     }
     {
-        Function<UnidentifiedEventData32*> callback(fn_80022A78);
-        UnidentifiedFindEvent<UnidentifiedEventData32>(
+        Function<CollisionThwompPlayerData*> callback(fn_80022A78);
+        UnidentifiedFindEvent<CollisionThwompPlayerData>(
             "CollisionThwompPlayer", -1)->Add(callback, 0, -1);
     }
     {
@@ -1783,7 +1908,6 @@ void cCharacter::GetJointPositionFuture(nlVector3* v3Out, int nAnimIndex,
         }
         m4RootMat.SetTranslation(v3RootVelocity);
     }
-    nlVec3Scale(*v3Out, mUnidentified024.m_fDesiredPlayerScale);
     nlMatrix3 unidentifiedRotation;
     unidentifiedRotation.e2[0][0] = m4RootMat.e2[0][0];
     unidentifiedRotation.e2[0][1] = m4RootMat.e2[0][1];
@@ -1794,6 +1918,7 @@ void cCharacter::GetJointPositionFuture(nlVector3* v3Out, int nAnimIndex,
     unidentifiedRotation.e2[2][0] = m4RootMat.e2[2][0];
     unidentifiedRotation.e2[2][1] = m4RootMat.e2[2][1];
     unidentifiedRotation.e2[2][2] = m4RootMat.e2[2][2];
+    nlVec3Scale(*v3Out, mUnidentified024.m_fDesiredPlayerScale);
     nlMultVectorMatrix(*v3Out, *v3Out, unidentifiedRotation);
     nlVec3Add(*v3Out, *v3Out, m4RootMat.GetTranslation());
 }
@@ -1911,7 +2036,7 @@ cPN_SAnimController* cCharacter::NewAnimController(int animID, bool bRestartCycl
             {
                 if (m_pAnimInventory->GetPlayMode(animID) == PM_CYCLIC)
                 {
-                    if (m_pAnimInventory->GetEndPhase(m_eAnimID) == 1)
+                    if (m_pAnimInventory->GetEndPhase(m_eAnimID) == GOOFY_FOOT)
                     {
                         bMirrorSwap = true;
                     }
@@ -1947,7 +2072,7 @@ cPN_SAnimController* cCharacter::NewAnimController(int animID, bool bRestartCycl
             {
                 if (m_pAnimInventory->GetPlayMode(animID) == PM_CYCLIC)
                 {
-                    if (m_pAnimInventory->GetEndPhase(m_eAnimID) == 2)
+                    if (m_pAnimInventory->GetEndPhase(m_eAnimID) == LEFT_FOOT_DOWN)
                     {
                         startTime = 0.5f;
                     }
@@ -2206,14 +2331,10 @@ void cCharacter::Update(float fDeltaT)
     }
 }
 
-bool cCharacter::ShouldStartCrossBlend(int animID)
+bool cCharacter::ShouldStartCrossBlend(int nAnimID)
 {
-    float time;
-    float threshold = 0.5f * m_pAnimInventory->GetBlendTime(animID);
-    time = m_pCurrentAnimController->m_fTime;
-    time = 1.0f - time;
-    float remaining = time * ((float)m_pCurrentAnimController->m_pSAnim->m_nNumKeys / 30.0f);
-    return remaining <= threshold;
+    float fCrossBlendTime = 0.5f * m_pAnimInventory->GetBlendTime(nAnimID);
+    return (1.0f - m_pCurrentAnimController->get_fTime()) * m_pCurrentAnimController->m_pSAnim->GetDuration() <= fCrossBlendTime;
 }
 
 void cCharacter::UnidentifiedVirtual1C()
@@ -2325,7 +2446,7 @@ void cCharacter::UpdateMovementState(float fDeltaT)
     case MOVEMENT_COAST:
     {
         nlVector3 unidentifiedVelocity = mUnidentified024.m_v3Velocity;
-        float mag = nlVec2LengthSquared(*(const nlVector2*)&unidentifiedVelocity);
+        float mag = unidentifiedVelocity.GetLengthSq2D();
         if (mag > 625.0f)
         {
             nlPolar polar;

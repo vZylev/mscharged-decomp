@@ -171,7 +171,6 @@ extern "C" void fn_801B86A4(cPlayer* pCharacter);
 extern "C" void fn_801B865C(cPlayer* pCharacter);
 extern "C" void fn_801B84B4(cPlayer* pCharacter);
 bool KillDaze(cPlayer* player);
-extern "C" void fn_801B81F8(cPlayer* pCharacter);
 extern "C" bool fn_801B8164(cFielder* pFielder);
 extern "C" void fn_801B7F8C(cPlayer* pCharacter);
 extern "C" void fn_801B7E4C(const char* pName, cCharacter* pCharacter);
@@ -532,7 +531,7 @@ void CharacterTriggerHandler(cSAnim* pAnim, unsigned int uParam)
             if (fn_8019464C(lbl_806E0C34)
                 && !((cFielder*)lbl_806E0C34)->fn_800344B0())
             {
-                fn_801B81F8((cPlayer*)lbl_806E0C34);
+                EmitDaze((cPlayer*)lbl_806E0C34);
             }
             break;
 
@@ -942,7 +941,7 @@ extern "C" bool fn_801B8164(cFielder* pFielder)
     return false;
 }
 
-extern "C" void fn_801B81F8(cPlayer* pCharacter)
+void EmitDaze(cPlayer* pCharacter)
 {
     if (pCharacter->m_eClassType == FIELDER)
     {

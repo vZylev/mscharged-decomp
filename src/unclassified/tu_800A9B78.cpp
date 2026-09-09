@@ -38,6 +38,7 @@
 #include "NL/nlMemory.h"
 #include "NL/nlFunctionMemory.h"
 #include "NL/nlDLListContainer.h"
+#include "unclassified/tu_800A9B78.h"
 
 #include "Game/Physics/PhysicsPatch.h"
 #include "types.h"
@@ -67,26 +68,6 @@ struct UnidentifiedWeatherFloatState : UnidentifiedWeatherState
     float field10;
     float field14;
     float field18;
-};
-
-class TU800A9B78
-{
-public:
-    TU800A9B78();
-    ~TU800A9B78();
-    void fn_800AA29C();
-    void fn_800AA4B0();
-    UnidentifiedWeatherState* fn_800AA060(int);
-    void fn_800AA0FC(void*, DebugWriteCache*);
-    void fn_800AA1D4(float);
-
-    void fn_800AA3E8(bool);
-
-    void fn_800AA568();
-
-    void fn_800AA5F8();
-
-    nlDLListSlotPool<UnidentifiedWeatherState*> field00;
 };
 
 TU800A9B78::TU800A9B78()

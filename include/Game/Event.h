@@ -234,7 +234,7 @@ public:
         this->mCurrentConnection = 0;
     }
 
-    void Dispatch(T* data, Function<T*> disposer, bool deliver)
+    void Dispatch(T* data, Function<T*> disposer, unsigned char deliver)
     {
         if (deliver)
         {
@@ -264,7 +264,7 @@ protected:
 template <>
 inline void UnidentifiedEvent<UnidentifiedEventNoData>::Dispatch(
     UnidentifiedEventNoData* data, Function<UnidentifiedEventNoData*> disposer,
-    bool deliver)
+    unsigned char deliver)
 {
     if (deliver)
     {
