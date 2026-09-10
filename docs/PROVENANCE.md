@@ -5,6 +5,17 @@ legally obtained copy of *Mario Strikers Charged*. It does not distribute game
 assets, Nintendo SDK binaries, extracted assembly, or original proprietary
 source code.
 
+`unclassified/tu_802F2C3C.cpp` reconstructs the playback-object family from
+R4QE01's factory, virtual tables, pool allocation/free paths, and global
+destructor registrations. Its initializer at `0x802F39EC` registers the three
+pool destructors in the tail ending at `0x802F3E20`; that tail belongs to the
+existing unit, not to a separate translation unit. The concrete objects retain
+neutral identities because their original class names are not established.
+Their pools use the shared `nlSlotPool` implementation with element sizes
+`0x34`, `0x18`, and `0x18`. The two additional shared-pool registrations in
+the initializer remain unreconstructed; no substitute element types are
+introduced for them.
+
 The project was built with or adapted source from the following projects:
 
 | Project | Use in this project |
@@ -55,6 +66,17 @@ predecessor's `SkillLevel`, `GameTime` and skill-level enum. The home/away
 powerup and special-shot flags follow the retail challenge settings and their
 gameplay consumers. `WinBy`, `GameGoals` and `BestSeries` follow the recorded-game
 diagnostics in `Game/NetworkSession.cpp`.
+
+`Game/SH/SHMoviePlayer.cpp` follows the predecessor's movie-player scene
+hierarchy and names, with R4QE01's Home Button Menu event connection, texture
+resource setter, sound-mode handling, and movie-to-title transition. The
+movie constructor at `0x801D90C0`, its callback and scene vtables, and the
+movie-only configuration references identify the unit independently of the
+former options-menu split. Its initializer at `0x801D9D84` precedes the
+callback and scene-destructor tail ending at `0x801DA134`. The three derived
+destructors reuse the base destructor and canonical event-disconnection
+behavior; the callback uses the shared `Function`, `Bind`, and `MemFun`
+templates.
 
 `Game/GameObjectLighting.cpp` includes the lighting-service prefix at
 `0x801820FC..0x801826D0`. Its light selectors, stadium parameters, camera-relative

@@ -14,6 +14,13 @@ extern s32 lbl_806DF2F4;
 extern s32 lbl_806DF2F8;
 extern s32 lbl_806DF2FC;
 
+bool g_bTweaking;
+
+void fn_802BDA28()
+{
+    g_bTweaking = !g_bTweaking;
+}
+
 void TweakerTask::Run(float)
 {
     if (lbl_806DF2E0 == -1

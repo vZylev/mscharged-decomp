@@ -30,6 +30,16 @@ extern "C" void fn_80343E3C(
 extern "C" void fn_80344144(
     DrawableObject*, WorldObjectLoadContext*);
 
+u8* WorldObjectLoadContext::GetParentData()
+{
+    if (m_pParent == 0)
+    {
+        return 0;
+    }
+
+    return m_pParent + 0x20;
+}
+
 World::World(GLResourcePool* pResource)
     : m_pResource(pResource)
     , m_pOwnedData(0)

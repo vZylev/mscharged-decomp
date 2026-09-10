@@ -82,3 +82,23 @@ void* glFrameAlloc(unsigned long size, eGLMemory memType)
 {
     return glplatFrameAlloc(size, memType);
 }
+
+unsigned long GLResourcePool::fn_28()
+{
+    return 0;
+}
+
+unsigned long GLResourcePool::fn_24()
+{
+    return 0;
+}
+
+unsigned long GLResourcePool::fn_20()
+{
+    return 0;
+}
+
+unsigned long GLResourcePool::GetPeakMemoryUsage()
+{
+    return 0;
+}

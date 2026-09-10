@@ -499,6 +499,11 @@ Game/Audio/GameStreams.cpp:
 	.bss        start:0x8056DC90 end:0x8056DCD0
 	.sbss       start:0x806E0E80 end:0x806E0E90
 
+Game/Camera/tu_800EDE54.cpp:
+	.text       start:0x800EDE54 end:0x800EDEA0
+	.data       start:0x80504228 end:0x80504250
+	.sdata2     start:0x806E42F8 end:0x806E4300
+
 Game/Camera/animcam.cpp:
 	.text       start:0x800EDEC0 end:0x800EF2E8
 	.ctors      start:0x804DB5B4 end:0x804DB5B8
@@ -901,7 +906,7 @@ Game/Physics/PhysicsBall.cpp:
 	.sdata2     start:0x806E4840 end:0x806E4890
 
 Game/Physics/PhysicsBanana.cpp:
-	.text       start:0x80141000 end:0x80141AB0
+	.text       start:0x80141000 end:0x80141B1C
 	.rodata     start:0x804DCC50 end:0x804DCC5C
 	.data       start:0x8050E5E8 end:0x8050E680
 	.sdata2     start:0x806E4890 end:0x806E48BC
@@ -1111,9 +1116,11 @@ Game/Drawable/DrawableYoshiEgg.cpp:
 	.sdata2     start:0x806E4CB0 end:0x806E4CD0
 
 Game/GameObjectLighting.cpp:
-	.text       start:0x801820FC end:0x80183DEC
+	.text       start:0x801820FC end:0x80184080
 	.rodata     start:0x804DCCF0 end:0x804DCD00
+	.data       start:0x805114C0 end:0x805114CC
 	.bss        start:0x80570C00 end:0x80570C18
+	.sbss       start:0x806E1444 end:0x806E1458
 	.sdata2     start:0x806E4CD0 end:0x806E4D10
 
 unclassified/tu_8018480C.cpp:
@@ -1185,7 +1192,7 @@ Game/EventDataTypes.cpp:
 	.bss        start:0x80571248 end:0x80571A18
 
 Game/Render/DiddyBanana.cpp:
-	.text       start:0x80199880 end:0x80199AEC
+	.text       start:0x80199880 end:0x80199B10
 	.rodata     start:0x804DCD70 end:0x804DCD7C
 	.data       start:0x80511BB0 end:0x80511BD8
 	.sdata      start:0x806DCD50 end:0x806DCD5A
@@ -1567,12 +1574,18 @@ Game/SH/SHOptions.cpp:
 	.sdata2     start:0x806E55E0 end:0x806E55F0
 
 Game/FE/feOptionsSubMenus.cpp:
-	.text       start:0x801D3674 end:0x801D9DD8
+	.text       start:0x801D3674 end:0x801D90C0
+	.data       start:0x80518FA8 end:0x80519310
+	.sdata      start:0x806DD418 end:0x806DD480
+	.sdata2     start:0x806E55F0 end:0x806E5648
+
+Game/SH/SHMoviePlayer.cpp:
+	.text       start:0x801D90C0 end:0x801DA134
 	.ctors      start:0x804DB77C end:0x804DB780
-	.data       start:0x80518FA8 end:0x805193D4
+	.data       start:0x80519310 end:0x805194E8
 	.bss        start:0x80578310 end:0x80578338
-	.sdata      start:0x806DD418 end:0x806DD4B0
-	.sdata2     start:0x806E55F0 end:0x806E5660
+	.sdata      start:0x806DD480 end:0x806DD4B0
+	.sdata2     start:0x806E5648 end:0x806E5660
 
 Game/FE/feCaptainComponent.cpp:
 	.text       start:0x801DA134 end:0x801E72D0
@@ -1776,7 +1789,7 @@ Game/SH/SHHallOfFameRoom.cpp:
 	.sdata2     start:0x806E58B0 end:0x806E58C0
 
 Game/FE/fePointerButton.cpp:
-	.text       start:0x80219248 end:0x80219668
+	.text       start:0x80219248 end:0x802196B0
 	.data       start:0x8051C840 end:0x8051C8B0
 
 Game/FE/feDPD.cpp:
@@ -1788,7 +1801,7 @@ Game/FE/feDPD.cpp:
 	.sdata2     start:0x806E58C0 end:0x806E58E0
 
 Game/FE/feButtonComponent.cpp:
-	.text       start:0x80219E80 end:0x8021B124
+	.text       start:0x80219E80 end:0x8021B1EC
 	.data       start:0x8051C8E0 end:0x8051C928
 	.sdata      start:0x806DE000 end:0x806DE038
 	.sdata2     start:0x806E58E0 end:0x806E5904
@@ -1984,7 +1997,7 @@ Game/SH/SHOnlineMiiSelect.cpp:
 	.sdata2     start:0x806E5BB0 end:0x806E5BBC
 
 Game/SH/SHOnlineMiiSelectOverlay.cpp:
-	.text       start:0x802672D4 end:0x8026901C
+	.text       start:0x802672D4 end:0x80269078
 	.data       start:0x80520A14 end:0x80520A68
 
 Game/SH/SHStrikerTimesBase.cpp:
@@ -2059,15 +2072,27 @@ Game/Render/StadiumTweaks.cpp:
 	.sdata      start:0x806DEE70 end:0x806DEE78
 	.sdata2     start:0x806E5C70 end:0x806E5C80
 
+Game/Render/tu_8027944C.cpp:
+	.text       start:0x8027944C end:0x80279AA8
+	.data       start:0x80522528 end:0x80522588
+	.sdata      start:0x806DEE78 end:0x806DEE80
+	.sdata2     start:0x806E5C80 end:0x806E5C90
+
 Game/Render/tu_80279AC8.cpp:
 	.text       start:0x80279AC8 end:0x8027A4BC
 	.ctors      start:0x804DB7DC end:0x804DB7E0
 	.sbss       start:0x806E19A8 end:0x806E19B8
 
+Game/Render/tu_8027A4BC.cpp:
+	.text       start:0x8027A4BC end:0x8027ADC0
+	.ctors      start:0x804DB7E0 end:0x804DB7E4
+	.sdata      start:0x806DEE80 end:0x806DEE88
+
 Game/Render/tu_8027AE14.cpp:
-	.text       start:0x8027AE14 end:0x8027B0D8
-	.data       start:0x805231F0 end:0x80523200
+	.text       start:0x8027ADC0 end:0x8027B118
+	.data       start:0x805231C0 end:0x80523200
 	.sdata      start:0x806DEE88 end:0x806DEE98
+	.sbss       start:0x806E19B8 end:0x806E19C0
 
 Game/NisPlayer.cpp:
 	.text       start:0x8027B138 end:0x80280C84
@@ -2793,9 +2818,9 @@ NL/nlBufferedWriter.cpp:
 	.text       start:0x802B77B0 end:0x802B7BDC
 
 Game/Debug/FrameCounter.cpp:
-	.text       start:0x802B7BDC end:0x802B94B4
+	.text       start:0x802B7BDC end:0x802B9568
 	.ctors      start:0x804DB990 end:0x804DB994
-	.data       start:0x8052B560 end:0x8052B590
+	.data       start:0x8052B560 end:0x8052B5D8
 	.bss        start:0x8057C0F0 end:0x8057C108
 	.sdata      start:0x806DF258 end:0x806DF290
 	.sbss       start:0x806E1DC0 end:0x806E1DC8
@@ -2829,7 +2854,7 @@ Game/Debug/ShapeRender.cpp:
 	.sdata2     start:0x806E6248 end:0x806E6298
 
 Game/Task/SmokeTestUpdateTask.cpp:
-	.text       start:0x802BD4E4 end:0x802BD814
+	.text       start:0x802BD4E4 end:0x802BD820
 	.ctors      start:0x804DB9A0 end:0x804DB9A4
 	.data       start:0x8052B900 end:0x8052B9D4
 	.bss        start:0x8057C260 end:0x8057C488
@@ -2843,9 +2868,10 @@ Game/Task/TextWindowTask.cpp:
 	.sbss       start:0x806E1E00 end:0x806E1E08
 
 Game/Task/TweakerTask.cpp:
-	.text       start:0x802BDA3C end:0x802BDAF0
+	.text       start:0x802BDA28 end:0x802BDAF0
 	.data       start:0x8052BA08 end:0x8052BA20
 	.sdata      start:0x806DF300 end:0x806DF308
+	.sbss       start:0x806E1E08 end:0x806E1E10
 
 Game/Task/ProfilerTask.cpp:
 	.text       start:0x802BDB10 end:0x802BDB50
@@ -2991,7 +3017,8 @@ NL/gl/glMatrix.cpp:
 	.sdata      start:0x806DF3F0 end:0x806DF3F4
 
 NL/gl/glMemory.cpp:
-	.text       start:0x802CBEC4 end:0x802CC0AC
+	.text       start:0x802CBEC4 end:0x802CC0CC
+	.data       start:0x8052E270 end:0x8052E2A8
 	.sbss       start:0x806E1ED8 end:0x806E1EE0
 
 NL/gl/glModel.cpp:
@@ -3193,6 +3220,12 @@ Game/Audio/AudioBankTable.cpp:
 	.text       start:0x802EB644 end:0x802EBD54
 	.data       start:0x8052F3D8 end:0x8052F400
 
+Game/Audio/AudioSystem.cpp:
+	.text       start:0x802EBD54 end:0x802ECF90
+	.data       start:0x8052F400 end:0x8052F46C
+	.sbss       start:0x806E2018 end:0x806E2020
+	.sdata2     start:0x806E65B0 end:0x806E65B8
+
 Game/Audio/AudioResourceLoadOwner.cpp:
 	.text       start:0x802ED144 end:0x802ED678
 	.data       start:0x8052F490 end:0x8052F49C
@@ -3208,7 +3241,8 @@ Game/Audio/AudioResourceLoader.cpp:
 	.data       start:0x8052F528 end:0x8052F538
 
 Game/Audio/AudioBundleManager.cpp:
-	.text       start:0x802EDA7C end:0x802EE08C
+	.text       start:0x802EDA7C end:0x802EE178
+	.ctors      start:0x804DBA48 end:0x804DBA4C
 	.data       start:0x8052F538 end:0x8052F570
 	.sdata      start:0x806DF4D0 end:0x806DF4D8
 
@@ -3235,12 +3269,32 @@ unclassified/tu_802F2110.cpp:
 	.sdata2     start:0x806E6618 end:0x806E6638
 
 unclassified/tu_802F2C3C.cpp:
-	.text       start:0x802F2C3C end:0x802F39EC
+	.text       start:0x802F2C3C end:0x802F3E20
+	.ctors      start:0x804DBA64 end:0x804DBA68
+	.data       start:0x8052F750 end:0x8052F818
+	.bss        start:0x8057FAD8 end:0x8057FB68
+	.sdata2     start:0x806E6638 end:0x806E6650
+
+unclassified/tu_802F3E20.cpp:
+	.text       start:0x802F3E20 end:0x802F479C
+	.ctors      start:0x804DBA68 end:0x804DBA6C
+	.bss        start:0x8057FB68 end:0x8057FB90
 
 Game/Audio/AudioResourceRuntime.cpp:
-	.text       start:0x802F479C end:0x802F68F0
+	.text       start:0x802F479C end:0x802F6BC4
 	.ctors      start:0x804DBA6C end:0x804DBA70
 	.sdata      start:0x806DF4E0 end:0x806DF4F0
+
+Game/Audio/UnidentifiedAudioScriptRuntime.cpp:
+	.text       start:0x802F6BC4 end:0x802F8418
+	.ctors      start:0x804DBA70 end:0x804DBA74
+	.data       start:0x8052F978 end:0x8052F998
+	.bss        start:0x8057FBC8 end:0x8057FBF0
+
+Game/Audio/UnidentifiedAudioEffectBinding.cpp:
+	.text       start:0x802F8418 end:0x802F98F4
+	.data       start:0x8052F998 end:0x8052F9F0
+	.sdata      start:0x806DF4F0 end:0x806DF4F8
 
 Game/Audio/AudioRuntimeGroup.cpp:
 	.text       start:0x802F98F4 end:0x802F9CD8
@@ -3325,6 +3379,9 @@ Game/FE/tlComponent.cpp:
 Game/FE/feGroup.cpp:
 	.text       start:0x80301F3C end:0x80301F74
 
+Game/FE/feImage.cpp:
+	.text       start:0x80301F74 end:0x80301FAC
+
 Game/FE/feLayer.cpp:
 	.text       start:0x80301FAC end:0x80301FE4
 
@@ -3382,16 +3439,20 @@ Game/FE/BaseSceneHandler.cpp:
 	.text       start:0x803060FC end:0x8030616C
 	.data       start:0x8052FF10 end:0x8052FF40
 
+Game/FE/feTimer.cpp:
+	.text       start:0x8030616C end:0x8030677C
+	.sdata2     start:0x806E6768 end:0x806E676C
+
 Game/FE/feFinder.cpp:
 	.text       start:0x8030677C end:0x80306B34
 
 Game/Font/fontmanager.cpp:
-	.text       start:0x80306B34 end:0x80307564
+	.text       start:0x80306B34 end:0x80307620
 	.ctors      start:0x804DBA8C end:0x804DBA90
-	.data       start:0x8052FF64 end:0x8052FF98
+	.data       start:0x8052FF40 end:0x8052FFA8
 	.bss        start:0x80580748 end:0x80584048
 	.sbss       start:0x806E2090 end:0x806E2098
-	.sdata2     start:0x806E6768 end:0x806E6770
+	.sdata2     start:0x806E676C end:0x806E6770
 
 NL/PointerEntryTable.cpp:
 	.text       start:0x80307620 end:0x803077B4
@@ -3411,7 +3472,7 @@ Game/SAnim.cpp:
 	.sdata2     start:0x806E6778 end:0x806E6798
 
 Game/SAnim/pnSAnimController.cpp:
-	.text       start:0x803097F8 end:0x8030A93C
+	.text       start:0x803097F8 end:0x8030A9D0
 	.ctors      start:0x804DBA94 end:0x804DBA98
 	.data       start:0x8052FFE0 end:0x80530008
 	.bss        start:0x805840F0 end:0x80584118
@@ -3448,7 +3509,7 @@ Game/SAnim/pnFeather.cpp:
 	.sdata2     start:0x806E6808 end:0x806E6820
 
 Game/SAnim/tu_8030E550.cpp:
-	.text       start:0x8030E550 end:0x8030E8C8
+	.text       start:0x8030E550 end:0x8030E940
 	.ctors      start:0x804DBAA4 end:0x804DBAA8
 	.data       start:0x805300A0 end:0x805300C8
 	.bss        start:0x805841A0 end:0x805841C8
@@ -3537,7 +3598,7 @@ Game/Physics/PhysicsColumn.cpp:
 	.sdata2     start:0x806E68C8 end:0x806E68D0
 
 Game/Physics/PhysicsCompositeObject.cpp:
-	.text       start:0x8031D0D4 end:0x8031D524
+	.text       start:0x8031D0D4 end:0x8031D52C
 	.data       start:0x80530568 end:0x805305A8
 
 Game/Physics/PhysicsCylinder.cpp:
@@ -3746,7 +3807,7 @@ Game/Transitions/TransitionSequence.cpp:
 	.sdata2     start:0x806E69D8 end:0x806E69E8
 
 Game/world.cpp:
-	.text       start:0x8034056C end:0x80341EC8
+	.text       start:0x80340550 end:0x80341EC8
 	.data       start:0x80534268 end:0x80534340
 	.sdata2     start:0x806E69E8 end:0x806E69F0
 

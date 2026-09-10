@@ -139,7 +139,6 @@ extern "C" SkinMesh* fn_8001C550(cCharacter*, int);
 extern "C" void fn_8001EFCC(cCharacter*, SkinMesh*, Model*);
 extern "C" void fn_80182EC8(int);
 extern "C" int fn_800FC748(int);
-extern "C" int fn_80183DEC(const nlVector3*);
 extern "C" RLView* fn_8027261C();
 extern "C" void fn_80273A4C(int, Model*, int);
 

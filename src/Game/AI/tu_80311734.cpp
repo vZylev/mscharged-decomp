@@ -548,18 +548,20 @@ extern "C" void fn_80313FA0(
     UnidentifiedFuzzyRuntimeBase* runtime, bool value,
     unsigned long hash, UnidentifiedVariant_80054AB8* action)
 {
+    int index = fn_80312208(hash);
     FuzzyVariant variant(FT_BOOL, value);
     runtime->UnidentifiedVirtual14(
-        action, fn_80312208(hash), variant);
+        action, index, variant);
 }
 
 extern "C" void fn_80314034(
     UnidentifiedFuzzyRuntimeBase* runtime, unsigned long hash,
     float value, UnidentifiedVariant_80054AB8* action)
 {
+    int index = fn_80312208(hash);
     FuzzyVariant variant(FT_FLOAT, value);
     runtime->UnidentifiedVirtual14(
-        action, fn_80312208(hash), variant);
+        action, index, variant);
 }
 
 extern "C" void fn_803140CC(

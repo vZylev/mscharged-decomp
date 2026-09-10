@@ -262,7 +262,7 @@ void OnlineConnectionQualityScene::UpdateConnectionQuality()
             = (TransportConnection*)roster->GetMachineAid(i);
         if (connection != 0 && connection != (TransportConnection*)-1)
         {
-            value = value < connection->mRoundTripTimeMS ? connection->mRoundTripTimeMS : value;
+            value = value >= connection->mRoundTripTimeMS ? value : connection->mRoundTripTimeMS;
         }
     }
 
@@ -274,20 +274,20 @@ void OnlineConnectionQualityScene::UpdateConnectionQuality()
         component = &gDefaultTLComponentInstance;
     }
     mUnidentified2FC = component;
-    value >>= 1;
-    if (value > 200)
+    unsigned int latency = value >> 1;
+    if (latency > 200)
     {
         component->SetActiveSlide("1", true, false);
     }
-    else if (value > 160)
+    else if (latency > 160)
     {
         component->SetActiveSlide("2", true, false);
     }
-    else if (value > 80)
+    else if (latency > 80)
     {
         component->SetActiveSlide("3", true, false);
     }
-    else if (value != 0)
+    else if (latency != 0)
     {
         component->SetActiveSlide("4", true, false);
     }

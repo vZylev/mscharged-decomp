@@ -383,7 +383,3 @@ bool PhysicsBanana::SetContactInfo(dContact* contact, PhysicsObject* other, bool
     contact->surface.mu = 100.0f;
     return true;
 }
-
-PhysicsBanana::~PhysicsBanana()
-{
-}

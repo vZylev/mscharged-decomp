@@ -3,6 +3,7 @@
 #include "Game/GameInfo.h"
 #include "Game/FE/feHelpFuncs.h"
 #include "Game/TweakRegistry.h"
+#include "NL/gl/glMemory.h"
 #include "NL/nlPrint.h"
 
 #include <string.h>
@@ -391,9 +392,10 @@ void* StrikerChallenge::DeserializeData(void* src)
     return (u8*)src + size;
 }
 
-int fn_8011162C()
+bool GLResourcePool::GetPoolMemoryInfo(unsigned long, const char**,
+    unsigned long*, unsigned long*, unsigned long*, const char**)
 {
-    return 0;
+    return false;
 }
 
 template TeamStats* Cup<4, 8>::GetPreviousTeamStats();

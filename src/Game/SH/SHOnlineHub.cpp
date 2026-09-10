@@ -343,7 +343,7 @@ void SHOnlineHub::UpdateFriendAndSeasonText()
     DWCTime time;
     GetAdjustedNetworkDate(&date, &time);
     NetworkSeasonDate current = { date.month, date.mday };
-    int boundary = FindNetworkSeasonBoundary(&sNetworkSeasonDateTable, &current);
+    int boundary = FindNetworkSeasonBoundary(&sNetworkSeasonDateTable, current);
     int elapsed = GetDaysSinceSeasonBoundary(&sNetworkSeasonDateTable, boundary, &current, date.year) + 1;
     int days = GetDaysUntilNextSeasonBoundary(&sNetworkSeasonDateTable, boundary, date.year) - elapsed;
     int hours = 23 - time.hour;

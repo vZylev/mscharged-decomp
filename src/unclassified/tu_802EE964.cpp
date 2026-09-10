@@ -7,6 +7,7 @@
 #include "NL/nlMemory.h"
 #include "NL/nlPrint.h"
 #include "NL/nlSlotPool.h"
+#include "unclassified/tu_802F2C3C.h"
 #include "types.h"
 
 #include <NMWException.h>
@@ -117,9 +118,6 @@ extern SlotPoolBase lbl_8057F9E8;
 extern SlotPoolBase lbl_8057FA10;
 extern SlotPoolBase lbl_8057FA68;
 extern SlotPoolBase lbl_8057FAA8;
-extern SlotPoolBase lbl_8057FAE8;
-extern SlotPoolBase lbl_8057FB10;
-extern SlotPoolBase lbl_8057FB38;
 extern SlotPoolBase lbl_8057FB78;
 
 extern "C" void* fn_802EFB70(nlChunk* chunk);

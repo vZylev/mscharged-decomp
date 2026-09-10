@@ -113,7 +113,7 @@ struct CalculationEntry_802F2110
 
 extern void* lbl_8052F3C8[];
 extern SlotPoolBase lbl_8057FA10;
-extern SlotPoolBase lbl_8057FB78;
+extern SlotPoolBase sPlaybackOwnerPool_802F3E20;
 
 extern "C" void* fn_802F0394(RpcController_802F2110*, RpcDefinition_802F2110*, SoundInstance_802F2110*);
 extern "C" void fn_802F04D4(RpcController_802F2110*, SoundInstance_802F2110*);
@@ -130,12 +130,12 @@ extern "C" void fn_802F4640(VoiceNode_802F2110*, AudioSource**, u32*);
 static inline VoiceNode_802F2110* AllocateVoice_802F2110()
 {
     VoiceNode_802F2110* voice = 0;
-    if (lbl_8057FB78.m_FreeList == 0)
-        SlotPoolBase::BaseAddNewBlock(&lbl_8057FB78, sizeof(VoiceNode_802F2110));
-    if (lbl_8057FB78.m_FreeList != 0)
+    if (sPlaybackOwnerPool_802F3E20.m_FreeList == 0)
+        SlotPoolBase::BaseAddNewBlock(&sPlaybackOwnerPool_802F3E20, sizeof(VoiceNode_802F2110));
+    if (sPlaybackOwnerPool_802F3E20.m_FreeList != 0)
     {
-        voice = (VoiceNode_802F2110*)lbl_8057FB78.m_FreeList;
-        lbl_8057FB78.m_FreeList = lbl_8057FB78.m_FreeList->next;
+        voice = (VoiceNode_802F2110*)sPlaybackOwnerPool_802F3E20.m_FreeList;
+        sPlaybackOwnerPool_802F3E20.m_FreeList = sPlaybackOwnerPool_802F3E20.m_FreeList->next;
     }
     return voice;
 }
