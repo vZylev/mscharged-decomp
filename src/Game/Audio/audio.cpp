@@ -280,7 +280,9 @@ XSoundHandle* FindSoundHandle(
     {
         return 0;
     }
-    XSoundHandle** slot = FindAudioHandleSlot(cueId, context);
+    XSoundHandle** slot = 0;
+    unsigned long key = MakeAudioHandleKey(cueId, context);
+    sAudioHandles.FindGet(key, &slot);
     return slot != 0 ? *slot : 0;
 }
 
@@ -306,8 +308,9 @@ bool PlayTrackedSound(int slotId, unsigned long cueId,
     if (played)
     {
         AddAudioHandleState(slotId, cueId, context, restartable);
+        return true;
     }
-    return played;
+    return false;
 }
 
 bool PlayTrackedOwnedSound(int slotId, unsigned long cueId,

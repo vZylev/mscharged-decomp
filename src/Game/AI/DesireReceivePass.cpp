@@ -910,13 +910,13 @@ const LooseBallContactAnimInfo* DesireReceivePass::fn_800C2048(
         float fCos;
         nlSinCos(&fSin, &fCos, aFacingDirection);
 
-        v3ContactOffsetWorld.z = v3ContactOffsetLocal.z;
         v3ContactOffsetWorld.x =
             v3ContactOffsetLocal.x * fCos
             - v3ContactOffsetLocal.y * fSin;
         v3ContactOffsetWorld.y =
             v3ContactOffsetLocal.y * fCos
             + v3ContactOffsetLocal.x * fSin;
+        v3ContactOffsetWorld.z = v3ContactOffsetLocal.z;
 
         float fContactOffset = nlVec2Length(
             *(nlVector2*)&v3ContactOffsetWorld);
@@ -924,7 +924,7 @@ const LooseBallContactAnimInfo* DesireReceivePass::fn_800C2048(
             > fContactOffset - lbl_806DC1C4)
         {
             pReachableAnimInfo = pCurrentAnimInfo;
-            break;
+            continue;
         }
         if (fContactOffset < fBestContactOffset)
         {

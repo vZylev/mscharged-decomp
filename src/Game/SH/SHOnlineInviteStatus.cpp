@@ -14,6 +14,7 @@
 #include "Game/Render/Presentation.h"
 #include "Game/FriendManager.h"
 #include "NL/nlBind.h"
+#include "NL/nlFunction.inl"
 #include "Game/FE/feDPD.h"
 #include "Game/SH/SHNavigation.h"
 #include "Game/SH/SHOnlineInvitePlayers.h"

@@ -159,8 +159,8 @@ static inline FEPopupMenu* PushSavePopup()
 
 static inline void WriteLocalizedBanner(NANDResultCallback callback)
 {
-    const unsigned short* title = g_pLocalization->GetString("SAVE_BANNER_TITLE");
-    const unsigned short* comment = g_pLocalization->GetString("SAVE_BANNER_COMMENT");
+    const unsigned short* title = LookupLocString("SAVE_BANNER_TITLE");
+    const unsigned short* comment = LookupLocString("SAVE_BANNER_COMMENT");
 
     memset(BannerBuffer->title, 0, sizeof(BannerBuffer->title));
     memset(BannerBuffer->subtitle, 0, sizeof(BannerBuffer->subtitle));
@@ -813,18 +813,18 @@ void LoadMemoryCardIconData()
     NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 0, 2);
     NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 1, 2);
     NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 2, 2);
-    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 3, 2);
-    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 4, 2);
-    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 5, 2);
-    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 6, 2);
-    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 7, 2);
+    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 3, 1);
+    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 4, 1);
+    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 5, 1);
+    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 6, 1);
+    NAND_BANNER_SET_ICON_SPEED(BannerBuffer, 7, 1);
 
     memset(BannerBuffer->title, 0, sizeof(BannerBuffer->title) + sizeof(BannerBuffer->subtitle));
     memset(BannerBuffer->bannerTexture, 0, sizeof(BannerBuffer->bannerTexture));
     memset(BannerBuffer->iconTexture, 0, sizeof(BannerBuffer->iconTexture));
 
-    const unsigned short* title = g_pLocalization->GetString("SAVE_BANNER_TITLE");
-    const unsigned short* comment = g_pLocalization->GetString("SAVE_BANNER_COMMENT");
+    const unsigned short* title = LookupLocString("SAVE_BANNER_TITLE");
+    const unsigned short* comment = LookupLocString("SAVE_BANNER_COMMENT");
     memcpy(BannerBuffer->title, title, wcslen((const wchar_t*)title) * sizeof(unsigned short));
     memcpy(BannerBuffer->subtitle, comment, wcslen((const wchar_t*)comment) * sizeof(unsigned short));
 

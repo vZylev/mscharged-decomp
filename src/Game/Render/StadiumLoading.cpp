@@ -131,10 +131,8 @@ DrawableObject* GetBallRenderObject(unsigned int index)
 bool CreateStadiumModelInstances(int entry, glModel* models, unsigned long numModels)
 {
     char name[128];
-    WorldObjectLoadContext* context;
     glModel* end = models + numModels;
-    context = (WorldObjectLoadContext*)nlMalloc(sizeof(WorldObjectLoadContext), 8, true);
-    new (context) WorldObjectLoadContext(pBasicStadiumInstance);
+    WorldObjectLoadContext* context = new (8, true) WorldObjectLoadContext(pBasicStadiumInstance);
 
     int instance = 1;
     DrawableObject* pObject;
@@ -198,7 +196,7 @@ void BeginLoadStadium(const char* path, bool skipGameplayModels)
     char buffer[255];
 
     gSkipGameplayModels = skipGameplayModels;
-    nlStrNCpy(gStadiumResourcePath, path, sizeof(gStadiumResourcePath));
+    nlStrNCpy(gStadiumResourcePath, path, 255);
 
     gStadiumResourceData = 0;
     gStadiumResourceDataSize = 0;
@@ -216,20 +214,16 @@ void BeginLoadStadium(const char* path, bool skipGameplayModels)
 
     for (int i = 0; i < 22; ++i)
     {
-        gStadiumModelLoadResults[0][i].mData = 0;
-        gStadiumModelLoadResults[0][i].mSize = 0;
-        gStadiumModelLoadResults[0][i].mProcessed = false;
-        gStadiumModelLoadResults[1][i].mData = 0;
-        gStadiumModelLoadResults[1][i].mSize = 0;
-        gStadiumModelLoadResults[1][i].mProcessed = false;
+        for (int j = 0; j < 2; ++j)
+        {
+            gStadiumModelLoadResults[j][i].mData = 0;
+            gStadiumModelLoadResults[j][i].mSize = 0;
+            gStadiumModelLoadResults[j][i].mProcessed = false;
+        }
     }
 
     GLResourcePool* context = glGetCurrentResourcePool();
-    pBasicStadiumInstance = (BasicStadium*)nlMalloc(sizeof(BasicStadium), 8, false);
-    if (pBasicStadiumInstance != 0)
-    {
-        new (pBasicStadiumInstance) BasicStadium(context);
-    }
+    pBasicStadiumInstance = new (8, false) BasicStadium(context);
     pBasicStadiumInstance->m_pOpaqueView = (GLView*)fn_8027261C();
     pBasicStadiumInstance->m_pAlphaView = (GLView*)GetLayerView(eCLV_WorldAlphaBlended);
 

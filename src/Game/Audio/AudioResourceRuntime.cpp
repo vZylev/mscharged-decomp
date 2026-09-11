@@ -85,7 +85,7 @@ extern "C" void fn_802F49A4(AudioResourceRuntime* runtime, u32 instance)
  */
 void SetAudioEffectContext(unsigned long* hash, int index)
 {
-    g_pAudioResourceRuntime->m_Script->Unidentified6E98(*hash, index);
+    g_pAudioResourceRuntime->m_Script->Unidentified6E98(*hash, (UnidentifiedAudioEffectSetState*)index);
 }
 
 /**

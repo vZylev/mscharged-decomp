@@ -161,7 +161,7 @@ void SHNavigation::Update(float fDeltaT)
     if (mHomeWarningPlaying)
     {
         TLSlide* slide = mHomeWarning->GetActiveSlide();
-        if (slide->m_time >= slide->m_duration + slide->m_start)
+        if (slide->GetCurrentTime() >= slide->GetStartTime() + slide->GetDuration())
         {
             mHomeWarning->m_bVisible = false;
             mHomeWarningPlaying = false;
