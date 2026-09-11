@@ -6,6 +6,7 @@
 #include "NL/nlList.h"
 #include "NL/nlListContainer.h"
 #include "NL/nlMemory.h"
+#include "Game/UnidentifiedStaticStorage.h"
 
 extern nlListContainer<PhysicsObject*> g_StaticPhysicsPrimitives;
 extern nlListContainer<PhysicsObject*> g_NetPhysicsObjects;

@@ -29,23 +29,6 @@ static inline float RandomRange_802F2C3C(float minimum, float maximum)
     return nlRandomf(minimum, maximum, &nlDefaultSeed);
 }
 
-struct SlotPoolEntry_802F2C3C
-{
-    u8 data[0x7C];
-};
-
-extern "C" SlotPool<SlotPoolEntry_802F2C3C>* fn_802F2C3C(
-    SlotPool<SlotPoolEntry_802F2C3C>* pool, int destroy)
-{
-    if (pool != 0)
-    {
-        pool->BasicSlotPool<SlotPoolEntry_802F2C3C>::~BasicSlotPool();
-        if (destroy > 0)
-            operator delete(pool);
-    }
-    return pool;
-}
-
 extern "C" PlaybackObject_802F2C3C* fn_802F3114(PlaybackObject_8052F7B0* object);
 
 inline PlaybackObject_8052F7B0::PlaybackObject_8052F7B0(

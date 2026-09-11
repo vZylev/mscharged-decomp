@@ -6,7 +6,7 @@
 
 // Shared storage for the dynamic registry: one pool of containers and one of
 // nodes, both constructed (16, 16). Sixty-seven translation units emit the
-// guarded initializers for this pair; `Game/tu_80009B88.cpp` is first in link
+// guarded initializers for this pair; `Game/tu_80009B34.cpp` is first in link
 // order and therefore owns the two objects and their guards.
 //
 // The entry sizes are not guesses. `UnidentifiedRegistryOwner_802BF984`

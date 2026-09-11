@@ -1,4 +1,5 @@
 #include "Game/Camera/BaseCamera.h"
+#include "Game/UnidentifiedStaticStorage.h"
 
 float cBaseCamera::GetFOV() const
 {

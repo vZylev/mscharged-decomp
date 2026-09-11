@@ -6,6 +6,41 @@ cPN_8030E550::~cPN_8030E550()
 {
 }
 
+void cPN_8030E550::BeginBlendIn(float duration)
+{
+    m_eBlendMode = BLEND_MODE_8030E550_IN;
+    if (duration > 0.0f)
+    {
+        m_fBlendTime = 0.0f;
+        m_fBlendDuration = duration;
+    }
+    else
+    {
+        m_fBlendTime = 1.0f;
+        m_fBlendDuration = 1.0f;
+    }
+}
+
+void cPN_8030E550::BeginBlendOut(float duration)
+{
+    m_eBlendMode = BLEND_MODE_8030E550_OUT;
+    if (duration > 0.0f)
+    {
+        m_fBlendDuration = duration;
+        m_fBlendTime = 1.0f;
+    }
+    else
+    {
+        m_fBlendTime = 0.0f;
+        m_fBlendDuration = 1.0f;
+        if (GetChild(1) != 0)
+        {
+            delete GetChild(1);
+            SetChild(1, 0);
+        }
+    }
+}
+
 cPoseNode* cPN_8030E550::Update(float dt)
 {
     if (GetChild(0))

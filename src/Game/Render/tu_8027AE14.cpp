@@ -1,4 +1,5 @@
 #include "Game/Render/tu_8027AE14.h"
+#include "Game/UnidentifiedStaticStorage.h"
 
 extern "C"
 {

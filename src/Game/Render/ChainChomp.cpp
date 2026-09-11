@@ -5,6 +5,7 @@
 #include "Game/AI/Fielder.h"
 #include "Game/AI/Powerups.h"
 #include "Game/Audio/GameStreams.h"
+#include "Game/UnidentifiedStaticStorage.h"
 #include "Game/Audio/UnidentifiedRegistryPools.h"
 #include "Game/Ball.h"
 #include "Game/BasicStadium.h"
@@ -38,7 +39,6 @@
 #include "Game/SAnim/pnSAnimController.h"
 #include "Game/Team.h"
 #include "Game/Terrain.h"
-#include "Game/UnidentifiedStaticStorage.h"
 #include "NL/gl/glState.h"
 #include "NL/nlColour.h"
 #include "NL/nlString.h"
@@ -923,8 +923,5 @@ void ChainChomp::Hide()
     mtStateTimer.m_uPackedTime = 0;
     mfChaseSpeed = 0.0f;
 }
-
-template struct UnidentifiedRegistryPools<UnidentifiedRegistryPoolTag>;
-template struct UnidentifiedStaticStorage<UnidentifiedStaticTag>;
 
 #include "NL/nlBind_impl.h"

@@ -28,6 +28,9 @@ public:
         nlVector3* outBase, float weight, float* scratch);
     virtual void BlendRootRot(u16* outRot, float weight, float* scratch);
 
+    void BeginBlendIn(float duration);
+    void BeginBlendOut(float duration);
+
     static void* operator new(unsigned long)
     {
         cPN_8030E550* node = 0;

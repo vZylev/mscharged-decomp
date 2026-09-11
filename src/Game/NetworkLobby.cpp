@@ -19,7 +19,6 @@
 
 #include <string.h>
 
-
 static int s_nTimeoutFindingMaxPlayersAcceptMin = 20;
 
 static void MatchmakingCallback(
@@ -797,4 +796,3 @@ static TweakIntBinding sTimeoutFindingMaxPlayersAcceptMinTweak(
     "s_nTimeoutFindingMaxPlayersAcceptMin", "Network/DWCLobby",
     &s_nTimeoutFindingMaxPlayersAcceptMin, true);
 
-template struct UnidentifiedStaticStorage<UnidentifiedStaticTag>;

@@ -2,6 +2,7 @@
 #include "Game/Audio/AudioSource.h"
 #include "Game/Audio/AudioBundleManager.h"
 #include "Game/Audio/AudioSystem.h"
+#include "Game/Audio/UnidentifiedRegistryPools.h"
 #include "Game/Audio/XSoundHandle.h"
 #include "Game/Sys/debug.h"
 #include "NL/nlDLListContainer.h"
@@ -14,7 +15,7 @@
 
 extern void* lbl_8052F6D0[];
 extern char lbl_8052F680[0x38];
-extern SlotPoolBase lbl_8057FA68;
+SlotPool<CueHandle_802F1758> lbl_8057FA68(32, 16);
 extern SlotPoolBase lbl_8057FAA8;
 
 extern "C" CueHandle_802F1758* fn_802ED74C(CueHandle_802F1758*, void*, CueOwner_802F1758*, void*, void (*)(void*, CueHandle_802F1758*, void*), void*);
@@ -306,4 +307,9 @@ extern "C" void fn_802F1DC4(CueHandle_802F1758* handle, float dt)
             instance = instance->nextInstance;
         }
     }
+}
+
+bool IsSoundHandleValid()
+{
+    return true;
 }

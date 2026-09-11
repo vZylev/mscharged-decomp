@@ -88,7 +88,7 @@ bool CreatePowerupDrawables(glModel* models, unsigned long numModels)
     unsigned long uExcluded = nlStringHash(StadiumExcludedMetalShellModel);
     for (; models < end; models++)
     {
-        if (uExcluded == models->unknown00)
+        if (uExcluded == models->id)
         {
             continue;
         }
@@ -96,9 +96,9 @@ bool CreatePowerupDrawables(glModel* models, unsigned long numModels)
         DrawableObject* pObject = (DrawableObject*)nlMalloc(0x78, 8, false);
         if (pObject != 0)
         {
-            pObject = fn_8027A4BC(pObject, context, models, models->unknown00);
+            pObject = fn_8027A4BC(pObject, context, models, models->id);
         }
-        pObject->m_uHashID = models->unknown00;
+        pObject->m_uHashID = models->id;
         fn_8027876C(pBasicStadiumInstance, pObject);
     }
 
@@ -146,7 +146,7 @@ bool CreateStadiumModelInstances(int entry, glModel* models, unsigned long numMo
         pObject = (DrawableObject*)nlMalloc(0xFC, 8, false);
         if (pObject != 0)
         {
-            pObject = fn_8027A7F0(pObject, context, models, models->unknown00);
+            pObject = fn_8027A7F0(pObject, context, models, models->id);
         }
         fn_8027876C(pBasicStadiumInstance, pObject);
         instance = 0;
@@ -158,7 +158,7 @@ bool CreateStadiumModelInstances(int entry, glModel* models, unsigned long numMo
             pObject = (DrawableObject*)nlMalloc(0x78, 8, false);
             if (pObject != 0)
             {
-                pObject = fn_8027A4BC(pObject, context, models, models->unknown00);
+                pObject = fn_8027A4BC(pObject, context, models, models->id);
             }
             fn_8027876C(pBasicStadiumInstance, pObject);
         }
@@ -485,7 +485,7 @@ void FinishLoadTournamentTrophy()
     DrawableObject* pObject = (DrawableObject*)nlMalloc(0x78, 8, false);
     if (pObject != 0)
     {
-        pObject = fn_8027A4BC(pObject, context, models, models->unknown00);
+        pObject = fn_8027A4BC(pObject, context, models, models->id);
     }
     pObject->m_uObjectFlags |= 1;
     pBasicStadiumInstance->AddDrawableObject(pObject);

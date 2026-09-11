@@ -7,6 +7,7 @@
 #include "NL/nlPrint.h"
 
 #include <string.h>
+#include "Game/UnidentifiedStaticStorage.h"
 
 struct StrikerChallengeDefinition
 {
@@ -397,16 +398,6 @@ bool GLResourcePool::GetPoolMemoryInfo(unsigned long, const char**,
 {
     return false;
 }
-
-template TeamStats* Cup<4, 8>::GetPreviousTeamStats();
-template TeamStats* Cup<6, 12>::GetPreviousTeamStats();
-template TeamStats* Cup<10, 11>::GetPreviousTeamStats();
-template u16 Cup<4, 8>::GetNumTeams();
-template u16 Cup<6, 12>::GetNumTeams();
-template u16 Cup<10, 11>::GetNumTeams();
-template int Cup<4, 8>::GetSaveDataSize() const;
-template int Cup<6, 12>::GetSaveDataSize() const;
-template int Cup<10, 11>::GetSaveDataSize() const;
 
 // Explicit specializations emit strong symbols matching R4QE01 (predecessor
 // keeps these weak). Bodies reproduce the retail immediates via sizeof and

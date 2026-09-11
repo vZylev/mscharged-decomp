@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 int g_nConnectToStatsAddress[4] = { 192, 168, 2, 188 };
 
 static int g_nConnectToStatsPort = 80;
@@ -949,4 +948,3 @@ static TweakIntBinding sConnectToStatsAddress3Tweak(
     "g_nConnectToStatsAddress3", "Network/Stats",
     &g_nConnectToStatsAddress[3], true);
 
-template struct UnidentifiedStaticStorage<UnidentifiedStaticTag>;

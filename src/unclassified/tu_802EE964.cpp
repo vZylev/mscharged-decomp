@@ -108,7 +108,7 @@ struct SliderManager_802EFA14
     void* rpcController;
 };
 
-extern void* lbl_8052F3C8[4];
+extern void* __vt__10Transition[4];
 extern char lbl_8052F5D0[0x11];
 extern char lbl_8052F5E8[0x18];
 extern char lbl_8052F600[0x17];
@@ -384,7 +384,7 @@ extern "C" void fn_802EF5D0(SliderState_802EE964* slider)
 {
     slider->value = 0.0f;
     slider->reportValue = true;
-    slider->vtable = lbl_8052F3C8;
+    slider->vtable = __vt__10Transition;
     slider->elapsed = -1.0f;
     slider->duration = 1.0f;
     slider->enabled = true;

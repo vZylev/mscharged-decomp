@@ -11,6 +11,7 @@
 #include "NL/gl/glTexture.h"
 #include "NL/gl/glView.h"
 #include "NL/nlPrint.h"
+#include "Game/UnidentifiedStaticStorage.h"
 
 class WorldUpdateObject_80341BC8
 {

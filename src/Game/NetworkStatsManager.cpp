@@ -19,7 +19,6 @@
 
 #include <string.h>
 
-
 static int sLeaderboardJobs[5] = { 6, 7, 8, 9, 10 };
 
 static NetworkStatsManager* sNetworkStatsManager;
@@ -1130,4 +1129,3 @@ static TweakIntBinding sAddHoursTimeTweak(
 static TweakIntBinding sAddMinsTimeTweak(
     "g_nAddMinsTime", "Network", &g_nAddMinsTime, true);
 
-template struct UnidentifiedStaticStorage<UnidentifiedStaticTag>;

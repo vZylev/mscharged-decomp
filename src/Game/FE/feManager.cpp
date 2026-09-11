@@ -630,4 +630,3 @@ void FrontEnd::OnPresentationBypass()
     }
 }
 
-template struct UnidentifiedStaticStorage<UnidentifiedStaticTag>;

@@ -18,6 +18,7 @@
 #include "NL/nlSlotPool.h"
 #include "unclassified/tu_801A5F10.h"
 #include "math.h"
+#include "Game/UnidentifiedStaticStorage.h"
 
 
 extern "C" bool fn_800167A8(cBall*);

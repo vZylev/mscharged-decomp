@@ -13,6 +13,7 @@
 #include "NL/gl/glMatrix.h"
 #include "NL/gl/glMaterialParameters.h"
 #include "NL/gl/glMemory.h"
+#include "NL/gl/glState.h"
 #include "NL/gl/glTexture.h"
 #include "NL/gl/glView.h"
 #include "Game/TweakValue.h"
@@ -27,6 +28,8 @@
 #include "Game/Render/LightingLookup.h"
 #include "Game/TweakValueFloat.h"
 #include "Game/TweakValueInt.h"
+#include "Game/UnidentifiedStaticStorage.h"
+#include "Game/UnidentifiedTweakAction.h"
 
 // GameRenderTask defines this flag as u8; this unit only matches closer when
 // it reads the byte as a bool.
@@ -88,16 +91,49 @@ struct UnidentifiedObject_80182168
     /* 0x70 */ nlFloatColour m_colour;
 };
 
+TweakValueFloat gShadowLookupScaleX(
+    "Scale X", "/Rendering/Lighting/Shadow Lookup", 0.042f, false);
+TweakValueFloat gShadowLookupScaleY(
+    "Scale Y", gLastTweakCategory, 0.073f, false);
+TweakValueFloat gShadowLookupTransX(
+    "Trans X", gLastTweakCategory, 0.0f, false);
+TweakValueFloat gShadowLookupTransY(
+    "Trans Y", gLastTweakCategory, 0.0f, false);
+
+u32 lbl_806E1414 = glGetTexture("global/lightramp");
+u32 lbl_806E1418 = glGetTexture("global/black");
+u32 lbl_806E141C = glGetTexture("global/white");
+
+StadiumLightingParams gStadiumGameObjectLightingParams = {
+    glGetTexture("ThePalaceStadiumPlayerLightRamp"),
+    0x28, 0x30, 0x28,
+    0xAF, 0xAF, 0xAF,
+    0.85f, 0.3f, 0.9f, 0.25f,
+    55.0f, 60.0f, 55.0f, -120.0f,
+    0,
+};
+
+GameObjectLight lbl_805709D8[8];
+GameObjectLight lbl_80570AF8[2];
+GameObjectLight lbl_80570B40;
+TweakValueInt lbl_80570B70(
+    "numCharacterInGameLights", "/Rendering/Lighting/Character", 2);
+GameObjectLight lbl_80570B80;
+TweakValueInt lbl_80570BB0(
+    "siCharacterLightRed", "/Rendering/Lighting/Character", 0);
+TweakValueInt lbl_80570BD0("siCharacterLightGreen", gLastTweakCategory, 0);
+TweakValueInt lbl_80570BF0("siCharacterLightBlue", gLastTweakCategory, 0);
+
+extern "C" void fn_80182128();
+
+UnidentifiedTweakAction lbl_806E1430(
+    "Character Light Red", gLastTweakCategory, Function0<void>(fn_80182128));
+UnidentifiedTweakAction lbl_806E1434(
+    "Character Light Green", gLastTweakCategory, Function0<void>(fn_80182128));
+UnidentifiedTweakAction lbl_806E1438(
+    "Character Light Blue", gLastTweakCategory, Function0<void>(fn_80182128));
+
 extern "C" {
-extern StadiumLightingParams gStadiumGameObjectLightingParams;
-extern GameObjectLightArray lbl_80570AF8;
-extern GameObjectLight lbl_805709D8[8];
-extern GameObjectLight lbl_80570B40;
-extern GameObjectLight lbl_80570B80;
-extern TweakValueInt lbl_80570B70;
-extern TweakValueInt lbl_80570BB0;
-extern TweakValueInt lbl_80570BD0;
-extern TweakValueInt lbl_80570BF0;
 extern bool lbl_806DCC40;
 extern bool lbl_806DCC48;
 extern s32 lbl_806DCC64;
@@ -221,8 +257,8 @@ void InitializeGameObjectLighting()
     lbl_80570B80.unknown1C[1] = lbl_80570BD0.value;
     lbl_80570B80.unknown1C[2] = lbl_80570BF0.value;
 
-    lbl_80570AF8.lights[0].intensity = 1.0f;
-    lbl_80570AF8.lights[1].intensity = 1.0f;
+    lbl_80570AF8[0].intensity = 1.0f;
+    lbl_80570AF8[1].intensity = 1.0f;
     lbl_80570B40.intensity = 1.0f;
     lbl_80570B40.enabled = true;
     nlVec3Set(lbl_80570B40.worldPosition, 0.0f, 0.0f, -1.0f);
@@ -920,7 +956,7 @@ GameObjectLight* fn_8018230C(s32 arg0, bool arg1)
             var1->unknown20 = pLight->m_fRadius;
             return var1;
         }
-        return &lbl_80570AF8.lights[arg0];
+        return &lbl_80570AF8[arg0];
 
     case 2:
         return &lbl_80570B40;

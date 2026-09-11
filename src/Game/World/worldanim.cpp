@@ -97,7 +97,6 @@ struct WorldVertexAnimDrawable_80343E3C
 extern "C" WorldVisibilityNode* fn_80343F78(
     WorldVertexAnimDrawable_80343E3C*, WorldVisibilityNode*);
 
-
 extern "C" void fn_80341EE8(void*)
 {
 }
@@ -424,7 +423,7 @@ extern "C" void fn_80343E3C(
 
     WorldVisibilityNode* pNode
         = pContext->m_pWorld->m_pVisibilityTree;
-    unsigned long uModelHash = pObject->m_pModel->unknown00;
+    unsigned long uModelHash = pObject->m_pModel->id;
     for (int i = 0; i < pNode->mNumModelHashes; ++i)
     {
         if (pNode->mModelHashes[i] == uModelHash)
@@ -469,7 +468,7 @@ extern "C" WorldVisibilityNode* fn_80343F78(
     WorldVertexAnimDrawable_80343E3C* pObject,
     WorldVisibilityNode* pNode)
 {
-    unsigned long uModelHash = pObject->m_pModel->unknown00;
+    unsigned long uModelHash = pObject->m_pModel->id;
     for (int i = 0; i < pNode->mNumModelHashes; ++i)
     {
         if (pNode->mModelHashes[i] == uModelHash)
@@ -963,4 +962,3 @@ void WorldAnimController::SetWorldMatrix(
     m_worldMatrix = worldMatrix;
 }
 
-template struct UnidentifiedStaticStorage<UnidentifiedStaticTag>;

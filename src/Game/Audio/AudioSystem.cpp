@@ -35,6 +35,7 @@ u32 FindAudioResourceCue(AudioResourceLoadOwner*, u32, u32, u32, u32);
 
 unsigned int lbl_806E2018;
 AudioSystem* g_pAudioSystem;
+AudioBackend* g_pAudioBackend;
 
 AudioSystem::AudioSystem()
     : m_Unknown48(false), m_AsyncLoading(true), m_BundleManager(0), m_Unknown2E0(0)
