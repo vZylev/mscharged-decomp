@@ -112,6 +112,11 @@ public:
             return mData.mData;
         }
 
+        const CharT* c_str() const
+        {
+            return mData.mData;
+        }
+
         CharT* end()
         {
             return mData.mData + mData.mSize - 1;
@@ -171,7 +176,7 @@ public:
     const CharT* c_str() const
     {
         static CharT emptyString = 0;
-        return mData ? mData->mData.mData : &emptyString;
+        return mData ? mData->c_str() : &emptyString;
     }
 
     int size() const

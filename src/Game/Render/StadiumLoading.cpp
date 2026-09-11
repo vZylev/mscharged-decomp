@@ -34,7 +34,6 @@ extern "C"
         WorldObjectLoadContext* context, glModel* model, u32 hash);
     DrawableObject* fn_8027A7F0(void* storage,
         WorldObjectLoadContext* context, glModel* model, u32 hash);
-    void fn_8027876C(BasicStadium* stadium, DrawableObject* object);
     RLView* fn_8027261C();
     void fn_802785FC(BasicStadium* stadium, float fDeltaT);
     DrawableObject* fn_802787AC(BasicStadium* stadium, unsigned long uHashID);
@@ -60,6 +59,7 @@ extern "C"
     extern StadiumTweaks* lbl_806E196C;
     extern DrawableObject* lbl_8057AB20[12];
 }
+void fn_8027876C(BasicStadium* stadium, DrawableObject* object);
 
 bool gSkipGameplayModels;
 void* gStadiumResourceData;
@@ -131,13 +131,10 @@ DrawableObject* GetBallRenderObject(unsigned int index)
 bool CreateStadiumModelInstances(int entry, glModel* models, unsigned long numModels)
 {
     char name[128];
+    WorldObjectLoadContext* context;
     glModel* end = models + numModels;
-    WorldObjectLoadContext* context
-        = (WorldObjectLoadContext*)nlMalloc(sizeof(WorldObjectLoadContext), 8, true);
-    if (context != 0)
-    {
-        new (context) WorldObjectLoadContext(pBasicStadiumInstance);
-    }
+    context = (WorldObjectLoadContext*)nlMalloc(sizeof(WorldObjectLoadContext), 8, true);
+    new (context) WorldObjectLoadContext(pBasicStadiumInstance);
 
     int instance = 1;
     DrawableObject* pObject;
@@ -164,16 +161,15 @@ bool CreateStadiumModelInstances(int entry, glModel* models, unsigned long numMo
         }
     }
 
-    StadiumModelEntry& description = gStadiumModelEntries[entry];
-    description.mInstances[0] = pObject;
-    for (; (unsigned long)instance < (unsigned long)description.mNumInstances;
+    gStadiumModelEntries[entry].mInstances[0] = pObject;
+    for (; (unsigned long)instance < (unsigned long)gStadiumModelEntries[entry].mNumInstances;
          instance++)
     {
         nlSNPrintf(name, sizeof(name), StadiumModelCloneNameFormat, entry, instance);
         DrawableObject* pClone = pObject->Clone(nlStringLowerHash(name));
         pClone->m_uObjectFlags &= ~1;
         fn_8027876C(pBasicStadiumInstance, pClone);
-        description.mInstances[instance] = pClone;
+        gStadiumModelEntries[entry].mInstances[instance] = pClone;
     }
 
     delete context;
@@ -640,11 +636,8 @@ void fn_802772D0(const char* name)
     nlStrNCpy(gStadiumName, name, sizeof(gStadiumName));
     BeginLoadStadium(path, false);
 
-    lbl_806E196C = (StadiumTweaks*)nlMalloc(sizeof(StadiumTweaks), 8, true);
-    if (lbl_806E196C != 0)
-    {
-        new (lbl_806E196C) StadiumTweaks(lbl_80522304, name);
-    }
+    lbl_806E196C = new (nlMalloc(sizeof(StadiumTweaks), 8, true))
+        StadiumTweaks(lbl_80522304, name);
 }
 
 void fn_80277BB0()

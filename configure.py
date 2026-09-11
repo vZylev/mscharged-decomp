@@ -1268,7 +1268,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/dsp/dsp_task.c"),
             Object(Matching, "RVL_SDK/dvd/dvdfs.c"),
             Object(Matching, "RVL_SDK/dvd/dvd.c"),
-            Object(NonMatching, "RVL_SDK/dvd/dvd_broadway.c"),
+            Object(Matching, "RVL_SDK/dvd/dvd_broadway.c"),
             Object(Matching, "RVL_SDK/dvd/dvdqueue.c"),
             Object(Matching, "RVL_SDK/dvd/dvderror.c"),
             Object(Matching, "RVL_SDK/dvd/dvdidutils.c"),

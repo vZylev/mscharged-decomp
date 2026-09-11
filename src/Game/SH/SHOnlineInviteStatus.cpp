@@ -26,7 +26,7 @@ SHOnlineInviteStatus::SHOnlineInviteStatus()
     , mCanCancel(false)
     , mPopupActive(false)
     , mElapsedTime(0.0f)
-    , mPointersInitialized(0)
+    , mPointersInitialized(false)
 {
 }
 
@@ -130,7 +130,7 @@ void SHOnlineInviteStatus::Update(float fDeltaT)
         }
         break;
     }
-    if (mPointersInitialized == 0)
+    if (!mPointersInitialized)
     {
         if (mCanCancel)
         {
@@ -142,7 +142,7 @@ void SHOnlineInviteStatus::Update(float fDeltaT)
                     gFEPointerInstances[i]->SetActiveSlide("waiting", true, false);
             }
         }
-        mPointersInitialized = 1;
+        mPointersInitialized = true;
     }
     if (mCanCancel)
     {

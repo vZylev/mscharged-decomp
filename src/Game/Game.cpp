@@ -418,7 +418,7 @@ void cGame::fn_80057FC0()
     mUnidentified134.mSize = 0;
 }
 
-void cGame::fn_80057FD8(u8 param1)
+void cGame::fn_80057FD8(bool param1)
 {
     u8* ptr;
     if (mUnidentified134.mSize >= mUnidentified134.mCapacity)
