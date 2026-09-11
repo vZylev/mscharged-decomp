@@ -14,11 +14,10 @@ AudioResourceRuntime* g_pAudioResourceRuntime;
 inline UnidentifiedAudioPoolOwner::~UnidentifiedAudioPoolOwner()
 {
     SlotPoolBase::BaseFreeBlocks(
-        &UnidentifiedRegistryPools<
-            UnidentifiedRegistryPoolTag>::sContainerPool,
+        &UnidentifiedRegistryPoolTypes::sContainerPool,
         sizeof(UnidentifiedRegistryScoped_802BEF0C));
     SlotPoolBase::BaseFreeBlocks(
-        &UnidentifiedRegistryPools<UnidentifiedRegistryPoolTag>::sNodePool,
+        &UnidentifiedRegistryPoolTypes::sNodePool,
         sizeof(UnidentifiedRegistryNode_802BE64C));
 }
 

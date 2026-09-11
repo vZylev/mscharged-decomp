@@ -1027,14 +1027,12 @@ void cGame::ChangeGameState(int state)
 
 void cGame::SendPauseGameEvent()
 {
-    mUnidentified49C.mEvent00.Queue(
-        (UnidentifiedEventNoData*)0, Function<UnidentifiedEventNoData*>());
+    mUnidentified49C.mEvent00.Queue(Function<FnVoidVoid>());
 }
 
 void cGame::SendResumingGameEvent()
 {
-    mUnidentified49C.mEvent01.Queue(
-        (UnidentifiedEventNoData*)0, Function<UnidentifiedEventNoData*>());
+    mUnidentified49C.mEvent01.Queue(Function<FnVoidVoid>());
 }
 
 void cGame::QueueChainNisEnd(ShotAtGoalData* data)

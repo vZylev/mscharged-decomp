@@ -686,8 +686,3 @@ unsigned int SimpleLineReader::GetSize() const
 {
     return mLineLength;
 }
-
-int SimpleParser::GetTokenLength() const
-{
-    return mTokenLength;
-}

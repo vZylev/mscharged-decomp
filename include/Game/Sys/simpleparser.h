@@ -24,7 +24,7 @@ public:
     char* NextToken(bool toLower);
     char* NextTokenOnLine(bool toLower);
     bool AdvanceLine();
-    int GetTokenLength() const;
+    int GetTokenLength() const { return mTokenLength; }
 
 private:
     inline bool AdvanceEnd();
