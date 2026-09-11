@@ -1,5 +1,6 @@
 #include <revolution/sc.h>
 #include "Game/FE/fePresentation.inl"
+#include "Game/Audio/UnidentifiedRegistryPools.h"
 
 #include "Game/SH/SHBootLoading.h"
 #include "Game/Render/RLViewLayers.h"

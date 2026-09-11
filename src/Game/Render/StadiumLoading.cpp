@@ -58,7 +58,7 @@ extern "C"
     extern bool lbl_806E1961;
     extern int lbl_806E1968;
     extern StadiumTweaks* lbl_806E196C;
-    extern u8 lbl_8057AB20[];
+    extern DrawableObject* lbl_8057AB20[12];
 }
 
 bool gSkipGameplayModels;
@@ -118,7 +118,7 @@ DrawableObject* GetRenderObject(int entry, int instance)
     return gStadiumModelEntries[entry].mInstances[instance];
 }
 
-u8* fn_80276380()
+DrawableObject** fn_80276380()
 {
     return lbl_8057AB20;
 }

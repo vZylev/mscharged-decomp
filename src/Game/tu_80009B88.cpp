@@ -1,7 +1,7 @@
 #include "Game/AI/Fielder.h"
 #include "Game/FE/feHelpFuncs.h"
 #include "Game/AnimInventory.h"
-#include "Game/Audio/UnidentifiedSoundPools.h"
+#include "Game/Audio/UnidentifiedRegistryPools.h"
 #include "Game/CharacterTemplate.h"
 #include "Game/CharacterTweaks.h"
 #include "Game/DB/CharacterInfo.h"
@@ -1268,7 +1268,7 @@ static TweakBoolBinding sUnidentifiedLoadAnimsCachedTweak(
 
 CharacterLoader_8056B290 CharacterLoader_8056B290::sUnidentifiedInstance;
 
-template struct UnidentifiedSoundPools<UnidentifiedSoundPoolTag>;
+template struct UnidentifiedRegistryPools<UnidentifiedRegistryPoolTag>;
 template struct UnidentifiedStaticStorage<UnidentifiedStaticTag>;
 
 #include "NL/nlstring_impl.h"

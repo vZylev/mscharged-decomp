@@ -485,7 +485,7 @@ Game/AI/TutorialMegastrikeDesire.cpp:
 	.data       start:0x80504000 end:0x80504040
 
 Game/Audio/audio.cpp:
-	.text       start:0x800EB6AC end:0x800ED8B8
+	.text       start:0x800EB6AC end:0x800ED8C0
 	.ctors      start:0x804DB5A8 end:0x804DB5AC
 	.data       start:0x80504040 end:0x805041B0
 	.bss        start:0x8056DC00 end:0x8056DC90
@@ -493,7 +493,7 @@ Game/Audio/audio.cpp:
 	.sdata2     start:0x806E42E8 end:0x806E42F8
 
 Game/Audio/GameStreams.cpp:
-	.text       start:0x800ED8B8 end:0x800EDE54
+	.text       start:0x800ED8C0 end:0x800EDE54
 	.ctors      start:0x804DB5AC end:0x804DB5B0
 	.data       start:0x805041B0 end:0x80504228
 	.bss        start:0x8056DC90 end:0x8056DCD0
@@ -1675,7 +1675,8 @@ unclassified/tu_801FA28C.cpp:
 	.sdata2     start:0x806E5790 end:0x806E5798
 
 unclassified/tu_801FADB4.cpp:
-	.text       start:0x801FADB4 end:0x801FB200
+	.text       start:0x801FADB4 end:0x801FB2D4
+	.ctors      start:0x804DB794 end:0x804DB798
 	.data       start:0x8051ACC8 end:0x8051AD18
 	.sdata      start:0x806DDA30 end:0x806DDA58
 	.sdata2     start:0x806E5798 end:0x806E57A8
@@ -1985,7 +1986,8 @@ Game/SH/SHOnlineInviteStatus.cpp:
 	.sdata2     start:0x806E5B70 end:0x806E5B80
 
 Game/SH/SHBootLoading.cpp:
-	.text       start:0x802639C4 end:0x80264DC4
+	.text       start:0x802639C4 end:0x80264E98
+	.ctors      start:0x804DB7BC end:0x804DB7C0
 	.data       start:0x805206B0 end:0x80520808
 	.sdata      start:0x806DEBD8 end:0x806DEC20
 	.sdata2     start:0x806E5B80 end:0x806E5BB0
@@ -3227,11 +3229,13 @@ Game/Audio/AudioSystem.cpp:
 	.sdata2     start:0x806E65B0 end:0x806E65B8
 
 Game/Audio/AudioResourceLoadOwner.cpp:
-	.text       start:0x802ED144 end:0x802ED678
+	.text       start:0x802ED144 end:0x802ED74C
+	.ctors      start:0x804DBA40 end:0x804DBA44
 	.data       start:0x8052F490 end:0x8052F49C
 
 Game/Audio/XSoundHandle.cpp:
-	.text       start:0x802ED74C end:0x802ED964
+	.text       start:0x802ED74C end:0x802EDA38
+	.ctors      start:0x804DBA44 end:0x804DBA48
 	.data       start:0x8052F4A0 end:0x8052F528
 	.sdata      start:0x806DF4C8 end:0x806DF4CC
 	.sdata2     start:0x806E65B8 end:0x806E65BC
@@ -3247,17 +3251,20 @@ Game/Audio/AudioBundleManager.cpp:
 	.sdata      start:0x806DF4D0 end:0x806DF4D8
 
 Game/Audio/SoundMap.cpp:
-	.text       start:0x802EE178 end:0x802EE890
+	.text       start:0x802EE178 end:0x802EE964
+	.ctors      start:0x804DBA4C end:0x804DBA50
 	.data       start:0x8052F570 end:0x8052F5D0
 
 unclassified/tu_802EE964.cpp:
-	.text       start:0x802EE964 end:0x802EFA9C
+	.text       start:0x802EE964 end:0x802EFB70
+	.ctors      start:0x804DBA50 end:0x804DBA54
 
 unclassified/tu_802EFB70.cpp:
 	.text       start:0x802EFB70 end:0x802F0614
 
 unclassified/tu_802F076C.cpp:
-	.text       start:0x802F076C end:0x802F1684
+	.text       start:0x802F076C end:0x802F1758
+	.ctors      start:0x804DBA58 end:0x804DBA5C
 	.sdata      start:0x806DF4D8 end:0x806DF4E0
 
 unclassified/tu_802F1758.cpp:

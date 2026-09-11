@@ -1527,7 +1527,7 @@ float cFielder::fn_80048A08()
 void cFielder::InitActionMegaStrikeMeter(bool bParam)
 {
     tDebugPrintManager::Print(DC_NETWORK, "InitActionMegaStrikeMeter at frame %d\n",
-        ((UnidentifiedHandler8011166C*)GetFixedUpdateTask())->UnidentifiedVirtual34());
+        GetFixedUpdateTask()->GetFrame());
 
     mUnidentified390 = 0.0f;
     mUnidentified394 = 0.0f;

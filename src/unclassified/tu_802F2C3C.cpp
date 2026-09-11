@@ -1,4 +1,5 @@
 #include "Game/Audio/AudioBackend.h"
+#include "Game/Audio/UnidentifiedRegistryPools.h"
 #include "Game/Audio/AudioSource.h"
 #include "Game/Audio/XSoundHandle.h"
 #include "NL/nlMath.h"

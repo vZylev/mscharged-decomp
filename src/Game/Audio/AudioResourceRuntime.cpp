@@ -3,7 +3,7 @@
 #include "Game/Audio/AudioConfig.h"
 #include "Game/Audio/AudioEffects.h"
 #include "Game/Audio/UnidentifiedAudioScriptRuntime.h"
-#include "Game/Audio/UnidentifiedSoundPools.h"
+#include "Game/Audio/UnidentifiedRegistryPools.h"
 #include "NL/nlFunction.h"
 #include "NL/nlMemory.h"
 #include "NL/nlString.h"
@@ -14,11 +14,12 @@ AudioResourceRuntime* g_pAudioResourceRuntime;
 inline UnidentifiedAudioPoolOwner::~UnidentifiedAudioPoolOwner()
 {
     SlotPoolBase::BaseFreeBlocks(
-        &UnidentifiedSoundPools<UnidentifiedSoundPoolTag>::sUnidentifiedPool14,
-        sizeof(UnidentifiedSoundPoolEntry14));
+        &UnidentifiedRegistryPools<
+            UnidentifiedRegistryPoolTag>::sContainerPool,
+        sizeof(UnidentifiedRegistryScoped_802BEF0C));
     SlotPoolBase::BaseFreeBlocks(
-        &UnidentifiedSoundPools<UnidentifiedSoundPoolTag>::sUnidentifiedPool40,
-        sizeof(UnidentifiedSoundPoolEntry40));
+        &UnidentifiedRegistryPools<UnidentifiedRegistryPoolTag>::sNodePool,
+        sizeof(UnidentifiedRegistryNode_802BE64C));
 }
 
 // Configuration keys the runtime resolves by lower-cased name hash. The DOL
@@ -201,9 +202,7 @@ AudioResourceRuntime::~AudioResourceRuntime()
  */
 UnidentifiedRegistryContainer* AudioResourceRuntime::AllocContainer()
 {
-    return (UnidentifiedRegistryContainer*)
-        UnidentifiedSoundPools<UnidentifiedSoundPoolTag>::sUnidentifiedPool14
-            .Allocate();
+    return UnidentifiedRegistryAllocContainer();
 }
 
 /**
@@ -211,9 +210,7 @@ UnidentifiedRegistryContainer* AudioResourceRuntime::AllocContainer()
  */
 UnidentifiedRegistryNode_802BE64C* AudioResourceRuntime::AllocNode()
 {
-    return (UnidentifiedRegistryNode_802BE64C*)
-        UnidentifiedSoundPools<UnidentifiedSoundPoolTag>::sUnidentifiedPool40
-            .Allocate();
+    return UnidentifiedRegistryAllocNode();
 }
 
 /**
@@ -229,8 +226,8 @@ void* AudioResourceRuntime::UnidentifiedVirtual2C(unsigned int size)
  */
 void AudioResourceRuntime::UnidentifiedVirtual30(void* container)
 {
-    UnidentifiedSoundPools<UnidentifiedSoundPoolTag>::sUnidentifiedPool14.Free(
-        (UnidentifiedSoundPoolEntry14*)container);
+    UnidentifiedRegistryFreeContainer(
+        (UnidentifiedRegistryScoped_802BEF0C*)container);
 }
 
 /**
@@ -238,8 +235,7 @@ void AudioResourceRuntime::UnidentifiedVirtual30(void* container)
  */
 void AudioResourceRuntime::UnidentifiedVirtual34(void* node)
 {
-    UnidentifiedSoundPools<UnidentifiedSoundPoolTag>::sUnidentifiedPool40.Free(
-        (UnidentifiedSoundPoolEntry40*)node);
+    UnidentifiedRegistryFreeNode((UnidentifiedRegistryNode_802BE64C*)node);
 }
 
 /**

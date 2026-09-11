@@ -74,7 +74,7 @@ UnidentifiedFuzzyRuntimeList lbl_806E20A8(0, 0);
 nlAVLTreeSlotPool<unsigned long, UnidentifiedVariant_80054AB8,
     DefaultKeyCompare<unsigned long> > lbl_805842EC(16, 16);
 UnidentifiedRuntimeTypeList lbl_806E20B0;
-BasicSlotPool<UnidentifiedRuntimeActionQueue> lbl_80584328(16, 16);
+SlotPool<UnidentifiedRuntimeActionQueue> lbl_80584328(16, 16);
 
 extern "C" UnidentifiedFuzzyRuntimeBase* fn_80311734(
     UnidentifiedFuzzyRuntimeReference* reference)

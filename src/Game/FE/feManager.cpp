@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "Game/AI/AIPad.h"
-#include "Game/Audio/UnidentifiedSoundPools.h"
+#include "Game/Audio/UnidentifiedRegistryPools.h"
 #include "Game/Ball.h"
 #include "Game/BaseGameSceneManager.h"
 #include "Game/Camera/CameraMan.h"
@@ -631,4 +631,3 @@ void FrontEnd::OnPresentationBypass()
 }
 
 template struct UnidentifiedStaticStorage<UnidentifiedStaticTag>;
-template struct UnidentifiedSoundPools<UnidentifiedSoundPoolTag>;

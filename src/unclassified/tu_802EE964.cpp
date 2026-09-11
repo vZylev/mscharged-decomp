@@ -1,4 +1,5 @@
 #include "Game/Audio/AudioBackend.h"
+#include "Game/Audio/UnidentifiedRegistryPools.h"
 #include "Game/Audio/AudioBundleManager.h"
 #include "NL/nlDebugString.h"
 #include "Game/Audio/AudioBankLoader.h"

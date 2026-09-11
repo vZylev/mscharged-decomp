@@ -5,7 +5,7 @@
 #include "Game/AI/Fielder.h"
 #include "Game/AI/Powerups.h"
 #include "Game/Audio/GameStreams.h"
-#include "Game/Audio/UnidentifiedSoundPools.h"
+#include "Game/Audio/UnidentifiedRegistryPools.h"
 #include "Game/Ball.h"
 #include "Game/BasicStadium.h"
 #include "Game/Camera/CameraMan.h"
@@ -924,7 +924,7 @@ void ChainChomp::Hide()
     mfChaseSpeed = 0.0f;
 }
 
-template struct UnidentifiedSoundPools<UnidentifiedSoundPoolTag>;
+template struct UnidentifiedRegistryPools<UnidentifiedRegistryPoolTag>;
 template struct UnidentifiedStaticStorage<UnidentifiedStaticTag>;
 
 #include "NL/nlBind_impl.h"
