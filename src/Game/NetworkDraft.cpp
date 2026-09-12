@@ -3,7 +3,9 @@
 #include "Game/Sys/debug.h"
 
 #include "Game/GameInfo.h"
+#include "Game/GameSceneManager.h"
 #include "Game/NetworkSession.h"
+#include "Game/OnlineMatchmaking.h"
 #include "Game/TweakValue.h"
 #include "NL/nlMath.h"
 #include "NL/nlMemory.h"
@@ -168,29 +170,19 @@ void NetworkDraft::BeginSortedDraft(NetMessageDraft* message)
     mCurrentDraftingPeer = -1;
     mCurrentDrafterIsGuest = false;
     mSideToTeam[0] = -1;
-    mSideToTeam[1] = -1;
     mSideDrafted[0] = false;
+    mSideToTeam[1] = -1;
     mSideDrafted[1] = false;
 
     tDebugPrintManager::Print(DC_NETWORK, "Starting Draft num Teams %d\n", mTeamCount);
     for (int teamIndex = 0; teamIndex < mTeamCount; ++teamIndex)
     {
-        NetworkDraftTeam& team = mTeams[teamIndex];
+        mTeams[teamIndex].Reset();
+        mTeams[teamIndex].mPlayerCount = 1;
+        NetworkDraftPlayer& player = mTeams[teamIndex].mPlayers[0];
         const NetworkDraftMachineInfo& entry = message->mEntries[teamIndex];
-        team = NetworkDraftTeam();
-        team.mPlayerCount = 1;
-        NetworkDraftPlayer& player = team.mPlayers[0];
         player.mHead = entry.mStats;
-        int character = 0;
-        for (; character < 10; ++character)
-        {
-            player.mName[character] = entry.mName[character];
-            if (entry.mName[character] == 0)
-            {
-                break;
-            }
-        }
-        player.mName[character] = 0;
+        nlStrNCpy(player.mName, entry.mName, 11);
         memcpy(player.mData, entry.mMiiData, sizeof(player.mData));
         player.mPeerIndex = (s8)entry.mMachineIndex;
     }
@@ -198,29 +190,30 @@ void NetworkDraft::BeginSortedDraft(NetMessageDraft* message)
     qsort(mTeams, mTeamCount, sizeof(NetworkDraftTeam), CompareDraftTeams);
     for (int teamIndex = 0; teamIndex < mTeamCount; ++teamIndex)
     {
-        if (mTeams[teamIndex].mPlayers[0].mPeerIndex == mLocalMachineIndex)
+        if (mTeams[teamIndex].mPlayers[0].mPeerIndex == GetLocalMachineIndex())
         {
             mMyTeamIndex = teamIndex;
         }
     }
     tDebugPrintManager::Print(DC_NETWORK, "Sorted Draft MyTeamIndex %d MyMachineIndex %d\n",
-        mMyTeamIndex, mLocalMachineIndex);
+        mMyTeamIndex, GetLocalMachineIndex());
     for (int teamIndex = 0; teamIndex < mTeamCount; ++teamIndex)
     {
         char name[12];
-        nlWcsToStr(mTeams[teamIndex].mPlayers[0].mName, name, 11);
+        NetworkDraftPlayer& player = mTeams[teamIndex].mPlayers[0];
+        nlWcsToStr(player.mName, name, 11);
         tDebugPrintManager::Print(DC_NETWORK,
             "%s Rank %d. %d-%d MyPeerIndex %d\n", name,
-            mTeams[teamIndex].mPlayers[0].mHead.mScore,
-            mTeams[teamIndex].mPlayers[0].mHead.mDisplayRank,
-            mTeams[teamIndex].mPlayers[0].mHead.mWins,
-            mTeams[teamIndex].mPlayers[0].mPeerIndex);
+            player.mHead.mDisplayRank, player.mHead.mWins, player.mHead.mLosses,
+            player.mPeerIndex);
     }
     mNextDraftingTeam = -1;
     mTimeBeforeDrafting = s_fDefaultTimeToWaitBeforeDrafting;
     mTimeToChangeDrafters = s_fDefaultTimeToChooseSidekicks;
     mFinalCountdown = s_fDefaultTimeFinalCountdown;
     mState = NET_DRAFT_CAPTAINS;
+    gOnlineStartMatchmaking = 0;
+    GameSceneManager::Instance()->Push((SceneList)0x31, SCREEN_NOTHING, true);
 }
 
 void NetworkDraft::BeginTeamDraft(NetMessageDraft* message)
@@ -234,8 +227,8 @@ void NetworkDraft::BeginTeamDraft(NetMessageDraft* message)
     mCurrentDraftingTeam = -1;
     mCurrentDraftingPeer = -1;
     mCurrentDrafterIsGuest = false;
-    mTeams[0] = NetworkDraftTeam();
-    mTeams[1] = NetworkDraftTeam();
+    mTeams[0].Reset();
+    mTeams[1].Reset();
 
     for (int entryIndex = 0; entryIndex < message->mMachineCount; ++entryIndex)
     {
@@ -244,26 +237,14 @@ void NetworkDraft::BeginTeamDraft(NetMessageDraft* message)
         for (int playerIndex = 0; playerIndex < playerCount; ++playerIndex)
         {
             int teamIndex = message->mPlayerSides.mData[entryIndex][playerIndex];
-            if (teamIndex < 0 || teamIndex >= mTeamCount)
-            {
-                continue;
-            }
             NetworkDraftTeam& team = mTeams[teamIndex];
-            NetworkDraftPlayer& player = team.mPlayers[team.mPlayerCount++];
+            NetworkDraftPlayer& player = team.mPlayers[team.mPlayerCount];
             player.mHead = entry.mStats;
-            int character = 0;
-            for (; character < 10; ++character)
-            {
-                player.mName[character] = entry.mName[character];
-                if (entry.mName[character] == 0)
-                {
-                    break;
-                }
-            }
-            player.mName[character] = 0;
+            nlStrNCpy(player.mName, entry.mName, 11);
             memcpy(player.mData, entry.mMiiData, sizeof(player.mData));
             player.mPeerIndex = (s8)entry.mMachineIndex;
             player.mGuest = playerIndex == 1;
+            ++team.mPlayerCount;
         }
     }
     AssignDraftSides();
@@ -272,6 +253,7 @@ void NetworkDraft::BeginTeamDraft(NetMessageDraft* message)
     mTimeToChangeDrafters = s_fDefaultTimeToChooseSidekicks;
     mFinalCountdown = s_fDefaultTimeFinalCountdown;
     mState = NET_DRAFT_CAPTAINS;
+    GameSceneManager::Instance()->Push((SceneList)0x32, SCREEN_FORWARD, true);
 }
 
 void NetworkDraft::AssignDraftSides()
@@ -314,16 +296,35 @@ bool NetworkDraft::HasDisconnectedPlayer(int team) const
 
 void NetworkDraft::Update(float dt)
 {
+    if (mState != NET_DRAFT_IDLE)
+    {
+        NetworkMachineRoster* roster =
+            g_pNetworkSessionBase->GetMachineRoster();
+        for (int team = 0; team < mTeamCount; ++team)
+        {
+            for (int player = 0; player < mTeams[team].mPlayerCount; ++player)
+            {
+                int peer = mTeams[team].mPlayers[player].mPeerIndex;
+                if (peer != mLocalMachineIndex
+                    && roster->GetMachineAid(peer) == 0
+                    && !mTeams[team].mPlayers[player].mDisconnected)
+                {
+                    mTeams[team].mPlayers[player].mDisconnected = true;
+                }
+            }
+        }
+    }
+
     switch (mState)
     {
     case NET_DRAFT_CAPTAINS:
         if (mTimeBeforeDrafting > 0.0f)
         {
             mTimeBeforeDrafting -= dt;
-        }
-        if (mTimeBeforeDrafting <= 0.0f && mNextDraftingTeam == -1)
-        {
-            AdvanceDraftTeam();
+            if (mTimeBeforeDrafting <= 0.0f && mNextDraftingTeam == -1)
+            {
+                AdvanceDraftTeam();
+            }
         }
         if (mNextDraftingTeam >= 0 && mNextDraftingTeam < mTeamCount
             && HasDisconnectedPlayer(mNextDraftingTeam))
@@ -332,36 +333,95 @@ void NetworkDraft::Update(float dt)
         }
         break;
     case NET_DRAFT_SIDEKICKS:
+    {
         if (mTimeToChangeDrafters > 0.0f)
         {
             mTimeToChangeDrafters -= dt;
         }
-        if (mTimeToChangeDrafters <= 0.0f)
+        bool allTeamsFinished = true;
+        for (int team = 0; team < mTeamCount; ++team)
+        {
+            if (!HasDisconnectedPlayer(team)
+                && mTeams[team].mSidekick0 == -1)
+            {
+                allTeamsFinished = false;
+            }
+        }
+        if (allTeamsFinished)
         {
             mState = NET_DRAFT_FINAL_COUNTDOWN;
             mFinalCountdown = s_fDefaultTimeFinalCountdown;
         }
         break;
+    }
     case NET_DRAFT_FINAL_COUNTDOWN:
         if (mFinalCountdown > 0.0f)
         {
             mFinalCountdown -= dt;
-        }
-        if (mFinalCountdown <= 0.0f)
-        {
-            UnregisterMessageReceivers();
-            mState = NET_DRAFT_STARTED;
+            if (mFinalCountdown <= 0.0f)
+            {
+                gNetworkMessageRegistry->UnregisterReceiver(23);
+                gNetworkMessageRegistry->UnregisterReceiver(24);
+
+                bool disconnected = false;
+                if (!g_pNetworkSession->mCupMode)
+                {
+                    for (int team = 0; team < mTeamCount; ++team)
+                    {
+                        if (HasDisconnectedPlayer(team))
+                        {
+                            disconnected = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (disconnected)
+                {
+                    mState = NET_DRAFT_DISCONNECTED;
+                }
+                else
+                {
+                    mState = NET_DRAFT_STARTED;
+                    if (g_pNetworkSessionBase->GetMachineRoster()
+                            ->GetLocalMachineIndex()
+                        == 0)
+                    {
+                        if (g_pNetworkSession->mCupMode)
+                        {
+                            g_pNetworkSession
+                                ->SendTournamentStartToEveryone();
+                        }
+                        else
+                        {
+                            g_pNetworkSession->SendGameStartToEveryone();
+                        }
+                    }
+                }
+            }
         }
         break;
     case NET_DRAFT_STARTED:
-        for (int team = 0; team < mTeamCount; ++team)
+    {
+        bool disconnected = false;
+        if (!g_pNetworkSession->mCupMode)
         {
-            if (HasDisconnectedPlayer(team))
+            for (int team = 0; team < mTeamCount; ++team)
             {
-                mState = NET_DRAFT_DISCONNECTED;
-                break;
+                if (HasDisconnectedPlayer(team))
+                {
+                    disconnected = true;
+                    break;
+                }
             }
         }
+        if (disconnected)
+        {
+            mState = NET_DRAFT_DISCONNECTED;
+        }
+        break;
+    }
+    case NET_DRAFT_DISCONNECTED:
         break;
     default:
         break;

@@ -45,6 +45,7 @@ void FinishLoadTournamentTrophy();
 
 DrawableObject* FindStadiumDrawableObject(unsigned long uHashID);
 DrawableObject* GetBallRenderObject(unsigned int index);
+DrawableObject** GetNumberRenderObjects();
 bool ShouldLoadStadiumModel(const StadiumModelEntry* entry);
 bool CreateStadiumModelInstances(int index, glModel* models, unsigned long numModels);
 bool CreatePowerupDrawables(glModel* models, unsigned long numModels);

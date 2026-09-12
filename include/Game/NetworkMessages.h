@@ -235,10 +235,13 @@ public:
         : mUnidentified08(0)
     {
     }
+    NetworkMessageType30(u32 value)
+        : mUnidentified08(value)
+    {
+    }
 
     virtual void Serialize(NetworkMessageSerializer* serializer);
-    virtual ~NetworkMessageType30();
-    virtual int GetType();
+    virtual int GetType() { return 30; }
 
     /* 0x08 */ u32 mUnidentified08;
 };
@@ -250,10 +253,13 @@ public:
         : mUnidentified08(0)
     {
     }
+    NetworkMessageType31(u32 value)
+        : mUnidentified08(value)
+    {
+    }
 
     virtual void Serialize(NetworkMessageSerializer* serializer);
-    virtual ~NetworkMessageType31();
-    virtual int GetType();
+    virtual int GetType() { return 31; }
 
     /* 0x08 */ u32 mUnidentified08;
 };

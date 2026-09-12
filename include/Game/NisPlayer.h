@@ -91,7 +91,7 @@ public:
     float fn_8027C064(int param1) const;
     cAnimCamera* fn_8027E708();
     void fn_8027EE38();
-    void Render(int pass);
+    void Render(int pass) const;
     void HideAllActors() const;
     void fn_8027EEA0(float param1);
     void fn_8027EE60(bool param1);

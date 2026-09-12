@@ -825,10 +825,18 @@ Game/NetworkMessages.cpp:
 	.data       start:0x8050AC20 end:0x8050AD68
 	.sbss       start:0x806E1108 end:0x806E1160
 
+Game/NetworkMessages_801268E8.cpp:
+	.text       start:0x801268E8 end:0x80126A70
+	.data       start:0x8050AD68 end:0x8050AD90
+
+Game/NetworkMessages_80126A70.cpp:
+	.text       start:0x80126A70 end:0x80126BE8
+	.data       start:0x8050AD90 end:0x8050ADB8
+
 Game/NetTournManager.cpp:
-	.text       start:0x801268E8 end:0x8012A2F0
+	.text       start:0x80126BE8 end:0x8012A2F0
 	.ctors      start:0x804DB614 end:0x804DB618
-	.data       start:0x8050AD68 end:0x8050B750
+	.data       start:0x8050ADB8 end:0x8050B750
 	.bss        start:0x8056FAA0 end:0x8056FB20
 	.sdata      start:0x806DC8D8 end:0x806DC8F0
 	.sbss       start:0x806E1160 end:0x806E1170
@@ -1067,7 +1075,7 @@ unclassified/tu_80175F8C.cpp:
 	.sbss       start:0x806E12D0 end:0x806E12D8
 	.sdata2     start:0x806E4A78 end:0x806E4A80
 
-unclassified/tu_80176EF4.cpp:
+Game/Physics/PhysicsThwomp.cpp:
 	.text       start:0x80176EF4 end:0x80177498
 	.ctors      start:0x804DB674 end:0x804DB678
 	.data       start:0x80510F40 end:0x80510FD8
@@ -1472,7 +1480,7 @@ Game/Render/AttackSideIndicators_801AE0C4.cpp:
 	.sbss       start:0x806E1620 end:0x806E1628
 	.sdata2     start:0x806E5290 end:0x806E52A0
 
-unclassified/tu_801AE530.cpp:
+Game/Render/NumberDisplay.cpp:
 	.text       start:0x801AE530 end:0x801AF510
 	.ctors      start:0x804DB730 end:0x804DB734
 	.rodata     start:0x804DCF08 end:0x804DCF68
@@ -3089,13 +3097,18 @@ Game/Debug/FrameCounter.cpp:
 	.sbss       start:0x806E1DC0 end:0x806E1DC8
 	.sdata2     start:0x806E6178 end:0x806E61F0
 
-unclassified/tu_802B9568.cpp:
-	.text       start:0x802B9568 end:0x802BAE84
+NL/nlDebugString.cpp:
+	.text       start:0x802B9568 end:0x802B9570
+	.sdata      start:0x806DF290 end:0x806DF298
+	.sbss       start:0x806E1DC8 end:0x806E1DD0
+
+Game/Debug/Histogram.cpp:
+	.text       start:0x802B9570 end:0x802BAE84
 	.ctors      start:0x804DB994 end:0x804DB998
 	.data       start:0x8052B5D8 end:0x8052B640
 	.bss        start:0x8057C108 end:0x8057C1A8
-	.sdata      start:0x806DF290 end:0x806DF2C8
-	.sbss       start:0x806E1DC8 end:0x806E1DE0
+	.sdata      start:0x806DF298 end:0x806DF2C8
+	.sbss       start:0x806E1DD0 end:0x806E1DE0
 	.sdata2     start:0x806E61F0 end:0x806E6238
 
 unclassified/tu_802BAE84.cpp:

@@ -33,6 +33,8 @@ MoviePlayerScene::MoviePlayerScene()
     , mLoopMovie(false)
     , mPushWithPop(true)
 {
+    typedef Detail::MemFunImpl<void, void (MoviePlayerScene::*)()> MemFunImpl_MoviePlayerScene_v;
+    typedef BindExp1<void, MemFunImpl_MoviePlayerScene_v, MoviePlayerScene*> BindExp1_MoviePlayerScene_v;
     mMovieFilename[0] = 0;
     if (GameSceneManager::s_pInstance)
     {
@@ -42,7 +44,8 @@ MoviePlayerScene::MoviePlayerScene()
     {
         mGameSceneManager = g_pOverlayManager;
     }
-    Function<FnVoidVoid> callback(Bind<void>(MemFun(&MoviePlayerScene::fn_801D9868), this));
+    Function<FnVoidVoid> callback(BindExp1_MoviePlayerScene_v(
+        MemFun(&MoviePlayerScene::fn_801D9868), this));
     UnidentifiedFindEvent<UnidentifiedEventNoData>("HBMHide", -1)->Add(
         callback, (unsigned int)&mUnidentified0B0, -1);
 }

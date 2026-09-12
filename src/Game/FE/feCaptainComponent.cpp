@@ -16,7 +16,7 @@
 #include "Game/OverlayHandlerGoal.h"
 #include "Game/OverlayHandlerHUD.h"
 #include "unclassified/tu_801F6A24.h"
-#include "unclassified/tu_801AE530.h"
+#include "Game/Render/NumberDisplay.h"
 #include "Game/FE/feSceneManager.h"
 #include "Game/GameInfo.h"
 #include "Game/DB/GameProgress.h"
@@ -1338,7 +1338,7 @@ inline void OverlayManager::SlideHUDOut()
     {
         static_cast<HUDOverlay*>(GetScene((SceneList)89))->SetSlideOut();
         mIsHUDSlideIn = false;
-        gpNumberDisplay->mUnidentified004 = false;
+        gpNumberDisplay->mVisible = false;
     }
 }
 
@@ -1440,7 +1440,7 @@ void OverlayManager::fn_801E2498(float delay)
     {
         static_cast<HUDOverlay*>(GetScene((SceneList)89))->SetSlideIn();
         mIsHUDSlideIn = true;
-        gpNumberDisplay->mUnidentified004 = true;
+        gpNumberDisplay->mVisible = true;
     }
 }
 
@@ -1565,7 +1565,7 @@ void OverlayManager::fn_801E2A28(GoalScoredData* eventData)
     if (eventData->uGoalType != 6)
     {
         static_cast<OverlayManager*>(g_pOverlayManager)->SlideHUDOut();
-        gpNumberDisplay->mUnidentified004 = true;
+        gpNumberDisplay->mVisible = true;
     }
     static_cast<HUDOverlay*>(g_pOverlayManager->GetScene((SceneList)89))->UpdateScore();
 }

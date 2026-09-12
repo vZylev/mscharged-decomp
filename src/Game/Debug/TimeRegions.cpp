@@ -86,7 +86,7 @@ inline TimeRegion::TimeRegion(
     , m_pConditionFunc(pConditionFunc)
     , m_fThreshold(0.0f)
     , m_unk10(0)
-    , m_unk14(pName, 5, lbl_806E6178, lbl_806E617C)
+    , m_Histogram(pName, 5, lbl_806E6178, lbl_806E617C)
 {
     ListEntry<TimeRegion*>* entry
         = (ListEntry<TimeRegion*>*)nlMalloc(

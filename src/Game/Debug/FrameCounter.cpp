@@ -1,5 +1,5 @@
 #include "Game/Debug/FrameCounter.h"
-#include "Game/Debug/ProfilerDisplay_802B9A3C.h"
+#include "Game/Debug/Histogram.h"
 #include "Game/GL/GLColourMeshWriter.h"
 #include "Game/Task/SmokeTestUpdateTask.h"
 #include "Game/UnidentifiedStaticStorage.h"
@@ -116,7 +116,7 @@ void FrameCounter::FinishTiming()
         if (region->m_pConditionFunc())
         {
             region->m_unk10++;
-            fn_802B9670(&region->m_unk14, totalFrameTime);
+            region->m_Histogram.AddSample(totalFrameTime);
             region->m_fThreshold += totalFrameTime;
         }
 
@@ -155,47 +155,47 @@ void FrameCounter::DisplayFrameRate()
     glFontEnd();
 }
 
-static inline TimeRegion* UnidentifiedFindTimeRegion_802B7FD4()
+static inline TimeRegion* FindGameplayRegion()
 {
-    nlListIterator<TimeRegion*> iterator = TimeRegion::sTimeRegionList.Begin();
-    while (iterator.IsValid())
+    ListEntry<TimeRegion*>* entry = TimeRegion::sTimeRegionList.m_Head;
+    while (entry != 0)
     {
-        TimeRegion* region = iterator.Current();
+        TimeRegion* region = entry->entry;
         if (nlStrICmp(region->m_pName, "during gameplay") == 0)
         {
             return region;
         }
-        iterator.Next();
+        entry = entry->next;
     }
     return 0;
 }
 
 void FrameCounter::fn_802B7FD4()
 {
-    TimeRegion* region = UnidentifiedFindTimeRegion_802B7FD4();
+    TimeRegion* region = FindGameplayRegion();
     if (region != 0)
     {
         static bool initialized = false;
         if (!initialized)
         {
-            fn_802B9A6C(fn_802B9A3C(), &region->m_unk14);
+            HistogramDisplay::GetInstance()->AddHistogram(&region->m_Histogram);
             initialized = true;
         }
-        fn_802B9A88(fn_802B9A3C());
+        HistogramDisplay::GetInstance()->Draw();
     }
 }
 
 void FrameCounter::fn_802B80C4()
 {
-    TimeRegion* region = UnidentifiedFindTimeRegion_802B7FD4();
+    TimeRegion* region = FindGameplayRegion();
     if (region != 0)
     {
         char name[128];
-        UnidentifiedTimeRegionData_802B9570* data = &region->m_unk14;
-        for (int index = 0; index < data->m_unk08 - 1; ++index)
+        Histogram* data = &region->m_Histogram;
+        for (int index = 0; index < data->m_NumBins - 1; ++index)
         {
-            float threshold = fn_802B98C8(data, index);
-            int count = fn_802B974C(data, index);
+            float threshold = data->GetBinBoundary(index);
+            int count = data->GetCumulativePercentage(index);
             nlSNPrintf(name, sizeof(name), "percent of gameplay frames below %0.0f ms", threshold);
             fn_802BD718(name, 0, (float)count);
         }
