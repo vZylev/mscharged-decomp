@@ -2,6 +2,7 @@
 
 #include "Game/Ball.h"
 #include "Game/BaseGameSceneManager.h"
+#include "Game/OverlayManager.h"
 #include "Game/BasicStadium.h"
 #include "Game/Debug/ShapeRender.h"
 #include "Game/Effects/EmissionController.h"
@@ -43,7 +44,6 @@ extern "C"
 {
     void fn_801B9DAC(const char* name);
     void fn_801BA358();
-    void fn_801E230C(void* manager, int scene, bool visible, bool immediate);
     void fn_801E2564(void* manager);
     void fn_80195868(ReplayChoreo* choreo, float deltaTime);
     void fn_801959F0(ReplayChoreo* choreo, int quality);
@@ -468,7 +468,7 @@ void UnidentifiedPresentationState::Update(float deltaTime)
         mOverlayDelay -= deltaTime;
         if (mOverlayDelay <= 0.0)
         {
-            fn_801E230C(g_pOverlayManager, mOverlayToDisplay, true, true);
+            static_cast<OverlayManager*>(g_pOverlayManager)->SetVisible((SceneList)mOverlayToDisplay, true, true);
             if (mOverlayToDisplay == 0x5F)
             {
                 fn_801E2564(g_pOverlayManager);
@@ -484,7 +484,7 @@ void UnidentifiedPresentationState::Update(float deltaTime)
         {
             if (mOverlayDisplayed)
             {
-                fn_801E230C(g_pOverlayManager, mOverlayToDisplay, false, false);
+                static_cast<OverlayManager*>(g_pOverlayManager)->SetVisible((SceneList)mOverlayToDisplay, false, false);
             }
             mOverlayDisplayed = false;
             mOverlayToDisplay = -2;
@@ -813,7 +813,7 @@ void UnidentifiedPresentationState::StopOverlay()
 {
     if (mOverlayDisplayed)
     {
-        fn_801E230C(g_pOverlayManager, mOverlayToDisplay, false, false);
+        static_cast<OverlayManager*>(g_pOverlayManager)->SetVisible((SceneList)mOverlayToDisplay, false, false);
     }
     mOverlayDisplayed = false;
     mOverlayToDisplay = -2;

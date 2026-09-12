@@ -77,6 +77,19 @@ powerup and special-shot flags follow the retail challenge settings and their
 gameplay consumers. `WinBy`, `GameGoals` and `BestSeries` follow the recorded-game
 diagnostics in `Game/NetworkSession.cpp`.
 
+`Game/OverlayManager.h` retains the predecessor's `OverlayManager` and
+`ShowDemoSlide`, `Update` and `SetVisible` names. R4QE01's allocation and
+constructor establish a `0x124`-byte object with a `BaseGameSceneManager` prefix; the demo-visible flag
+remains at `0x10F`. The method at `0x801E2504` retains the predecessor's scene
+lookup and virtual visibility update, using Charged's demo scene ID 96. The
+HUD flags at `0x10C`/`0x10D` and delay at `0x110` retain their predecessor roles;
+Charged also synchronizes the number display when the HUD slides in or out.
+The delayed slide-in method retains its address identity `fn_801E2498`.
+`SlideHUDOut` names the immediate transition repeated in the timer update and
+event callbacks; its spelling is reconstructed. Other derived fields remain
+explicitly unidentified. `SetVisible` uses the Charged filename pointer API and
+guards an absent scene before applying the predecessor's visibility-mask rule.
+
 `Game/SH/SHMoviePlayer.cpp` follows the predecessor's movie-player scene
 hierarchy and names, with R4QE01's Home Button Menu event connection, texture
 resource setter, sound-mode handling, and movie-to-title transition. The

@@ -559,21 +559,21 @@ extern "C" void fn_80179490(cPlayer* pParam)
 extern "C" void fn_801794A4(cPlayer* pParam)
 {
     WaluigiWallManager_80178400* pManager = static_cast<cFielder*>(pParam)->mUnidentified3F8.mUnidentified08;
-    PhysicsBox_80177498* pObject = pManager->mUnidentified050;
-    if (pObject != 0)
+    if (pManager->mUnidentified050 != 0)
     {
         EffectsGroup* pGroup = EmissionManager::Instance()->GetEffectsGroup(lbl_80511054);
         if (EmissionManager::Instance()->IsPlaying(
-                (unsigned long)pObject, pGroup))
+                (unsigned long)pManager->mUnidentified050, pGroup))
         {
             EmissionManager::Instance()->Kill(
-                (unsigned long)pObject, pGroup);
+                (unsigned long)pManager->mUnidentified050, pGroup);
         }
         pManager->mUnidentified05C = false;
-        pObject->mUnidentified05C = 0.0f;
+        pManager->mUnidentified050->mUnidentified05C = 0.0f;
 
+        PhysicsBox_80177498* pObject = pManager->mUnidentified050;
         nlVector3 v3Direction;
-        nlVec3Sub(v3Direction,
+        v3Direction.Sub2D(
             pObject->mUnidentified038, pObject->mUnidentified044);
         if (v3Direction.GetLengthSq2D() < sMinimumLengthSquared)
         {

@@ -46,6 +46,13 @@ struct MegaStrikeEndData
     /* 0x07 */ s8 goalValue;
 };
 
+struct UnidentifiedEventData_8006701C
+{
+    /* 0x00 */ cFielder* pFielder;
+    /* 0x04 */ float fMeterValue;
+    /* 0x08 */ nlVector3 v3Position;
+}; // total size: 0x14
+
 enum eReceiveBallResult
 {
     RECEIVEBALL_LOOSE_PICKUP = 0,
