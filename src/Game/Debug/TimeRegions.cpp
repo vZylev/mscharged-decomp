@@ -127,8 +127,3 @@ void DestroyTimeRegions()
     delete pRightFieldTimeRegion;
     delete pShotTimeRegion;
 }
-
-TimeRegion::~TimeRegion()
-{
-    sTimeRegionList.RemoveEntry(this);
-}

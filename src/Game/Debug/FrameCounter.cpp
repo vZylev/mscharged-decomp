@@ -2,6 +2,7 @@
 #include "Game/Debug/ProfilerDisplay_802B9A3C.h"
 #include "Game/GL/GLColourMeshWriter.h"
 #include "Game/Task/SmokeTestUpdateTask.h"
+#include "Game/UnidentifiedStaticStorage.h"
 #include "NL/gl/glFont.h"
 #include "NL/gl/glMatrix.h"
 #include "NL/gl/glState.h"
@@ -154,21 +155,24 @@ void FrameCounter::DisplayFrameRate()
     glFontEnd();
 }
 
+static inline TimeRegion* UnidentifiedFindTimeRegion_802B7FD4()
+{
+    nlListIterator<TimeRegion*> iterator = TimeRegion::sTimeRegionList.Begin();
+    while (iterator.IsValid())
+    {
+        TimeRegion* region = iterator.Current();
+        if (nlStrICmp(region->m_pName, "during gameplay") == 0)
+        {
+            return region;
+        }
+        iterator.Next();
+    }
+    return 0;
+}
+
 void FrameCounter::fn_802B7FD4()
 {
-    ListEntry<TimeRegion*>* entry = TimeRegion::sTimeRegionList.m_Head;
-    TimeRegion* region = 0;
-    while (entry != 0)
-    {
-        TimeRegion* current = entry->entry;
-        if (nlStrICmp(current->m_pName, "during gameplay") == 0)
-        {
-            region = current;
-            break;
-        }
-        entry = entry->next;
-    }
-
+    TimeRegion* region = UnidentifiedFindTimeRegion_802B7FD4();
     if (region != 0)
     {
         static bool initialized = false;
@@ -183,19 +187,7 @@ void FrameCounter::fn_802B7FD4()
 
 void FrameCounter::fn_802B80C4()
 {
-    ListEntry<TimeRegion*>* entry = TimeRegion::sTimeRegionList.m_Head;
-    TimeRegion* region = 0;
-    while (entry != 0)
-    {
-        TimeRegion* current = entry->entry;
-        if (nlStrICmp(current->m_pName, "during gameplay") == 0)
-        {
-            region = current;
-            break;
-        }
-        entry = entry->next;
-    }
-
+    TimeRegion* region = UnidentifiedFindTimeRegion_802B7FD4();
     if (region != 0)
     {
         char name[128];
@@ -249,7 +241,7 @@ void FrameCounter::DisplayFrameTicker()
     {
         for (unsigned int i = 0; i < 640; i++)
         {
-            unsigned int historyLoc = (m_NextHistoryPos + i) % 640;
+            unsigned int historyLoc = (i + m_NextHistoryPos) % 640;
             m1.Colour(255, 255, 255, 255);
             m1.Vertex((float)i, 1.25f * m_FrameHistory[historyLoc] + 32.0f, 0.0f);
         }
@@ -336,6 +328,7 @@ static void DrawSmile(nlVector3 p0, float fRadius, float fScaleX, nlColour colou
         float fYTop = p0.y + fRadius;
         float middleY = 0.5f * (fYFromAngle + fYTop);
 
+        degrees = (3.1415927f * degrees) / 180.0f;
         int i = 0;
         while (i < numVerts)
         {
@@ -349,15 +342,15 @@ static void DrawSmile(nlVector3 p0, float fRadius, float fScaleX, nlColour colou
             v3point.y = v3point.y + middleY;
 
             mesh.Colour(colour);
-            mesh.Vertex(v3point.x, v3point.y, v3point.z);
+            mesh.Vertex(v3point);
 
             v3point.y += fLineThickness;
 
             mesh.Colour(colour);
-            mesh.Vertex(v3point.x, v3point.y, v3point.z);
+            mesh.Vertex(v3point);
 
             i++;
-            fRadians += ((3.1415927f * degrees) / 180.0f) / (numVerts - 1);
+            fRadians += degrees / (numVerts - 1);
         }
 
         if (mesh.End() == 0)
@@ -448,23 +441,21 @@ void FrameCounter::DisplayFrameSmiler()
     nlColour black = { 0, 0, 0, 255 };
 
     nlColour colour;
-    if (happiness < 0.5f)
+    if (sfHappiness < 0.5f)
     {
-        float alpha = 2.0f * happiness;
-        nlColourSet(colour,
-            (int)((float)sMediumColour.c[0] * alpha + (float)sMadColour.c[0] * (1.0f - alpha)),
-            (int)((float)sMediumColour.c[1] * alpha + (float)sMadColour.c[1] * (1.0f - alpha)),
-            (int)((float)sMediumColour.c[2] * alpha + (float)sMadColour.c[2] * (1.0f - alpha)),
-            (int)((float)sMediumColour.c[3] * alpha + (float)sMadColour.c[3] * (1.0f - alpha)));
+        for (i = 0; i < 4; i++)
+        {
+            float alpha = 2.0f * sfHappiness;
+            colour.c[i] = (int)((float)sMediumColour.c[i] * alpha + (float)sMadColour.c[i] * (1.0f - alpha));
+        }
     }
     else
     {
-        float alpha = 2.0f * (happiness - 0.5f);
-        nlColourSet(colour,
-            (int)((float)sHappyColour.c[0] * alpha + (float)sMediumColour.c[0] * (1.0f - alpha)),
-            (int)((float)sHappyColour.c[1] * alpha + (float)sMediumColour.c[1] * (1.0f - alpha)),
-            (int)((float)sHappyColour.c[2] * alpha + (float)sMediumColour.c[2] * (1.0f - alpha)),
-            (int)((float)sHappyColour.c[3] * alpha + (float)sMediumColour.c[3] * (1.0f - alpha)));
+        for (i = 0; i < 4; i++)
+        {
+            float alpha = 2.0f * (sfHappiness - 0.5f);
+            colour.c[i] = (int)((float)sHappyColour.c[i] * alpha + (float)sMediumColour.c[i] * (1.0f - alpha));
+        }
     }
 
     nlVector3 leftEyeCentre = { 0, 0, 0 };

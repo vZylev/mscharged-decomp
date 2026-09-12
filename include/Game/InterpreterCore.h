@@ -44,7 +44,7 @@ public:
     InterpreterCore(unsigned int size);
     virtual ~InterpreterCore();
     virtual void DoFunctionCall(unsigned int) = 0;
-    virtual bool ExecuteFunction(FunctionEntryPoint*, unsigned int, u32, u32, u32, u32);
+    virtual bool ExecuteFunction(FunctionEntryPoint*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
 
     void LoadByteCode(void* data);
     void Reset();

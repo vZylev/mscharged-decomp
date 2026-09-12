@@ -62,7 +62,7 @@
 #include "NL/gl/glTexture.h"
 #include "NL/gl/glTextureManager.h"
 #include "NL/gl/glMaterialParameters.h"
-#include "NL/glx/GXMaterialProgram_80298B18.h"
+#include "NL/glx/GXCharacterDamageMaterialProgram.h"
 #include "math.h"
 #include <stddef.h>
 #include "Game/UnidentifiedStaticStorage.h"
@@ -2739,14 +2739,14 @@ void cCharacter::fn_80022E60()
                                 glSetMaterialTextureIndexParameter(packet, lbl_8056B7B0[k], &resolvedTexture);
                             }
                         }
-                        if (packet->materialProgram == GXMaterialProgram_80298B18::Instance)
+                        if (packet->materialProgram == GXCharacterDamageMaterialProgram::Instance)
                         {
                             glGetTextureManager()->ResolveTextureIndex(
-                                &((GXMaterialProgramParameters_80298B18*)packet->materialParameters)->texture4);
+                                &static_cast<GXCharacterDamageParameters*>(packet->materialParameters)->damage1Texture);
                             glGetTextureManager()->ResolveTextureIndex(
-                                &((GXMaterialProgramParameters_80298B18*)packet->materialParameters)->texture5);
+                                &static_cast<GXCharacterDamageParameters*>(packet->materialParameters)->damage2Texture);
                             glGetTextureManager()->ResolveTextureIndex(
-                                &((GXMaterialProgramParameters_80298B18*)packet->materialParameters)->texture3);
+                                &static_cast<GXCharacterDamageParameters*>(packet->materialParameters)->megaTexture);
                         }
                     }
                 }

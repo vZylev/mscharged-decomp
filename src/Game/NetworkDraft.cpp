@@ -40,16 +40,16 @@ void NetMessageDraft::Serialize(NetworkMessageSerializer* serializer)
     serializer->Transfer(&mMachineIndex, sizeof(mMachineIndex));
     serializer->Transfer(&mMachineCount, sizeof(mMachineCount));
     serializer->Transfer(&mUnidentified0A, sizeof(mUnidentified0A));
-    serializer->Transfer(&mUnidentified0B, sizeof(mUnidentified0B));
+    serializer->Transfer(&mPlayerSides, sizeof(mPlayerSides));
     for (int i = 0; i < 8; ++i)
     {
-        serializer->Transfer(&mEntries[i].mHead, sizeof(mEntries[i].mHead));
+        serializer->Transfer(&mEntries[i].mStats, sizeof(mEntries[i].mStats));
         serializer->Transfer(
-            &mEntries[i].mUnidentified18, sizeof(mEntries[i].mUnidentified18));
+            &mEntries[i].mProfileId, sizeof(mEntries[i].mProfileId));
         serializer->Transfer(mEntries[i].mName, sizeof(mEntries[i].mName));
         serializer->Transfer(
-            mEntries[i].mUnidentified32, sizeof(mEntries[i].mUnidentified32));
-        serializer->Transfer(&mEntries[i].mIndex, sizeof(mEntries[i].mIndex));
+            mEntries[i].mMiiData, sizeof(mEntries[i].mMiiData));
+        serializer->Transfer(&mEntries[i].mMachineIndex, sizeof(mEntries[i].mMachineIndex));
         serializer->Transfer(&mEntries[i].mGuestEnabled,
             sizeof(mEntries[i].mGuestEnabled));
     }
@@ -58,11 +58,11 @@ void NetMessageDraft::Serialize(NetworkMessageSerializer* serializer)
 void NetMessageDraftMachineInfo::Serialize(
     NetworkMessageSerializer* serializer)
 {
-    serializer->Transfer(&mEntry.mHead, sizeof(mEntry.mHead));
-    serializer->Transfer(&mEntry.mUnidentified18, sizeof(mEntry.mUnidentified18));
+    serializer->Transfer(&mEntry.mStats, sizeof(mEntry.mStats));
+    serializer->Transfer(&mEntry.mProfileId, sizeof(mEntry.mProfileId));
     serializer->Transfer(mEntry.mName, sizeof(mEntry.mName));
-    serializer->Transfer(mEntry.mUnidentified32, sizeof(mEntry.mUnidentified32));
-    serializer->Transfer(&mEntry.mIndex, sizeof(mEntry.mIndex));
+    serializer->Transfer(mEntry.mMiiData, sizeof(mEntry.mMiiData));
+    serializer->Transfer(&mEntry.mMachineIndex, sizeof(mEntry.mMachineIndex));
     serializer->Transfer(
         &mEntry.mGuestEnabled, sizeof(mEntry.mGuestEnabled));
 }
@@ -145,7 +145,7 @@ void NetworkDraft::Reset(bool)
     mTeamCount = 0;
     mCurrentDraftingTeam = -1;
     mCurrentDraftingPeer = -1;
-    mCurrentDrafterIsLocal = false;
+    mCurrentDrafterIsGuest = false;
     mSideToTeam[0] = -1;
     mSideDrafted[0] = false;
     mSideToTeam[1] = -1;
@@ -166,7 +166,7 @@ void NetworkDraft::BeginSortedDraft(NetMessageDraft* message)
     mMyTeamIndex = -1;
     mCurrentDraftingTeam = -1;
     mCurrentDraftingPeer = -1;
-    mCurrentDrafterIsLocal = false;
+    mCurrentDrafterIsGuest = false;
     mSideToTeam[0] = -1;
     mSideToTeam[1] = -1;
     mSideDrafted[0] = false;
@@ -180,7 +180,7 @@ void NetworkDraft::BeginSortedDraft(NetMessageDraft* message)
         team = NetworkDraftTeam();
         team.mPlayerCount = 1;
         NetworkDraftPlayer& player = team.mPlayers[0];
-        player.mHead = entry.mHead;
+        player.mHead = entry.mStats;
         int character = 0;
         for (; character < 10; ++character)
         {
@@ -191,8 +191,8 @@ void NetworkDraft::BeginSortedDraft(NetMessageDraft* message)
             }
         }
         player.mName[character] = 0;
-        memcpy(player.mData, entry.mUnidentified32, sizeof(player.mData));
-        player.mPeerIndex = (s8)entry.mIndex;
+        memcpy(player.mData, entry.mMiiData, sizeof(player.mData));
+        player.mPeerIndex = (s8)entry.mMachineIndex;
     }
 
     qsort(mTeams, mTeamCount, sizeof(NetworkDraftTeam), CompareDraftTeams);
@@ -233,7 +233,7 @@ void NetworkDraft::BeginTeamDraft(NetMessageDraft* message)
     mMyTeamIndex = -1;
     mCurrentDraftingTeam = -1;
     mCurrentDraftingPeer = -1;
-    mCurrentDrafterIsLocal = false;
+    mCurrentDrafterIsGuest = false;
     mTeams[0] = NetworkDraftTeam();
     mTeams[1] = NetworkDraftTeam();
 
@@ -243,14 +243,14 @@ void NetworkDraft::BeginTeamDraft(NetMessageDraft* message)
         int playerCount = entry.mGuestEnabled ? 2 : 1;
         for (int playerIndex = 0; playerIndex < playerCount; ++playerIndex)
         {
-            int teamIndex = message->mUnidentified0B.mData[entryIndex][playerIndex];
+            int teamIndex = message->mPlayerSides.mData[entryIndex][playerIndex];
             if (teamIndex < 0 || teamIndex >= mTeamCount)
             {
                 continue;
             }
             NetworkDraftTeam& team = mTeams[teamIndex];
             NetworkDraftPlayer& player = team.mPlayers[team.mPlayerCount++];
-            player.mHead = entry.mHead;
+            player.mHead = entry.mStats;
             int character = 0;
             for (; character < 10; ++character)
             {
@@ -261,8 +261,8 @@ void NetworkDraft::BeginTeamDraft(NetMessageDraft* message)
                 }
             }
             player.mName[character] = 0;
-            memcpy(player.mData, entry.mUnidentified32, sizeof(player.mData));
-            player.mPeerIndex = (s8)entry.mIndex;
+            memcpy(player.mData, entry.mMiiData, sizeof(player.mData));
+            player.mPeerIndex = (s8)entry.mMachineIndex;
             player.mGuest = playerIndex == 1;
         }
     }

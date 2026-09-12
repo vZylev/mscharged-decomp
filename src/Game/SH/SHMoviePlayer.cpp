@@ -22,7 +22,7 @@ extern "C" unsigned char SCGetSoundMode();
 extern "C" void THPSimpleSetVolume(int, int);
 extern "C" char* strstr(const char*, const char*);
 
-static Config lbl_80578320(Config::ALLOCATE_HIGH, 0x2800, 0x400);
+Config lbl_80578320(Config::ALLOCATE_HIGH, 0x2800, 0x400);
 
 MoviePlayerScene::MoviePlayerScene()
     : mNextScene(SCENE_INVALID)
@@ -32,7 +32,6 @@ MoviePlayerScene::MoviePlayerScene()
     , mWithSound(false)
     , mLoopMovie(false)
     , mPushWithPop(true)
-    , mUnidentified0B0(0)
 {
     mMovieFilename[0] = 0;
     if (GameSceneManager::s_pInstance)
@@ -58,7 +57,6 @@ MoviePlayerScene::~MoviePlayerScene()
     {
         g_pFEInput->PopExclusiveInputLock(this);
     }
-    UnidentifiedDisconnectOwner(&mUnidentified0B0);
 }
 
 void MoviePlayerScene::SceneCreated()
@@ -120,8 +118,8 @@ void MoviePlayerScene::Update(float fDeltaT)
     {
         mMovieInstance = FEFinder<TLImageInstance, 2>::Find<TLSlide>(
             mPresentation->m_currentSlide,
-            InlineHasher(nlStringLowerHash("Layer")),
-            InlineHasher(nlStringLowerHash("movie")));
+            "Layer",
+            "movie");
         unsigned long movieHandle = glGetTexture("movie");
         mMovieInstance->m_pTextureResource->SetTextureHandle(movieHandle);
         mSwappedTexture = true;
@@ -175,8 +173,8 @@ void LessonMoviePlayerScene::SceneCreated()
     OverrideMovieDimensions();
     mButtonComponent.mButtonInstance = FEFinder<TLComponentInstance, 4>::Find<TLSlide>(
         mPresentation->m_currentSlide,
-        InlineHasher(nlStringLowerHash("Layer")),
-        InlineHasher(nlStringLowerHash("buttons")));
+        "Layer",
+        "buttons");
     mButtonComponent.SetState(ButtonComponent::BS_B_ONLY);
 }
 

@@ -694,7 +694,7 @@ bool ShouldLoadStadiumModel(const StadiumModelEntry* entry)
         && entry->mStadium == -1;
 }
 
-float fn_80277DB0()
+float GetStadiumTime()
 {
     if (pBasicStadiumInstance != 0)
     {

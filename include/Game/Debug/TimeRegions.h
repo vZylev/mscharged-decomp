@@ -32,7 +32,10 @@ public:
 
     TimeRegion(const char* pName, bool (*pConditionFunc)());
 
-    virtual ~TimeRegion();
+    virtual ~TimeRegion()
+    {
+        sTimeRegionList.RemoveEntry(this);
+    }
 
     /* 0x04 */ const char* m_pName;
     /* 0x08 */ bool (*m_pConditionFunc)();

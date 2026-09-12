@@ -126,7 +126,7 @@ public:
     /* 0x00C */ int mMyTeamIndex;
     /* 0x010 */ int mCurrentDraftingTeam;
     /* 0x014 */ int mCurrentDraftingPeer;
-    /* 0x018 */ bool mCurrentDrafterIsLocal;
+    /* 0x018 */ bool mCurrentDrafterIsGuest;
     /* 0x019 */ u8 mPadding019[3];
     /* 0x01C */ int mSideToTeam[2];
     /* 0x024 */ bool mSideDrafted[2];

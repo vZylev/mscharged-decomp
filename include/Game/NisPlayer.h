@@ -141,7 +141,7 @@ public:
     /* 0x34358 */ bool mUnidentified34358;
     /* 0x34359 */ bool mUnidentified34359;
     /* 0x3435A */ bool mUnidentified3435A;
-    /* 0x3435B */ u8 unknown_0x3435B[0x41];
+    /* 0x3435C */ nlMatrix4 mUnidentified3435C;
     /* 0x3439C */ bool mUnidentified3439C;
     /* 0x3439D */ u8 unknown_0x3439D[0x43];
     /* 0x343E0 */ bool mUnidentified343E0;

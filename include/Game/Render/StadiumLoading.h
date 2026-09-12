@@ -37,6 +37,7 @@ bool FinishLoadStadiumEffects();
 void DestroyStadium();
 void UpdateStadium(float fDeltaT);
 bool IsStadiumWorldLoaded();
+float GetStadiumTime();
 
 void BeginLoadTournamentTrophy();
 bool IsTournamentTrophyLoaded();
