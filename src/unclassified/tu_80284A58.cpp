@@ -45,8 +45,6 @@ extern "C"
     void fn_801BA358();
     void fn_801E230C(void* manager, int scene, bool visible, bool immediate);
     void fn_801E2564(void* manager);
-    void fn_8027CA44(NisPlayer* player);
-    void fn_8027ED18(NisPlayer* player);
     void fn_80195868(ReplayChoreo* choreo, float deltaTime);
     void fn_801959F0(ReplayChoreo* choreo, int quality);
     int fn_8018A16C(ReplayManager* manager, float time);
@@ -306,7 +304,7 @@ void UnidentifiedPresentationState::Finish()
         {
             if (DuringEndOfGamePresentation(this))
             {
-                fn_8027ED18(NisPlayer::Instance());
+                NisPlayer::Instance()->fn_8027ED18();
                 g_pGame->mUnidentified49C.mEvent02.Queue(
                     Function<FnVoidVoid>());
                 nlTaskManager::SetNextState(1);
@@ -369,7 +367,7 @@ void UnidentifiedPresentationState::Update(float deltaTime)
         gpNumberDisplay->fn_801AE728(deltaTime);
     }
 
-    fn_8027CA44(NisPlayer::Instance());
+    NisPlayer::Instance()->fn_8027CA44();
 
     mUnidentified15C -= deltaTime;
     if (mUnidentified15C < 0.0f)

@@ -720,6 +720,14 @@ under `NL/glx` likewise use behavior-supported filenames; the applicable
 `glx_LoadDirectionalLight` and `glx_LoadSpecular` names follow the predecessor,
 with the Wii argument and cache layouts established from R4QE01.
 
+The material-program primitive conversion keeps the predecessor
+`glx_DrawPacket` function's six-entry `primitives` table and element order.
+R4QE01 places the corresponding mutable table at `0x80524470`, at the start of
+the material-program implementation data, and all 32 indexed draw methods use
+it directly. Its implementation-only inline definition reproduces the weak
+coalesced table, the indexed-load scheduling, and the linked retail layout. The
+helper's original identifier is unavailable and remains unidentified.
+
 The repository's [CC0 license](../LICENSE) applies only to contributions whose
 authors have the right to make that dedication. Nintendo, Next Level Games,
 and third-party names, trademarks, game content, and other proprietary

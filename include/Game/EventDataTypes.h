@@ -28,10 +28,14 @@ struct CharacterImpactEvent
 
 struct GoalScoredData
 {
-    /* 0x00 */ u32 mUnidentified000;
+    /* 0x00 */ unsigned int uTeamIndex : 8;
+    /* 0x00 */ unsigned int uNumGoalsScored : 8;
+    /* 0x00 */ unsigned int uGoalType : 16;
     /* 0x04 */ nlVector3 v3ShotPosition;
     /* 0x10 */ cPlayer* pScorer;
-}; // total size: 0x14
+    /* 0x14 */ cPlayer* pAssister;
+    /* 0x18 */ cPlayer* pLastTouch[2];
+}; // total size: 0x20
 
 struct MegaStrikeEndData
 {
