@@ -84,11 +84,6 @@ glModel* fn_80112E1C(glModel* model)
     return NULL;
 }
 
-static inline float DegreesToRadians(float degrees)
-{
-    return degrees * 3.1415927f / 180.0f;
-}
-
 static inline float RadiansToDegrees(float radians)
 {
     return radians * 180.0f / 3.1415927f;
