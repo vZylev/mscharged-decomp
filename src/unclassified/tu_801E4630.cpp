@@ -12,7 +12,7 @@
 #include "NL/nlFunctionMemory.h"
 #include "NL/nlBind.h"
 #include "Game/GameInfo.h"
-#include "Game/FE/feHelpFuncs.h"
+#include "Game/FE/feHelpFuncs_decl.h"
 #include "Game/FE/feDPD.h"
 #include "Game/DB/StadiumInfo.h"
 #include "Game/DB/SaveLoad.h"
@@ -76,7 +76,9 @@ TU801E4630Scene::TU801E4630Scene()
         mUnidentified1C4.SetBackScene(4);
     }
     fn_801E4F40();
-    Function<FnVoidVoid> callback(Bind<void>(MemFun(&TU801E4630Scene::fn_801E68DC), this));
+    typedef Detail::MemFunImpl<void, void (TU801E4630Scene::*)()> MemFunImpl_TU801E4630Scene_v;
+    typedef BindExp1<void, MemFunImpl_TU801E4630Scene_v, TU801E4630Scene*> BindExp1_TU801E4630Scene_v;
+    Function<FnVoidVoid> callback(BindExp1_TU801E4630Scene_v(MemFun(&TU801E4630Scene::fn_801E68DC), this));
     UnidentifiedFindEvent<UnidentifiedEventNoData>("HBMHide", -1)->Add(
         callback, (unsigned int)&mUnidentifiedB8, -1);
 }

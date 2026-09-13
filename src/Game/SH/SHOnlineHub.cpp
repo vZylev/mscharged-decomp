@@ -4,7 +4,7 @@
 
 #include "Game/SH/SHOnlineHub.h"
 #include "Game/FE/FEAudio.h"
-#include "Game/FE/feHelpFuncs.h"
+#include "Game/FE/feHelpFuncs_decl.h"
 #include "NL/nlPrint.h"
 #include "Game/OnlineMatchmaking.h"
 #include "Game/NetworkLobby.h"

@@ -4,7 +4,7 @@
 #include "Game/FE/tlSlide.h"
 #include "Game/FE/tlTextInstance.h"
 #include "Game/FE/feFinder.inl"
-#include "Game/FE/feHelpFuncs.h"
+#include "Game/FE/feHelpFuncs_decl.h"
 #include "Game/FE/feInput.h"
 #include "Game/FE/feDPD.h"
 #include "Game/BaseGameSceneManager.h"

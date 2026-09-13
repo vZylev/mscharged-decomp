@@ -1,5 +1,5 @@
 #include "Game/SH/SHNavigation.h"
-#include "Game/FE/feHelpFuncs.h"
+#include "Game/FE/feHelpFuncs_decl.h"
 #include "Game/SH/SHStrikerTimesBase.h"
 #include "Game/FE/tlImageInstance.h"
 #include "Game/FE/FEAudio.h"
