@@ -229,7 +229,7 @@ bool NetworkSocket::SocketVirtual14()
 }
 
 bool NetworkSocket::Connect(
-    void* connection, const u8* address, u16 port)
+    void* connection, const u8* address, u16 port, int, int)
 {
     if (mReliableSocket.Connect(connection, address, port) != 0)
     {
