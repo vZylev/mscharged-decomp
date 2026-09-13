@@ -5,7 +5,7 @@
 
 #include "Game/TweakValue.h"
 #include "Game/UnidentifiedStaticStorage.h"
-#include "unclassified/tu_802BAE84.h"
+#include "Game/Sys/tweak.h"
 #include "NL/plat/ReliableSocket.h"
 
 #include <string.h>
@@ -350,7 +350,7 @@ void NetworkSocket::SocketVirtual48()
 
     if (mHasLocalAddress && g_bDisplayLocAddr)
     {
-        fn_802BB048(sLocalAddressRow, sLocalAddressColumn, 0, 1,
+        nlScreenPrintf(sLocalAddressRow, sLocalAddressColumn, 0, 1,
             "LocAddr %d.%d.%d.%d", mLocalAddress[0], mLocalAddress[1],
             mLocalAddress[2], mLocalAddress[3]);
     }

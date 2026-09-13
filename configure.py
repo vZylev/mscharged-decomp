@@ -597,7 +597,7 @@ config.libs = [
             Object(Matching, "Game/Debug/FrameCounter.cpp", extra_cflags=["-ipa file", "-sym on"]),
             Object(Matching, "NL/nlDebugString.cpp"),
             Object(Matching, "Game/Debug/Histogram.cpp"),
-            Object(Matching, "unclassified/tu_802BAE84.cpp", extra_cflags=["-ipa file", "-sym on"]),
+            Object(Matching, "Game/Sys/tweak.cpp", extra_cflags=["-ipa file", "-sym on"]),
             Object(NonMatching, "Game/Debug/ShapeRender.cpp"),
             Object(Matching, "NL/nlEndian.cpp"),
             Object(Matching, "NL/gl/glDraw2.cpp", extra_cflags=["-ipa file"]),
