@@ -203,6 +203,7 @@ public:
     bool MoveTeamBUp(TeamStats b, TeamStats a);
 
     bool IsOvertime() const { return mIsOvertime; }
+    int GetNumGamesWon(int side) const { return mNumGamesWon[side]; }
 
     /* 0x000 */ BasicGameInfo* mBasicGameInfo;
     /* 0x004 */ TeamStats* mCumulativeTeamStats[2];
