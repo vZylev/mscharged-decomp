@@ -134,6 +134,9 @@ public:
             m_tSwapControllerTimer[i].UnidentifiedClear();
     }
     void ReleaseBall(int nParam);
+    void DoRegularPassing(cPlayer* pTeammate, bool bVolleyPass,
+        bool bFindPosition, bool bPerfectPass, bool bParam4,
+        float fMinPassSpeed, float fMaxPassSpeed);
     void fn_80095DF4(float fDeltaT);
     void GetAnimatedBallOrientation(nlQuaternion& qRetval);
     bool UnidentifiedPowerupPredicate();

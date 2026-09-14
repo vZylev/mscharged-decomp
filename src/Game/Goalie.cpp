@@ -3434,8 +3434,6 @@ void Goalie::fn_800809D0(cFielder* pTarget, bool bParam)
 }
 
 extern "C" void fn_8005D550(void* pManager, const GoalieSaveData* pData);
-extern "C" void fn_80097858(cPlayer* pPlayer, cPlayer* pPassTarget,
-    bool nParam1, bool nParam2, bool nParam3, bool nParam4, float fParam1, float fParam2);
 
 void Goalie::DoPassRelease()
 {
@@ -3495,7 +3493,7 @@ void Goalie::DoPassRelease()
             bLob = true;
         float fPassSpeedMin = m_pTweaks->fPassGroundSpeedMin;
         float fPassSpeedMax = m_pTweaks->fPassGroundSpeedMax;
-        fn_80097858(this, mpPassTarget, bLob, true, false, false, fPassSpeedMin, fPassSpeedMax);
+        DoRegularPassing(mpPassTarget, bLob, true, false, false, fPassSpeedMin, fPassSpeedMax);
         if (bIsKick)
             fn_801B74C8(this);
         return;
@@ -3543,10 +3541,9 @@ void Goalie::DoPassRelease()
     unsigned short aShot = RadToAng16((3.1415927f * fShotAng) / 180.0f);
     nlSinCos(&fSin, &fCos, aShot);
     float fXYMag = fCos * fShotSpeed;
-    float x = v3Direction.x * fXYMag;
-    float y = v3Direction.y * fXYMag;
-    float z = fSin * fShotSpeed;
-    nlVec3Set(v3Velocity, x, y, z);
+    v3Velocity.x = v3Direction.x * fXYMag;
+    v3Velocity.y = v3Direction.y * fXYMag;
+    v3Velocity.z = fSin * fShotSpeed;
     PlayRumbleAction(1, GetGlobalPad());
     ReleaseBall(0);
     g_pBall->ShootRelease(v3Velocity, spinType);
@@ -4443,7 +4440,7 @@ void Goalie::CollideWithCharacterCallback(CollisionPlayerPlayerData* pData)
     }
 }
 
-extern "C" void fn_800180F4(cBall* pBall, float fTime, nlVector3& v3Position);
+extern "C" void fn_800180F4(cBall* pBall, nlVector3* pPosition, float fTime);
 
 bool Goalie::fn_8007BF68(bool bParam)
 {
@@ -4464,7 +4461,7 @@ bool Goalie::fn_8007BF68(bool bParam)
         float fTime = nNumSolutions > 1 ? nlMaxEquals(fTimes[0], fTimes[1]) : fTimes[0];
         if (fTime < lbl_806DBBB0)
             return false;
-        fn_800180F4(g_pBall, fTime, v3LandingPos);
+        fn_800180F4(g_pBall, &v3LandingPos, fTime);
         bool bShouldMiss = mbShouldMiss;
         if (bParam)
         {
