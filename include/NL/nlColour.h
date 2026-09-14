@@ -36,6 +36,11 @@ inline void nlFloatColourSet(nlFloatColour& c0, float _r, float _g, float _b, fl
     c0.c[3] = _a;
 }
 
+inline void nlFloatColourSet(nlFloatColour& output, const nlFloatColour& input)
+{
+    nlFloatColourSet(output, input.c[0], input.c[1], input.c[2], input.c[3]);
+}
+
 inline void nlColourSet(nlColour& c0, u8 _r, u8 _g, u8 _b, u8 _a)
 {
     c0.c[0] = _r;
