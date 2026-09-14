@@ -87,6 +87,8 @@ public:
     TeamStats* pGetTeamStatsByIndex(u16 index) const;
     BasicGameInfo* GetMatchupInfo(int phase, short round, int matchup) const;
     eTeamID GetUserSelectedCupTeam() const;
+    void SetSidekicks(GameRules sidekicks) { unknown_0x8A2C = sidekicks; }
+    int fn_8022ED7C() const { return unknown_0x8A28; }
     int GetPreviousGameTeam(int index) const;
     bool ShouldShowCupPhasePopup() const;
     void SetShowCupPhasePopup(bool value);
