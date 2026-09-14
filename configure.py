@@ -654,7 +654,7 @@ config.libs = [
             Object(Matching, "unclassified/tu_8036D6F8.cpp"),
             Object(Matching, "NL/glx/glxSkinMatrix.cpp"),
             Object(NonMatching, "NL/glx/glxTarget.cpp"),
-            Object(NonMatching, "NL/glx/glxMatrix.cpp", extra_cflags=["-ipa file"]),
+            Object(Matching, "NL/glx/glxMatrix.cpp", extra_cflags=["-ipa file"]),
             Object(Matching, "NL/glx/glxModel.cpp"),
             Object(Matching, "NL/glx/glxFont.cpp"),
             Object(NonMatching, "NL/glx/glxSend.cpp"),
