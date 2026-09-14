@@ -12,6 +12,15 @@ the render task advances enabled objects until expiry, and the manager owns
 the objects and list nodes. `TimedObject`, its manager/list and member names
 describe those R4QE01 behaviors; original Charged spellings are unknown.
 
+`Game/AI/Scripts/FuzzyAIRuntime.cpp` reconstructs the 305-case R4QE01
+interpreter dispatcher from its jump table, stack operations, and called APIs.
+The stack-based call convention is also present in the predecessor's
+[generated interpreter](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/src/Game/ReplayChoreo_interp.cpp).
+`Variant::GetPlayer` preserves the predecessor's
+[accessor name and field](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/include/Game/AI/Variant.h);
+`GetTeam` exposes the corresponding team field used by R4QE01's runtime.
+These source names do not establish original Charged spellings.
+
 The light setup in `NL/glx/glxLight.cpp` follows the GX lighting operations in
 [Super Mario Strikers' glxSend](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/src/NL/glx/glxSend.cpp).
 R4QE01 supplies the indexed light cache, directional scale, point attenuation,

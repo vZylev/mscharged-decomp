@@ -185,7 +185,7 @@ void ChooseSidekicksSceneV2::SceneCreated()
     else
         mUnidentified1914 = sidekicks;
 
-    TLInstance* sidekick = FEFinder<TLInstance, 1>::Find<TLSlide>(mUnidentified1914->GetActiveSlide(), "SIDEKICK");
+    TLInstance* sidekick = FEFinder<TLInstance, -1>::Find<TLSlide>(mUnidentified1914->GetActiveSlide(), "SIDEKICK");
     TLComponentInstance* pda[2];
     pda[0] = FEFinder<TLComponentInstance, 4>::Find<TLSlide>(GetPresentation()->GetActiveSlide(), "Layer", "PDA left");
     pda[1] = FEFinder<TLComponentInstance, 4>::Find<TLSlide>(GetPresentation()->GetActiveSlide(), "Layer", "PDA right");

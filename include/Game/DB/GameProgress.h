@@ -30,6 +30,13 @@ struct CupRecord_8010C5C0
         mValues[2] = 0;
     }
 
+    CupRecord_8010C5C0(int value0, int value1, int value2)
+    {
+        mValues[0] = value0;
+        mValues[1] = value1;
+        mValues[2] = value2;
+    }
+
     u16 mValues[3];
 };
 
