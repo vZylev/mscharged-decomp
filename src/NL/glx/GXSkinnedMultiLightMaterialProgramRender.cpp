@@ -84,10 +84,10 @@ extern "C" void glxConfigureSkinnedMultiLightBlend(float blendAmount)
 }
 
 static inline void LoadMaterialDiffuseLight(unsigned int index,
-    const GXSkinnedMultiLightParameters* parameters,
+    GXSkinnedMultiLightParameters* parameters,
     const nlMatrix4& viewMatrix)
 {
-    const nlFloatColour* colour = &parameters->lightColours[index];
+    nlFloatColour* colour = &parameters->lightColours[index];
     const GXSkinnedMultiLightParameters::PointLight* point = &parameters->pointLights[index];
     const nlVector3* direction = &parameters->lightDirections[index];
     nlVector3 transformed;
@@ -177,13 +177,13 @@ void GXMaterialProgramImpl<GXSkinnedMultiLightMaterialProgram>::Draw(
     }
 
     if (diffuseLightCount > 0)
-        LoadMaterialDiffuseLight(0, static_cast<const GXSkinnedMultiLightParameters*>(packet->materialParameters), sSkinnedMultiLightViewMatrix);
+        LoadMaterialDiffuseLight(0, static_cast<GXSkinnedMultiLightParameters*>(packet->materialParameters), sSkinnedMultiLightViewMatrix);
     if (diffuseLightCount > 1)
-        LoadMaterialDiffuseLight(1, static_cast<const GXSkinnedMultiLightParameters*>(packet->materialParameters), sSkinnedMultiLightViewMatrix);
+        LoadMaterialDiffuseLight(1, static_cast<GXSkinnedMultiLightParameters*>(packet->materialParameters), sSkinnedMultiLightViewMatrix);
     if (diffuseLightCount > 2)
-        LoadMaterialDiffuseLight(2, static_cast<const GXSkinnedMultiLightParameters*>(packet->materialParameters), sSkinnedMultiLightViewMatrix);
+        LoadMaterialDiffuseLight(2, static_cast<GXSkinnedMultiLightParameters*>(packet->materialParameters), sSkinnedMultiLightViewMatrix);
     if (diffuseLightCount > 3)
-        LoadMaterialDiffuseLight(3, static_cast<const GXSkinnedMultiLightParameters*>(packet->materialParameters), sSkinnedMultiLightViewMatrix);
+        LoadMaterialDiffuseLight(3, static_cast<GXSkinnedMultiLightParameters*>(packet->materialParameters), sSkinnedMultiLightViewMatrix);
 
     if (specularLightCount > 0)
         LoadMaterialSpecularLight(0, static_cast<const GXSkinnedMultiLightParameters*>(packet->materialParameters), sSkinnedMultiLightViewMatrix);

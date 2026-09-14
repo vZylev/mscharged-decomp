@@ -1,5 +1,14 @@
 # Source provenance
 
+The light setup in `NL/glx/glxLight.cpp` follows the GX lighting operations in
+[Super Mario Strikers' glxSend](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/src/NL/glx/glxSend.cpp).
+R4QE01 supplies the indexed light cache, directional scale, point attenuation,
+and retained interfaces. `nlFloatColourToByte` retains the predecessor's
+[colour-conversion API name](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/include/NL/nlColour.h),
+with Charged's truncation after multiplication by 255 instead of the
+predecessor's clamped 255.5 conversion. The reference project's licensing
+notice below also applies to this ancestry.
+
 `RVL_SDK/hbm/nw4hbm/db/db_DbgPrintBase.cpp` uses the unreferenced helper from
 [Twilight Princess's HBM reconstruction](https://github.com/zeldaret/tp/blob/c8fa8c9e2aab72cf4e5db0e5d1c84a9ea6ee6eb0/libs/revolution/src/homebuttonLib/nw4hbm/db/db_DbgPrintBase.cpp)
 to emit the shared `nw4hbm::ut::Color` destructor at its retained link position.

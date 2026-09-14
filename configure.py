@@ -647,7 +647,7 @@ config.libs = [
             Object(NonMatching, "Game/GL/GLSkinMesh.cpp"),
             Object(NonMatching, "Game/Render/ImpostorSprite.cpp"),
             Object(NonMatching, "NL/glx/glxLoadModel.cpp"),
-            Object(NonMatching, "NL/glx/glxLight.cpp"),
+            Object(Matching, "NL/glx/glxLight.cpp"),
             Object(NonMatching, "NL/glx/glxTexture.cpp", extra_cflags=["-inline deferred"]),
             Object(Matching, "NL/glx/glxGX.cpp"),
             Object(Matching, "NL/glx/glxSwap.cpp", extra_cflags=["-inline noauto"]),
