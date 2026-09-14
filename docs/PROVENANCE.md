@@ -1,5 +1,12 @@
 # Source provenance
 
+`RVL_SDK/hbm/nw4hbm/db/db_DbgPrintBase.cpp` uses the unreferenced helper from
+[Twilight Princess's HBM reconstruction](https://github.com/zeldaret/tp/blob/c8fa8c9e2aab72cf4e5db0e5d1c84a9ea6ee6eb0/libs/revolution/src/homebuttonLib/nw4hbm/db/db_DbgPrintBase.cpp)
+to emit the shared `nw4hbm::ut::Color` destructor at its retained link position.
+This is a dummy emitter; the original stripped debug-print implementation has
+not been reconstructed. The helper is discarded by the linker, leaving only
+the 64-byte destructor used by other HBM objects.
+
 `Game/Physics/PhysicsWaluigiWall.cpp` reconstructs the Charged-specific Waluigi
 wall ability from R4QE01's collision dispatch, segment geometry, event
 callbacks and effect strings. `PhysicsWaluigiWall`, `WaluigiWallManager`, their

@@ -1702,7 +1702,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/hbm/HBMRemoteSpk.cpp", cflags=cflags_rvl_hbm),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_assert.cpp", cflags=cflags_rvl_hbm),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_console.cpp", cflags=cflags_rvl_hbm),
-            Object(NonMatching, "RVL_SDK/hbm/nw4hbm/db/db_DbgPrintBase.cpp", cflags=cflags_rvl_hbm),
+            Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_DbgPrintBase.cpp", cflags=cflags_rvl_hbm),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/db/db_directPrint.cpp", cflags=cflags_rvl_hbm, mw_version="GC/3.0a5.2"),
             Object(NonMatching, "RVL_SDK/hbm/nw4hbm/db/db_mapFile.cpp", cflags=cflags_rvl_hbm),
             Object(Matching, "RVL_SDK/hbm/nw4hbm/snd/snd_Channel.cpp", cflags=cflags_rvl_hbm),
