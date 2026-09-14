@@ -27,7 +27,7 @@
 #include "Game/Physics/PhysicsCharacter.h"
 #include "Game/Physics/PhysicsAIBall.h"
 #include "Game/Physics/PhysicsFakeBall.h"
-#include "unclassified/tu_80177498.h"
+#include "Game/Physics/PhysicsWaluigiWall.h"
 #include "Game/SAnim/pnBlender.h"
 #include "Game/SAnim/pnSAnimController.h"
 #include "Game/SAnim/pnFeather.h"
@@ -2028,29 +2028,29 @@ void Goalie::ActionMove(float deltaTime)
     if (bWallBlocked)
     {
         cFielder* pCaptain = m_pTeam->GetOtherTeam()->GetCaptain();
-        PhysicsBox_80177498* pWall = 0;
+        PhysicsWaluigiWall* pWall = 0;
         if (pCaptain->mUnidentified024.m_eCharacterClass == MARIO)
         {
-            pWall = pCaptain->mUnidentified3F8.mUnidentified08->fn_801792D0(muWallID);
+            pWall = pCaptain->mUnidentified3F8.mUnidentified08->FindWall(muWallID);
         }
         else
         {
             pCaptain = m_pTeam->GetCaptain();
             if (pCaptain->mUnidentified024.m_eCharacterClass == MARIO)
             {
-                pWall = pCaptain->mUnidentified3F8.mUnidentified08->fn_801792D0(muWallID);
+                pWall = pCaptain->mUnidentified3F8.mUnidentified08->FindWall(muWallID);
             }
         }
 
         if (pWall != 0)
         {
             nlVec3Set(v3WallNormal,
-                pWall->mUnidentified038.y
-                    - pWall->mUnidentified044.y,
-                pWall->mUnidentified044.x
-                    - pWall->mUnidentified038.x,
+                pWall->mStartPoint.y
+                    - pWall->mEndPoint.y,
+                pWall->mEndPoint.x
+                    - pWall->mStartPoint.x,
                 0.0f);
-            MakePerpendicularPlane(pWall->mUnidentified038,
+            MakePerpendicularPlane(pWall->mStartPoint,
                 v3WallNormal,
                 wallPlane,
                 0.0f);

@@ -19,7 +19,7 @@
 #include "Game/AI/FuzzyVariant.h"
 #include "Game/AI/ShotMeter.h"
 #include "Game/Ball.h"
-#include "Game/BulletBill.h"
+#include "Game/Render/BulletBill.h"
 #include "Game/CharacterTweaks.h"
 #include "Game/DebugWriteCache.h"
 #include "Game/DB/StatsTracker.h"
@@ -45,7 +45,7 @@
 #include "math.h"
 #include <stddef.h>
 #include "Game/DB/StadiumInfo.h"
-#include "unclassified/tu_80177498.h"
+#include "Game/Physics/PhysicsWaluigiWall.h"
 
 extern "C" shdStateMachine* fn_80319FC0(UnidentifiedScriptMachine*, int);
 extern "C" shdStateMachine* fn_80319F94(UnidentifiedScriptMachine*, int);
@@ -267,7 +267,7 @@ cFielder::cFielder(int nPlayerID, int nTeamID, eCharacterClass cc,
     if (mUnidentified024.m_eCharacterClass == (eCharacterClass)6)
     {
         mUnidentified3F8.mUnidentified08
-            = new (8, false) WaluigiWallManager_80178400();
+            = new (8, false) WaluigiWallManager();
     }
     else
     {
@@ -301,7 +301,7 @@ cFielder::~cFielder()
     }
     if (mUnidentified420 != 0)
     {
-        fn_8019ABB8(mUnidentified420, true);
+        mUnidentified420->Hide(true);
     }
     delete m_pShotMeter;
     mUnidentified428->fn_8030F74C(true, true);
@@ -2707,7 +2707,7 @@ void cFielder::Update(float fDeltaT)
     if (mUnidentified024.m_eCharacterClass == (eCharacterClass)6
         && mUnidentified3F8.mUnidentified08 != 0)
     {
-        mUnidentified3F8.mUnidentified08->fn_80178DBC(fDeltaT);
+        mUnidentified3F8.mUnidentified08->Update(fDeltaT);
     }
     UpdateController(fDeltaT);
     m_bHasBeenUpdated = true;
@@ -3431,11 +3431,11 @@ void cFielder::ResetEffects()
     cCharacter::ResetEffects();
     if (mUnidentified3F8.mUnidentified08 != 0)
     {
-        mUnidentified3F8.mUnidentified08->fn_80178D0C();
+        mUnidentified3F8.mUnidentified08->ClearWalls();
     }
     if (mUnidentified420 != 0)
     {
-        fn_8019ABB8(mUnidentified420, true);
+        mUnidentified420->Hide(true);
     }
 }
 

@@ -19,7 +19,7 @@
 #include "Game/SAnim.h"
 #include "NL/nlString.h"
 #include "Game/SAnim/pnSAnimController.h"
-#include "Game/BulletBill.h"
+#include "Game/Render/BulletBill.h"
 #include "Game/AI/AiUtil.h"
 #include "Game/Render/ElectricFence.h"
 #include "Game/AI/ShotMeter.h"
@@ -28,6 +28,7 @@
 #include "Game/Team.h"
 #include "Game/GameTweaks.h"
 #include "Game/AI/Desire.h"
+#include "Game/AI/DesireSuperPower.h"
 #include "Game/Effects/EffectsGroup.h"
 #include "Game/TweakValue.h"
 #include "NL/nlstring_tmpl.h"
@@ -71,8 +72,6 @@ extern "C" cPN_SAnimController* fn_800C2F64(cCharacter*);
 extern "C" cBall* fn_800C2F40(cPlayer*);
 extern "C" const nlVector3* fn_800D1450(const cCharacter*);
 extern "C" bool fn_800EBBFC(int, unsigned long, const void*, void*);
-extern "C" void fn_800CAB18(Desire*);
-extern "C" void fn_800C9DB4(Desire*);
 extern "C" void fn_800318F8(cFielder*);
 extern "C" void fn_800395C0(cFielder*);
 extern "C" void fn_800367B4(cFielder*);
@@ -424,7 +423,7 @@ void CharacterTriggerHandler(cSAnim* pAnim, unsigned int uParam)
                 Desire* pDesire = fn_8002E08C((cFielder*)lbl_806E0C34, 0x17);
                 if (fn_801BE128(pDesire))
                 {
-                    fn_800CAB18(pDesire);
+                    ((DesireSuperPower*)pDesire)->fn_800CAB18();
                 }
             }
             break;
@@ -435,7 +434,7 @@ void CharacterTriggerHandler(cSAnim* pAnim, unsigned int uParam)
                 Desire* pDesire = fn_8002E08C((cFielder*)lbl_806E0C34, 0x17);
                 if (fn_801BE128(pDesire))
                 {
-                    fn_800C9DB4(pDesire);
+                    fn_800C9DB4((DesireSuperPower*)pDesire);
                 }
             }
             break;

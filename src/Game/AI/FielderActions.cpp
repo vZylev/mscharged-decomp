@@ -8,7 +8,7 @@
 #include "Game/AI/Fielder.h"
 #include "NL/gl/glView.h"
 #include "Game/AI/FielderInput.h"
-#include "Game/BulletBill.h"
+#include "Game/Render/BulletBill.h"
 
 #include "Game/Render/RLView.h"
 
@@ -32,7 +32,7 @@
 #include "unclassified/tu_800A9B78.h"
 #include "Game/NetworkSession.h"
 #include "Game/TweakValue.h"
-#include "unclassified/tu_80177498.h"
+#include "Game/Physics/PhysicsWaluigiWall.h"
 #include "Game/Ball.h"
 #include "Game/BaseGameSceneManager.h"
 #include "Game/AI/AIPad.h"
@@ -139,7 +139,6 @@ extern "C" bool fn_8003D9BC(cFielder* pFielder);
 extern "C" bool fn_8003E8A0(cFielder* pFielder);
 extern "C" void fn_801B98A0(cFielder* pFielder);
 extern "C" void fn_8002E340(cFielder* pFielder);
-extern "C" void fn_8019AA00(void* pParam, cFielder* pFielder);
 extern "C" void fn_801B8FF8(cFielder* pFielder);
 extern "C" void fn_8003C560(cFielder* pFielder, int nParam1, int nParam2);
 extern "C" void fn_801B90F8(cFielder* pFielder);
@@ -771,12 +770,12 @@ void cFielder::ActionHit(float fDeltaT)
             float fT2;
             for (int i = 0; i < 0x14; i++)
             {
-                PhysicsBox_80177498* pObject
-                    = pCaptain->mUnidentified3F8.mUnidentified08->fn_801792C4(i);
+                PhysicsWaluigiWall* pObject
+                    = pCaptain->mUnidentified3F8.mUnidentified08->GetWall(i);
                 if (pObject != 0
                     && fn_802B6BC8(&rv3Position, &v3Target,
-                        &pObject->mUnidentified038,
-                        &pObject->mUnidentified044, &fT1, &fT2))
+                        &pObject->mStartPoint,
+                        &pObject->mEndPoint, &fT1, &fT2))
                 {
                     bBlocked = true;
                 }
@@ -5153,7 +5152,7 @@ void cFielder::fn_8004E438()
     else if (mUnidentified024.m_eCharacterClass == (eCharacterClass)0x13)
     {
         SetAnimState(0x81, true, 0.2f, false, false);
-        fn_8019AA00(mUnidentified420, this);
+        mUnidentified420->Show(this);
         InitMovementFromAnim(0, v3Zero, 0.0f, false);
         fn_801B8FF8(this);
         PlaySound(mUnidentified318, 0x1D6C8D56, 0, 0);
@@ -5559,4 +5558,3 @@ static TweakBoolBinding s_UseTurboChargingTweak(
     &gbUseTurboCharging, true);
 
 u16 g_IdleTurnCompletionDelta = (u16)(65536.0f / 36.0f);
-
