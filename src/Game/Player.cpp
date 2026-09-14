@@ -1355,7 +1355,7 @@ extern "C" void fn_80099030(UnidentifiedEventData00*)
     }
 }
 
-void cPlayer::fn_80099074(UnidentifiedEventData24*)
+void cPlayer::fn_80099074(const UnidentifiedEventData24*)
 {
 }
 

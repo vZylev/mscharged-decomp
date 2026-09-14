@@ -126,7 +126,7 @@ extern "C" float fn_8002C678(PlayerTweaks* pTweaks);
 extern "C" float fn_8002C6E8(PlayerTweaks* pTweaks);
 extern "C" float fn_8002CFC4(PlayerTweaks* pTweaks);
 extern "C" void fn_80097858(cPlayer* pPlayer, cPlayer* pPassTarget,
-    int nParam1, int nParam2, int nParam3, int nParam4, float fParam1,
+    bool nParam1, bool nParam2, bool nParam3, bool nParam4, float fParam1,
     float fParam2);
 extern "C" float fn_8002CF88(PlayerTweaks* pTweaks);
 extern "C" float fn_80030750(cFielder* pFielder);
