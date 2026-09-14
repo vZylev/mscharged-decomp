@@ -95,3 +95,17 @@ Striker Challenges and cup selection follow R4QE01. The float `std::ceil` and
 double C routines with the rounding conversion observed in R4QE01.
 The shared wide-string `LexicalCast` copy specialization follows the
 predecessor's `NL/nlLexicalCast.h` and the retained R4QE01 reference-counted copy.
+
+`Game/SH/SHNetworkStart.cpp` reconstructs the LAN lobby menu from R4QE01's
+presentation strings, listener callbacks, controller input and ranking payloads.
+Its menu and callable interfaces use the corresponding Super Mario Strikers
+`Game/FE/feMenu.h`, `NL/nlBind.h` and `NL/nlFunction.h` as ancestry references.
+The bound callback values, function-memory allocation and retained member layouts
+follow R4QE01. Pointer-listener consumers construct their bound member callables
+directly; the menu callbacks use the generic `Bind` wrapper.
+
+`unclassified/tu_801FE81C.cpp` contains the adjacent frontend stadium-loading and
+camera operations. Its separate state, constant pools and initializer follow the
+retail layout; the address-based filename does not identify an original source
+filename. The reference project's licensing notice above also applies to the
+shared source ancestry.
