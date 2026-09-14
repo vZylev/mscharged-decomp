@@ -1758,7 +1758,7 @@ extern "C" bool fn_800D0DB0(DesireSuperPower* self, void*)
     self->mUnidentifiedFielder->m_pTweaks
         = self->mUnidentifiedFielder->mUnidentified328;
     fn_8002E52C(self->mUnidentifiedFielder);
-    if (self->mUnidentifiedFielder->m_tFireTimer.m_uPackedTime != 0)
+    if (self->mUnidentifiedFielder->mUnidentified1E4.m_tFireTimer.m_uPackedTime != 0)
     {
         self->mUnidentifiedFielder->fn_8009750C();
         self->mUnidentifiedFielder->EndAction();

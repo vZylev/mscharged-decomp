@@ -27,6 +27,22 @@ stream by ID, and decodes its compact coordinates as signed bytes scaled by
 stream-by-ID lookup using the existing model API terminology; its original
 Charged spelling is not known.
 
+The player animation, ball possession, controller selection and head-tracking
+routines in `Game/Player.cpp` use the corresponding
+[Super Mario Strikers player implementation](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/src/Game/Player.cpp)
+and shared headers as ancestry references. Player state layout, sixteen input
+timers, power-up events and camera-flash interactions follow R4QE01. The
+reference project's licensing notice below describes its source origins and
+applicable rights.
+
+The popup layout and string-formatting operations in `Game/FE/fePopupMenu.cpp`
+use the corresponding
+[Super Mario Strikers popup implementation](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/src/Game/FE/fePopupMenu.cpp)
+and shared string headers as ancestry references. The popup table, pointer
+callbacks, network messages and allocation behavior follow R4QE01. The reference
+project's licensing notice below describes its source origins and applicable
+rights.
+
 The rematch actions in `Game/SH/SHPausePostGame.cpp` use the corresponding
 [Super Mario Strikers routines](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/src/Game/SH/SHPausePostGame.cpp)
 as an ancestry reference. The network state, timer, statistics layout and article

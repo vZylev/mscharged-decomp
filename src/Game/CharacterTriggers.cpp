@@ -180,7 +180,7 @@ extern "C" void fn_801B7A28(cBall* pBall);
 extern "C" void fn_801B79A4(const char* szEffectName, bool bReallyKill);
 extern "C" void fn_801B75C8(cFielder* pCharacter, eBallShotEffectType eNewBallEffect, cPlayer* pPassTarget, bool bSilent, bool bParam5);
 extern "C" void fn_801B74C8(cPlayer* pCharacter);
-extern "C" void fn_801B73B8(cPlayer* pCharacter);
+extern "C" void fn_801B73B8(cPlayer* pCharacter, bool);
 void GetAnimTriggerInfo(cCharacter* pCharacter, int animIndex, bool (*callback)(float, float, unsigned long, float, void*), void* pData);
 
 EmissionController* EmitGeneric(cCharacter* pCharacter, const char* baseName, const char* characterName);
@@ -664,7 +664,7 @@ void GetAnimTriggerInfo(cCharacter* pCharacter, int animIndex,
     }
 }
 
-extern "C" void fn_801B73B8(cPlayer* pCharacter)
+extern "C" void fn_801B73B8(cPlayer* pCharacter, bool)
 {
     const char* groupName = "ball_impact";
     EffectsGroup* pGroup = EmissionManager::Instance()->GetEffectsGroup(groupName);
@@ -1360,11 +1360,21 @@ extern "C" void fn_801B9B94(cCharacter* pCharacter)
 
 extern "C" bool fn_801B9C90(const char* szEffectName)
 {
-    if (!fn_80014EA4(g_pBall,
-            EmissionManager::Instance()->GetEffectsGroup(szEffectName)))
+    EffectsGroup* pCheckGroup
+        = EmissionManager::Instance()->GetEffectsGroup(szEffectName);
+    if (!fn_80014EA4(g_pBall, pCheckGroup))
     {
-        SetBallUpdateCallback(
-            CreateBallEffect(nlStringLowerHash(szEffectName), g_pBall));
+        cBall* pBall = g_pBall;
+        unsigned long uHash = nlStringLowerHash(szEffectName);
+        EffectsGroup* pGroup
+            = fn_802E7D54(EmissionManager::Instance(), uHash);
+        EmissionController* pController
+            = EmissionManager::Instance()->Create(pGroup, 3, true, 0);
+        pController->m_uUserData = (unsigned long)pBall;
+        nlVector3 vel = lbl_80515478;
+        pController->SetVelocity(vel);
+        pController->m_fGround = 0.02f;
+        SetBallUpdateCallback(pController);
         return true;
     }
     return false;
@@ -1376,7 +1386,17 @@ extern "C" bool fn_801B9DAC(const char* szEffectName)
 
     fn_801BA358();
 
-    SetBallUpdateCallback(CreateBallEffect(uHash, g_pBall));
+    EmissionController* pController;
+    EffectsGroup* pGroup;
+    cBall* pBall;
+    pBall = g_pBall;
+    pGroup = fn_802E7D54(EmissionManager::Instance(), uHash);
+    pController = EmissionManager::Instance()->Create(pGroup, 3, true, 0);
+    pController->m_uUserData = (unsigned long)pBall;
+    nlVector3 vel = lbl_80515478;
+    pController->SetVelocity(vel);
+    pController->m_fGround = 0.02f;
+    SetBallUpdateCallback(pController);
     g_pBall->m_CurrentGlowEffect = uHash;
     return true;
 }
@@ -2233,8 +2253,9 @@ extern "C" void fn_801BDCB4(bool bParam)
 extern "C" void fn_801BDD24(const char* name, nlVector3 v3Position, bool bParam)
 {
     cBall* pBall = g_pBall;
-    EmissionController* pController = EmissionManager::Instance()->Create(
-        fn_802E7D54(EmissionManager::Instance(), nlStringLowerHash(name)), 3, true, 0);
+    unsigned long uHash = nlStringLowerHash(name);
+    EffectsGroup* pGroup = fn_802E7D54(EmissionManager::Instance(), uHash);
+    EmissionController* pController = EmissionManager::Instance()->Create(pGroup, 3, true, 0);
     pController->m_uUserData = (unsigned long)pBall;
     nlVector3 vel = lbl_80515478;
     pController->SetVelocity(vel);

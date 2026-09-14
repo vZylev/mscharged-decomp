@@ -1224,7 +1224,7 @@ void cFielder::fn_80099074(UnidentifiedEventData24* eventData)
     if (type == 1)
     {
         if (eventData->mUnidentified10->m_pOwner != this
-            && m_tFireTimer.m_uPackedTime == 0
+            && mUnidentified1E4.m_tFireTimer.m_uPackedTime == 0
             && m_eActionState != ACTION_ELECTROCUTION
             && !IsStuck() && !IsInvincible())
         {
@@ -1701,7 +1701,7 @@ void cFielder::CleanUpAction(eFielderActionState actionState)
     }
 
     case ACTION_RUNNING_WB:
-        m_eLastPadAction = 50;
+        mUnidentified1E4.m_eLastPadAction = 50;
         if (fn_8003EA6C())
         {
             if (fn_80319FEC(mUnidentified428->mUnidentified18, 0x17))
@@ -2185,7 +2185,7 @@ void cFielder::DoRegularShooting(bool bParam)
     else if (m_eActionState == ACTION_ONETIMER
         || m_eActionState == ACTION_LATE_ONETIMER_FROM_VOLLEY
         || (m_eActionState == ACTION_UNKNOWN_15
-            && m_tBallPossessionTimer.GetSeconds() < 0.1f))
+            && mUnidentified1E4.m_tBallPossessionTimer.GetSeconds() < 0.1f))
     {
         g_pBall->m_uGoalType = 1;
     }
@@ -2322,7 +2322,7 @@ void cFielder::DoRegularShooting(bool bParam)
             {
                 stat = STATS_01;
             }
-            StatsTracker::Instance()->TrackStat(stat, m_pTeam->m_nSide, m_ID, 0, 0, 0, 0);
+            StatsTracker::Instance()->TrackStat(stat, m_pTeam->m_nSide, mUnidentified1E4.m_ID, 0, 0, 0, 0);
         }
     }
 }
@@ -2407,7 +2407,7 @@ const LooseBallContactAnimInfo* cFielder::fn_80038230(
 
 bool cFielder::IsFallenDown() const
 {
-    if (m_tFireTimer.m_uPackedTime != 0)
+    if (mUnidentified1E4.m_tFireTimer.m_uPackedTime != 0)
     {
         return true;
     }
@@ -2683,7 +2683,7 @@ void cFielder::Update(float fDeltaT)
     cPlayer::Update(fDeltaT);
     mUnidentified428->fn_8030F800(true, fDeltaT);
 
-    if (!m_bSkipActionUpdate)
+    if (!mUnidentified1E4.m_bSkipActionUpdate)
     {
         UpdateActionState(fDeltaT);
         UpdateHeadTracking(fDeltaT);
@@ -2693,11 +2693,11 @@ void cFielder::Update(float fDeltaT)
         SetPosition(mUnidentified024.m_v3PrevPosition);
     }
 
-    if (!m_bSkipAnimUpdate)
+    if (!mUnidentified1E4.m_bSkipAnimUpdate)
     {
         cCharacter::Update(fDeltaT);
     }
-    else if (m_bForceFeatherUpdate && fn_800976C4())
+    else if (mUnidentified1E4.m_bForceFeatherUpdate && fn_800976C4())
     {
         cCharacter::Update(0.0f);
         m_pPowerupLayer->SetChild(

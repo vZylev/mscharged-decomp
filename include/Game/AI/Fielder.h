@@ -237,6 +237,7 @@ public:
     void StartRunning();
     bool CanGetElectrocuted(
         const CollisionPlayerWallData* eventData);
+    eFielderActionState GetActionState() const { return m_eActionState; }
     bool CanDoCaptainShootToScore();
     bool CanReceivePass();
     void SetSlideAttackSuccessFlag();
@@ -546,6 +547,7 @@ public:
 
 public:
     /* 0x3DC */ bool mUnidentified3DC;
+
 private:
     /* 0x3DD */ bool mUnidentified3DD;
 
