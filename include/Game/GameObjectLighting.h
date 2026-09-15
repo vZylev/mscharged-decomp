@@ -39,6 +39,7 @@ extern "C"
     int ShouldDoubleGameObjectLighting();
     int GetGameObjectLightCount(bool character, bool includeEffects);
     GameObjectLight* GetGameObjectLight(s32 index, bool character);
+    void SetGameObjectLightTexture(unsigned long texture);
     void LoadGameObjectSpecularLight(s32 index, GameObjectLight* light, f32 exponent, const nlMatrix4& viewMatrix);
     void SetGameObjectSpecularLightingEnabled(s32 enabled, s32 count);
     unsigned long GetGameObjectLightTexture();

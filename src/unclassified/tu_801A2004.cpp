@@ -1,6 +1,6 @@
 #include "unclassified/tu_801A2004.h"
 
-#include "unclassified/tu_802B7798.h"
+#include "NL/nlDebugViews.h"
 
 #include "Game/Render/RLView.h"
 
@@ -185,7 +185,7 @@ extern "C" void fn_801A2394(HighRangeState_801A2394* state)
         nlZeroMemory(&info, sizeof(info));
         info.width = widths[i];
         info.height = heights[i];
-        info.format = 6;
+        info.format = GLTargetFormat_6;
         info.unknown18 = 0;
         info.unknown1C = 0;
         state->mRenderPairs[i] = glCreateTarget(state->mNames[i], &info);

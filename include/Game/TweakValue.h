@@ -58,6 +58,15 @@ public:
         : m_pValue(value)
     {
     }
+    TweakFloatBinding(const char* path, float defaultValue)
+        : m_pValue(0)
+    {
+        mName = 0;
+        if (IsTweakRegistryInitialized() && !Bind(path))
+        {
+            *m_pValue = defaultValue;
+        }
+    }
     TweakFloatBinding(const char* name, const char* category, float* value,
         bool formatName = false)
     {
@@ -97,14 +106,24 @@ public:
     virtual void BindValueAddress(void* value);
     virtual float GetDefault();
 
+    using TweakBindingBase::Bind;
+
+    bool Bind(const char* name, float value, const char* group,
+        bool reload, float min, float max)
+    {
+        bool found = TweakBindingBase::Bind(name, value, group, reload, min, max);
+        if (!found)
+        {
+            *m_pValue = GetDefaultValue();
+            return found;
+        }
+        return found;
+    }
+
     bool BindWithDefault(const char* name, float defaultValue,
         const char* group, bool reload, float value, float min, float max)
     {
         bool found = Bind(name, value, group, reload, min, max);
-        if (!found)
-        {
-            *m_pValue = GetDefaultValue();
-        }
         if (!found)
         {
             *m_pValue = defaultValue;

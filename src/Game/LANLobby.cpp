@@ -9,7 +9,7 @@
 #include "NL/gl/glFont.h"
 #include "NL/nlString.h"
 #include "NL/nlTicker.h"
-#include "unclassified/tu_802B7798.h"
+#include "NL/nlDebugViews.h"
 #include "NL/plat/TransportConnection.h"
 #include "Game/LANMessages.h"
 

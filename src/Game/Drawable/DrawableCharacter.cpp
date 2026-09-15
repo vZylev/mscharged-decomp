@@ -384,7 +384,7 @@ void DrawableCharacter::Grab(cCharacter& source)
     if (megaEnabled)
     {
         megaTranslation = source.mUnidentified194;
-        megaBasis = *(const nlVector4*)&source.mUnidentified184;
+        megaBasis = source.mUnidentified184;
         megaScale = source.mUnidentified1A0;
     }
     flag5 = source.mUnidentified181;
@@ -424,7 +424,7 @@ void DrawableCharacter::Grab(cCharacter& source)
     if (lbl_806E13B0 == 0 && megaEnabled)
     {
         nlMatrix4 matrix;
-        nlQuatToMatrix(matrix, *(const nlQuaternion*)&megaBasis, true);
+        nlQuatToMatrix(matrix, megaBasis, true);
         for (int row = 0; row < 3; ++row)
         {
             for (int column = 0; column < 3; ++column)
@@ -931,7 +931,7 @@ void DrawableCharacter::Blend(
         if (!lbl_806E13B0 && megaEnabled)
         {
             nlMatrix4 matrix;
-            nlQuatToMatrix(matrix, *(const nlQuaternion*)&megaBasis, true);
+            nlQuatToMatrix(matrix, megaBasis, true);
             for (int row = 0; row < 3; ++row)
             {
                 for (int column = 0; column < 3; ++column)

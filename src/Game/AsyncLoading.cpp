@@ -22,6 +22,7 @@
 #include "Game/Sys/debug.h"
 #include "Game/FE/feMusic.h"
 #include "Game/FE/FEAudio.h"
+#include "Game/FE/feCamera.h"
 #include "Game/FE/feResourceManager.h"
 #include "Game/Render/CrowdManager.h"
 #include "Game/Render/CrowdImpostors.h"
@@ -133,8 +134,6 @@ extern "C" bool fn_80311C5C();
 extern "C" bool fn_800F08A4();
 extern "C" void fn_800F06D4();
 extern "C" void fn_800F030C(bool stadiumViewer);
-extern "C" void fn_801FE81C();
-extern "C" bool fn_801FE8EC();
 extern "C" void fn_8013D8DC();
 extern "C" void fn_80144070();
 extern "C" void fn_8013D85C();
@@ -581,12 +580,12 @@ void AsyncLoadingManager::DoFunctionCall(unsigned int functionIndex)
         break;
     case 44:
         mLoadingComment = "AsyncStartupFEWorldBegin";
-        fn_801FE81C();
+        BeginLoadFEWorld();
         FinishLoadingStep(this);
         break;
     case 45:
         mLoadingComment = "AsyncStartupFEWorldFinalize";
-        FinishLoadingStepOrUndo(this, fn_801FE8EC());
+        FinishLoadingStepOrUndo(this, FinishLoadFEWorld());
         break;
     case 46:
         StopSound(0x7FC13AA3, this);
@@ -966,7 +965,7 @@ void AsyncLoadingManager::DoFunctionCall(unsigned int functionIndex)
         gNPCManager->fn_801A9BD0();
         break;
     case 115:
-        gNPCManager->fn_801AA4C0();
+        gNPCManager->CreateThwomps();
         break;
     case 116:
         gNPCManager->fn_801A9DF0();

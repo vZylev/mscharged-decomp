@@ -781,9 +781,9 @@ void fn_80182EC8(s32 arg0)
     lbl_806E1428 = arg0;
 }
 
-void fn_80182EC0(u32 arg0)
+void SetGameObjectLightTexture(u32 texture)
 {
-    lbl_806DCC60 = arg0;
+    lbl_806DCC60 = texture;
 }
 
 u32 GetGameObjectLightTexture()
