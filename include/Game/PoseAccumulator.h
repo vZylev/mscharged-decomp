@@ -84,6 +84,10 @@ public:
     void MultiplyScale(int nNode, const nlVector3* pScale, float fWeight);
     void BlendTransIdentity(int nNode, float fWeight);
     nlMatrix4& GetNodeMatrix(int nNode) const;
+    nlQuaternion& GetNodeQuaternion(int nNode) const
+    {
+        return m_pQuaternions[nNode];
+    }
     nlMatrix4& GetNodeMatrixByHashID(unsigned int nHashID) const;
     s32 GetNumNodes() const;
     void Pose(const cPoseNode& pPoseTree, const nlMatrix4& pWorldMatrix);

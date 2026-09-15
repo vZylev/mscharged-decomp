@@ -1470,7 +1470,7 @@ void UnFreezeEveryoneButCaptain(cFielder* pCaptain)
     }
 }
 
-void cFielder::fn_800489C0()
+void cFielder::fn_800489C0(float)
 {
 }
 

@@ -5,6 +5,12 @@
 R4QE01 establishes the additional per-frame state word and the Charged frame
 pool layout used by this implementation.
 
+`Game/GoalieTweaks.cpp` reconstructs the initialization at R4QE01 address
+`0x800278C8` from its binding calls, member offsets, strings and float constants.
+It uses the shared `TweakFloatBinding` API, preserves the repeated jogging-speed
+binding, and initializes maximum shot fatigue to zero before binding the
+remaining settings.
+
 `NL/nlIntersection.cpp` reconstructs the two-dimensional segment intersection
 routine at R4QE01 address `0x802B6BC8`. Its determinant arithmetic, tolerance,
 output parameters and polygon/wall callers establish the API and vector width.
@@ -153,6 +159,21 @@ callbacks, network messages and allocation behavior follow R4QE01. The reference
 project's licensing notice below describes its source origins and applicable
 rights.
 
+The recursive instance walk in `Game/FE/tlSlide.cpp` and
+`TLInstance::GetType` follow the corresponding
+[Super Mario Strikers slide implementation](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/src/Game/FE/tlSlide.cpp)
+and [instance accessor](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/include/Game/FE/feImage.h).
+R4QE01 determines the retained recursion, time advancement, play-mode dispatch
+and slide initialization. The reference project's licensing notice below
+describes its source origins and applicable rights.
+
+`FEPresentation::SetActiveSlide` retains the hash overload from the
+[Super Mario Strikers presentation interface](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/src/Game/FE/fePresentation.cpp).
+The string overload delegates its hash lookup to that operation. The boolean
+reset argument and conditional timer reset follow R4QE01. The reference
+project's licensing notice below describes its source origins and applicable
+rights.
+
 The rematch actions in `Game/SH/SHPausePostGame.cpp` use the corresponding
 [Super Mario Strikers routines](https://github.com/yannicksuter/smstrikers-decomp/blob/c62fc6a0ed90f4eacc8cca9b231f1d4aaf16ad0b/src/Game/SH/SHPausePostGame.cpp)
 as an ancestry reference. The network state, timer, statistics layout and article
@@ -234,7 +255,6 @@ The Strikers 101 mode field name follows the corresponding predecessor GameInfoM
 its retained Charged uses. The loading API and source filename are descriptive
 names, not claims about original Charged spellings. The reference licensing
 notice above also applies to this source ancestry.
-
 
 The snapshot replay traversal and `FloatCompressor` implementation use the
 corresponding Super Mario Strikers `Game/RenderSnapshot.h`,
@@ -400,3 +420,23 @@ assignments establish their roles, while the predecessor's particle task
 corroborates the task-state and world-render gates. The source, function and
 global names describe that retained behavior and do not claim original Charged
 spellings.
+## MSL integer absolute value
+
+The `_abs` inline helper in `libs/MSL_C/include/stdlib.h` follows the
+MSL `arith.h` implementation in [Pikmin 1 Wii](https://github.com/projectPiki/pik1wii/blob/7170ba8a1eafd6dd3e30923c827b20f4a0df735e/include/PowerPC_EABI_Support/MSL_C/MSL_Common/arith.h)
+and [Pikmin 2 Wii](https://github.com/projectPiki/pik2wii/blob/8784a059f1c3213ef5adf031fa1bd8e415723ede/include/PowerPC_EABI_Support/MSL_C/MSL_Common/arith.h).
+Its conditional expression reproduces the repeated integer
+absolute-value evaluations in DesireMegaStrike at R4QE01 `0x800B93C4`.
+The separately available compiler intrinsic `__abs` does not reproduce that
+caller's evaluation boundaries.
+
+The marking calculations in `Game/AI/DesireMark.cpp` use the predecessor's
+`cFielder::DesireMark` as algorithm and naming ancestry. R4QE01 supplies the
+variant-based updates, defensive-position transition, multiple-mark loop,
+tuning references and script calls. The transition result uses the existing
+variant constructor with no duration overrides, preserving its metadata copy.
+
+`Game/AI/DesireShoot.cpp` uses the predecessor's `cFielder::DesireWindupShot`
+as ancestry for the ball-loss and shot-meter transition flow. R4QE01 supplies
+the variant updates, transition identifiers, character filter, goalie-distance
+checks, and `Windup/Skillshot` probability gate.

@@ -216,7 +216,10 @@ public:
 class TweakBoolBinding : public TweakBindingBase
 {
 public:
-    TweakBoolBinding(bool* value = 0);
+    TweakBoolBinding(bool* value = 0)
+        : m_pValue(value)
+    {
+    }
     TweakBoolBinding(const char* name, const char* category,
         bool* value, bool formatName)
         : m_pValue(value)
@@ -255,6 +258,31 @@ public:
     virtual int IsBound();
     virtual void UnidentifiedVirtual14(float*, float*, float*);
     virtual void BindValueAddress(void* value);
+
+    using TweakBindingBase::Bind;
+
+    bool Bind(const char* name, float value,
+        const char* group, bool reload, float min, float max)
+    {
+        bool found = TweakBindingBase::Bind(name, value, group, reload, min, max);
+        if (!found)
+        {
+            *m_pValue = GetDefault();
+            return found;
+        }
+        return found;
+    }
+
+    bool BindWithDefault(const char* name, bool defaultValue,
+        const char* group, bool reload, float value, float min, float max)
+    {
+        bool found = Bind(name, value, group, reload, min, max);
+        if (!found)
+        {
+            *m_pValue = defaultValue;
+        }
+        return found;
+    }
 
 public:
     /* 0x0C */ bool* m_pValue;

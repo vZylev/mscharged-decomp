@@ -741,11 +741,11 @@ DetInput* cPlayer::GetGlobalPad()
     return NULL;
 }
 
-void* cPlayer::fn_800972CC()
+cGlobalPad* cPlayer::fn_800972CC()
 {
     DetInput* pGlobalPad
         = m_pController != NULL ? m_pController->m_pGlobalPad : NULL;
-    void* pResult = NULL;
+    cGlobalPad* pResult = NULL;
     if (pGlobalPad != NULL)
     {
         pResult = ((NetworkPeerChannel*)pGlobalPad->m_pMyUser)->GetLocalChannelPad();
@@ -956,7 +956,7 @@ void cPlayer::DoRegularPassing(cPlayer* pTeammate, bool bVolleyPass,
     float fMinPassSpeed, float fMaxPassSpeed)
 {
     DesireReceivePass* pDesire = (DesireReceivePass*)fn_8002E08C((cFielder*)pTeammate, 22);
-    fn_800C22CC(pDesire, this, bVolleyPass, bFindPosition, bPerfectPass, NULL, fMinPassSpeed, fMaxPassSpeed);
+    pDesire->fn_800C22CC(this, bVolleyPass, bFindPosition, bPerfectPass, NULL, fMinPassSpeed, fMaxPassSpeed);
 }
 
 void cPlayer::SetPowerupAnimState(int animID)

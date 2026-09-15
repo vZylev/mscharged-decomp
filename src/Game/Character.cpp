@@ -2186,7 +2186,7 @@ extern "C" void fn_8001EFE4(cFielder* character, bool bParam)
             lbl_806E0C28 = character->m_pPoseAccumulator->m_BaseSHierarchy->GetNodeIndexByID(
                 nlStringLowerHash("bip01 r prop"));
         }
-        character->mUnidentified184 = character->m_pPoseAccumulator->m_pQuaternions[lbl_806E0C28];
+        character->mUnidentified184 = character->m_pPoseAccumulator->GetNodeQuaternion(lbl_806E0C28);
         const nlMatrix4& m = character->m_pPoseAccumulator->GetNodeMatrix(lbl_806E0C28);
         character->mUnidentified194 = *(nlVector3*)&m.e2[3][0];
         character->mUnidentified1A0 = nlVec3Length(*(nlVector3*)&m.e2[0][0]);

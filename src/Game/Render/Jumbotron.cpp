@@ -2,7 +2,7 @@
 
 Jumbotron Jumbotron::instance;
 
-void Jumbotron::Initialize()
+void Jumbotron::Initialize(GLResourcePool*)
 {
 }
 

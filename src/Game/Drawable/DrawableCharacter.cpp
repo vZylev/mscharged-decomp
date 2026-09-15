@@ -904,9 +904,9 @@ void DrawableCharacter::Blend(
         for (int i = 0; i < fn_8030C374(poseAccumulator); ++i)
         {
             nlQuatNLerp(
-                poseAccumulator->m_pQuaternions[i],
-                lhs.poseAccumulator->m_pQuaternions[i],
-                rhs.poseAccumulator->m_pQuaternions[i],
+                poseAccumulator->GetNodeQuaternion(i),
+                lhs.poseAccumulator->GetNodeQuaternion(i),
+                rhs.poseAccumulator->GetNodeQuaternion(i),
                 rhsWeight);
             BlendTranslationAccum(
                 poseAccumulator->m_trans[i],
@@ -1494,4 +1494,3 @@ bool DrawableCharacter::NoShadowCallback()
 {
     return false;
 }
-

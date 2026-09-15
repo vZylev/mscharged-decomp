@@ -514,7 +514,7 @@ void UnidentifiedPresentationState::Update(float deltaTime)
 /**
  * Address/Size: 0x80285E1C | size: 0x4
  */
-void fn_80285E1C()
+void UnidentifiedPresentationState::fn_80285E1C()
 {
 }
 

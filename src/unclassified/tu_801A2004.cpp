@@ -58,18 +58,8 @@ extern "C" void fn_801A2004(
         *values->miHighRangeGray.m_pValue = 80;
     }
 
-    registered
-        = values->mbFineHighRange.Bind(
-            "mbFineHighRange", 0.0f, group, true, 0.0f, 0.0f);
-    if (!registered)
-    {
-        *values->mbFineHighRange.m_pValue
-            = values->mbFineHighRange.GetDefault();
-    }
-    if (!registered)
-    {
-        *values->mbFineHighRange.m_pValue = true;
-    }
+    values->mbFineHighRange.BindWithDefault(
+        "mbFineHighRange", true, group, true, 0.0f, 0.0f, 0.0f);
 
     registered = values->miRed.Bind(
             "miRed", 0.0f, group, true, 255.0f, 1.0f);

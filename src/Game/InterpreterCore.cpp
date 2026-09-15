@@ -18,11 +18,6 @@ inline TweakIntBinding::TweakIntBinding(int* value)
 {
 }
 
-inline TweakBoolBinding::TweakBoolBinding(bool* value)
-    : m_pValue(value)
-{
-}
-
 struct InterpreterTweakStorage
 {
     /* 0x00 */ u32 unknown_0x00;
