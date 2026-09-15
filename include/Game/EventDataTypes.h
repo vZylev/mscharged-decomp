@@ -302,7 +302,9 @@ struct NISData
 
 struct PowerupUsedEventData
 {
-    /* 0x00 */ u8 data[0xC];
+    /* 0x00 */ ePowerUpType Type;
+    /* 0x04 */ cPlayer* Thrower;
+    /* 0x08 */ cPlayer* Target;
 }; // total size: 0xC
 
 struct PowerupHitPlayerEventData

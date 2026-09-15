@@ -682,7 +682,7 @@ inline SpinyShell::SpinyShell(cFielder* pTarget, int nIndex, float fRadius,
 {
 }
 
-u8 PowerupCreateAndThrow(cFielder* pThrower, cFielder* pTarget,
+int PowerupCreateAndThrow(cFielder* pThrower, cFielder* pTarget,
     unk_8009A5D8* pUnidentified)
 {
     PowerupBase* pFirstPowerup = 0;

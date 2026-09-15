@@ -741,7 +741,11 @@ void Windy::AvoidDebrisObstacle(nlVector3& start, nlVector3& end, nlVector3& dis
             direction.x *= -1.0f;
             direction.y *= -1.0f;
         }
-        nlVec3Scale(direction, nlRecipSqrt(nlVec3LengthSquared(direction), false));
+        float inverseLength = nlRecipSqrt(nlVec3LengthSquared(direction), false);
+        nlVec3Set(direction,
+            inverseLength * direction.x,
+            inverseLength * direction.y,
+            inverseLength * direction.z);
         nlVec3Scale(offset, direction, radius - distance);
         nlVec3Add(displacement, displacement, offset);
         nlVec3Add(start, start, offset);

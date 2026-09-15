@@ -193,14 +193,14 @@ Game/TweakFileLoader.cpp:
 	.sdata2     start:0x806E37A0 end:0x806E37A8
 
 Game/GameTweaksManager.cpp:
-	.text       start:0x80073C98 end:0x800742DC
+	.text       start:0x80073C98 end:0x80074F04
 	.ctors      start:0x804DB528 end:0x804DB52C
 	.data       start:0x804FC7F0 end:0x804FC8C0
 	.bss        start:0x8056BA00 end:0x8056CF28
 	.sdata      start:0x806DBAE8 end:0x806DBB00
 
 Game/GameTweaks.cpp:
-	.text       start:0x800742DC end:0x8007722C
+	.text       start:0x80074F04 end:0x8007722C
 	.ctors      start:0x804DB52C end:0x804DB530
 	.data       start:0x804FC8C0 end:0x804FD8D8
 	.sdata      start:0x806DBB00 end:0x806DBB08
@@ -6467,6 +6467,10 @@ RVL_SDK/hbm/nw4hbm/math/math_triangular.cpp:
 	.text       start:0x80454AF8 end:0x80454D68
 	.data       start:0x80558EF8 end:0x8055A010
 	.sdata2     start:0x806E7778 end:0x806E7798
+
+RVL_SDK/hbm/nw4hbm/snd/snd_AnimSound.cpp:
+	.data       start:0x8055A010 end:0x8055A040
+	.sdata      start:0x806E0248 end:0x806E0250
 
 RVL_SDK/hbm/nw4hbm/snd/snd_AxManager.cpp:
 	.text       start:0x80454D68 end:0x80456B48
