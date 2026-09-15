@@ -10,7 +10,7 @@
 #include "Game/MathHelpers.h"
 #include "Game/Effects/EmissionManager.h"
 #include "Game/Effects/EmissionController.h"
-#include "unclassified/tu_80175F8C.h"
+#include "Game/Physics/PhysicsShockwave.h"
 #include "Game/Render/NPCManager.h"
 #include "Game/Render/tu_801B532C.h"
 #include "math.h"
@@ -1431,7 +1431,7 @@ void StormShipWeather::Update(float value)
             if (m_FirstStrikeElectrocuteTimer <= 0.0f)
             {
                 m_FirstStrikeElectrocuteTimer = 0.0f;
-                fn_801768E0(&v3Zero, gStormStrikeRadius);
+                CreateLightningShockwave(&v3Zero, gStormStrikeRadius);
             }
         }
         if (m_StopChainLightningSound > 0.0f)

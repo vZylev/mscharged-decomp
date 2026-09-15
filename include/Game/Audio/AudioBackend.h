@@ -50,7 +50,7 @@ public:
     void ResumeControllerSpeakers();
     void* AllocateAudioMemory(unsigned long size);
     void FreeAudioMemory(void* pointer);
-    void ServiceReadQueue();
+    void ServiceReadQueue(float dt);
     AudioSource* CreateSource(AudioSourceInfo*, XSoundOwner* owner);
     void ReleaseSource(AudioSource* source);
     void QueueRead(nlFile* file, unsigned int offset, void* buffer,

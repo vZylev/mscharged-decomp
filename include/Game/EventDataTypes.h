@@ -12,7 +12,7 @@ class CrowdRiot;
 class NetMesh;
 class PhysicsObject;
 class PhysicsPatch;
-class PhysicsSphere_80175F8C;
+class PhysicsShockwave;
 class cBall;
 class cCharacter;
 class cFielder;
@@ -408,10 +408,10 @@ struct UnidentifiedEventData35;
 struct UnidentifiedEventData36;
 struct UnidentifiedEventData37;
 
-struct UnidentifiedEventData38
+struct CollisionShockwaveData
 {
-    /* 0x00 */ PhysicsSphere_80175F8C* mUnidentified00;
-    /* 0x04 */ PhysicsObject* mUnidentified04;
+    /* 0x00 */ PhysicsShockwave* pShockwave;
+    /* 0x04 */ PhysicsObject* pObject;
     /* 0x08 */ unsigned int mUnidentified08;
 }; // total size: 0xC
 

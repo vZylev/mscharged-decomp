@@ -145,7 +145,7 @@ void AudioReadState::SetInputVolume(float value)
     OSRestoreInterrupts(enabled);
 }
 
-void AudioBackend::ServiceReadQueue()
+void AudioBackend::ServiceReadQueue(float)
 {
     bool enabled = OSDisableInterrupts();
     while (m_Unknown024.m_Head != 0)
