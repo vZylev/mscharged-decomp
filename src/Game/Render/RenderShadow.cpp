@@ -31,11 +31,11 @@ void fn_80273A4C(eCLV, const glModel*, unsigned long);
 }
 
 
-int fn_802721BC();
-void fn_802721C4(int partition, bool enabled);
-GLView* fn_802721EC(int partition);
-u32 fn_80272200(int partition);
-void fn_80272214(int partition, const nlMatrix4& view,
+int GetShadowPartitionCount();
+void SetShadowPartitionEnabled(int partition, bool enabled);
+GLView* GetShadowPartitionView(int partition);
+u32 GetShadowPartitionTexture(int partition);
+void SetShadowPartitionCamera(int partition, const nlMatrix4& view,
     const nlMatrix4& projection);
 extern "C" void fn_80184C3C(
     GLView* pView, const ProjectedShadowParams& params);
@@ -272,9 +272,9 @@ static void DrawBallShadow(
 void ClearCharacterShadowsUpdated()
 {
     int shadowIndex;
-    for (shadowIndex = 0; shadowIndex < fn_802721BC(); shadowIndex++)
+    for (shadowIndex = 0; shadowIndex < GetShadowPartitionCount(); shadowIndex++)
     {
-        fn_802721C4(shadowIndex, false);
+        SetShadowPartitionEnabled(shadowIndex, false);
     }
 }
 
@@ -475,7 +475,7 @@ static void RenderBlobShadow(const nlVector3& vPosition,
     }
     else
     {
-        texture = fn_80272200(index);
+        texture = GetShadowPartitionTexture(index);
 
         quad.m_pos[0] = pPoints[0];
         quad.m_pos[1] = pPoints[1];
@@ -599,15 +599,15 @@ void RenderCharacterIntoTexture(const ProjectedShadowParams& params)
     float radius = 2.0f * params.fRadius;
     glMatrixOrthographicCentered(projection, radius, radius, 4.0f, 12.0f);
 
-    fn_80272214(params.nPartitionIndex, view, projection);
-    fn_802721C4(params.nPartitionIndex, true);
-    fn_80184C3C(fn_802721EC(params.nPartitionIndex), params);
-    fn_802721EC(params.nPartitionIndex)->AttachModel(params.pModel, 0);
+    SetShadowPartitionCamera(params.nPartitionIndex, view, projection);
+    SetShadowPartitionEnabled(params.nPartitionIndex, true);
+    fn_80184C3C(GetShadowPartitionView(params.nPartitionIndex), params);
+    GetShadowPartitionView(params.nPartitionIndex)->AttachModel(params.pModel, 0);
 
     if (g_bShadowBounds)
     {
         GLView* unknownView = g_ShapeRenderer.m_eView;
-        g_ShapeRenderer.m_eView = fn_802721EC(params.nPartitionIndex);
+        g_ShapeRenderer.m_eView = GetShadowPartitionView(params.nPartitionIndex);
 
         vTemp = params.vPosition;
         vTemp.z += 0.5f * params.fHeight;

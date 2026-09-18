@@ -406,6 +406,7 @@ public:
     void SendConnectionDecisionToEveryone(NetworkMessage* message);
     void SendConnectionDecisionToHost(NetworkMessage* message);
     void ShutdownLAN();
+    void SetLoginListener(NetworkLoginListener* listener) { mLoginListener = listener; }
     void StartLoginThread();
     bool IsLoginThreadComplete();
     bool RequiresDisconnectAfterError();

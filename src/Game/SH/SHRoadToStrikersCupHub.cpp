@@ -1,5 +1,4 @@
 #include "Game/SH/SHRoadToStrikersCupHub.h"
-#include "NL/nlBasicString.inl"
 #include "NL/nlFunction.inl"
 
 #include "Game/DB/CharacterInfo.h"
@@ -13,7 +12,6 @@
 #include "Game/FE/feInput.h"
 #include "Game/FE/feMusic.h"
 #include "Game/FE/fePackage.h"
-#include "Game/FE/fePresentation.h"
 #include "Game/FE/fePresentation.inl"
 #include "Game/FE/feScene.h"
 #include "Game/FE/tlComponentInstance.h"

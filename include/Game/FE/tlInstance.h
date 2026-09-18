@@ -22,6 +22,8 @@ public:
     TLInstance(FELibObject* component);
 
     eTimeLineAssetType GetType() const;
+    bool IsVisible() const;
+    FELibObject* GetLibRefObject() const;
     bool IsValidAtTime(float fCurrentTime);
     void SetVisible(bool visible);
 

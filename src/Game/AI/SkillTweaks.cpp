@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include "NL/nlBasicString.inl"
 #include <string.h>
 
 #include "Game/AI/SkillTweaks.h"
@@ -465,8 +464,9 @@ SkillTweak* SkillTweaks::AddTweak(const char* name)
     }
     else
     {
+        unsigned long hash = nlStringLowerHash(name);
         SkillTweak** found;
-        if (sDefaultSkillTweaks.FindGet(nlStringLowerHash(name), &found))
+        if (sDefaultSkillTweaks.FindGet(hash, &found))
             defaultTweak = *found;
     }
     if (defaultTweak != 0)

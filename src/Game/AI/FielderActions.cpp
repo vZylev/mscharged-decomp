@@ -733,16 +733,17 @@ void cFielder::ActionHit(float fDeltaT)
                 pCaptain = m_pTeam->GetOtherTeam()->GetCaptain();
             }
 
-            nlVector3& rv3Position = mUnidentified024.m_v3Position;
+            const nlVector2& v2Position
+                = *(const nlVector2*)&mUnidentified024.m_v3Position;
 
             float fOffsetY;
             float fOffsetX;
             nlPolarToCartesian(
                 fOffsetX, fOffsetY, mUnidentified024.m_aActualFacingDirection, lbl_806E35F0);
 
-            nlVector3 v3Target;
-            v3Target.y = fOffsetY + rv3Position.y;
-            v3Target.x = fOffsetX + rv3Position.x;
+            nlVector2 v2Target;
+            nlVec2Set(v2Target, fOffsetX + v2Position.x,
+                fOffsetY + v2Position.y);
 
             bool bBlocked = false;
             float fT1;
@@ -752,9 +753,9 @@ void cFielder::ActionHit(float fDeltaT)
                 PhysicsWaluigiWall* pObject
                     = pCaptain->mUnidentified3F8.mUnidentified08->GetWall(i);
                 if (pObject != 0
-                    && nlIntersectLineSegments2D((const nlVector2*)&rv3Position, (const nlVector2*)&v3Target,
-                        (const nlVector2*)&pObject->mStartPoint,
-                        (const nlVector2*)&pObject->mEndPoint, &fT1, &fT2))
+                    && nlIntersectLineSegments2D(&v2Position, &v2Target,
+                        (const nlVector2*)&pObject->GetStartPoint(),
+                        (const nlVector2*)&pObject->GetEndPoint(), &fT1, &fT2))
                 {
                     bBlocked = true;
                 }
