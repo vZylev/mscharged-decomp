@@ -63,6 +63,9 @@ public:
     /* 0x88 */ eTimeLineAssetType m_type;
     /* 0x8C */ u16 m_priority;
     /* 0x8E */ bool m_bVisible;
+
+private:
+    void SetName(const char* name);
 };
 
 

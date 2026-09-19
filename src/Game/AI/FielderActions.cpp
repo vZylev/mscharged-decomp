@@ -5168,12 +5168,9 @@ void cFielder::fn_8004E6B4()
                     * (float)(pProjectile->mIndex % 5);
 
             nlVector3 v3Target;
-            v3Target.x = fDistance * m_m4WorldMatrix.e2[0][0]
-                + mUnidentified024.m_v3Position.x;
-            v3Target.y = fDistance * m_m4WorldMatrix.e2[0][1]
-                + mUnidentified024.m_v3Position.y;
-            v3Target.z = fDistance * m_m4WorldMatrix.e2[0][2]
-                + mUnidentified024.m_v3Position.z;
+            m_m4WorldMatrix.GetRow_(0, v3Target);
+            nlVec3ScaleAdd(v3Target, fDistance, v3Target,
+                mUnidentified024.m_v3Position);
 
             nlVector3 v3Delta;
             nlVec3Sub(v3Delta, v3Target, mUnidentified024.m_v3Position);
@@ -5205,8 +5202,7 @@ void cFielder::fn_8004E6B4()
                 fRoot = fX2;
             }
             float fScale = 1.0f / fRoot;
-            v3Delta.x *= fScale;
-            v3Delta.y *= fScale;
+            nlVec3Scale(v3Delta, fScale);
             v3Delta.z = fHeight;
             pProjectile->SetVelocity(v3Delta);
         }

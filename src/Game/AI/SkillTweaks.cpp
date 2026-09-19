@@ -433,8 +433,9 @@ SkillTweakCopier::SkillTweakCopier(SkillTweaks* tweaks, Config* config)
 void SkillTweakCopier::Copy(const unsigned long& key, SkillTweak** value)
 {
     SkillTweak* tweak;
+    unsigned long hash = (*value)->mHash;
     SkillTweak** foundValue;
-    bool found = mTweaks->mSkillTweaksList.FindGet((*value)->mHash, &foundValue);
+    bool found = mTweaks->mSkillTweaksList.FindGet(hash, &foundValue);
     if (found)
         tweak = *foundValue;
     if (found)

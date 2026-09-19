@@ -156,10 +156,8 @@ void BootLoadingScene::SetPhaseSlide()
     if (mHomeButtonWarning != 0)
     {
         float time = mHomeButtonWarning->GetActiveSlide()->m_time;
-        mHomeButtonWarning = FEFinder<TLComponentInstance, 4>::Find(mPresentation->GetActiveSlide(),
-            InlineHasher("Layer"), InlineHasher("no home"));
-        if (mHomeButtonWarning == 0)
-            mHomeButtonWarning = &UnidentifiedTLComponentDefault::sInstance;
+        mHomeButtonWarning = FEFinder<TLComponentInstance, 4>::FindOrDefault(
+            mPresentation->GetActiveSlide(), "Layer", "no home");
         if (mWidescreen)
             mHomeButtonWarning->SetActiveSlide("widescreen", true, false);
         else
@@ -167,7 +165,7 @@ void BootLoadingScene::SetPhaseSlide()
         if (mHomeButtonWarningActive)
         {
             TLSlide* slide = mHomeButtonWarning->GetActiveSlide();
-            if (time < slide->m_start + slide->m_duration)
+            if (time < slide->GetStartTime() + slide->GetDuration())
                 mHomeButtonWarning->m_bVisible = true;
         }
         mHomeButtonWarning->Update(time);

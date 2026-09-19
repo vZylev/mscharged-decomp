@@ -135,16 +135,21 @@ void CrowdImpostorManager::GenerateCrowd(int reload)
 
 void CrowdImpostorManager::Clear()
 {
+    BasicSlotPool<DLListEntry<CrowdLayoutObject*> >* objectPool;
+
     mPrimaryObjects.Clear();
-    mPrimaryObjects.m_Allocator.FreeBlocks();
+    objectPool = &mPrimaryObjects.m_Allocator;
+    objectPool->FreeBlocks();
     mPrimaryObjectCount = 0;
 
     mOcclusionObjects.Clear();
-    mOcclusionObjects.m_Allocator.FreeBlocks();
+    objectPool = &mOcclusionObjects.m_Allocator;
+    objectPool->FreeBlocks();
     mOcclusionObjectCount = 0;
 
     mEnabledObjects.Clear();
-    mEnabledObjects.m_Allocator.FreeBlocks();
+    objectPool = &mEnabledObjects.m_Allocator;
+    objectPool->FreeBlocks();
     mEnabledObjectCount = 0;
 
     mCharacters.Clear();
