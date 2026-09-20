@@ -844,7 +844,7 @@ config.libs = [
             Object(Matching, "Game/Physics/PhysicsWaluigiWall.cpp", extra_cflags=["-ipa file", "-sym on"]),
             Object(Matching, "Game/Physics/PhysicsWall.cpp"),
             Object(Matching, "Game/Physics/PhysicsYoshiEgg.cpp"),
-            Object(NonMatching, "Game/Task/FixedUpdateTask.cpp", extra_cflags=["-ipa file"]),
+            Object(Matching, "Game/Task/FixedUpdateTask.cpp", extra_cflags=["-ipa file", "-sym on"]),
             Object(Matching, "Game/Task/WorldUpdateTask.cpp"),
             Object(Matching, "Game/Task/EndFrameTask.cpp"),
             Object(Matching, "Game/Task/BeginFrameTask.cpp", extra_cflags=["-ipa file"]),
