@@ -1105,7 +1105,7 @@ config.libs = [
             Object(Matching, "Game/Transitions/TransitionSequence.cpp"),
             Object(NonMatching, "Game/world.cpp", extra_cflags=["-ipa file"]),
             Object(NonMatching, "Game/World/worldanim.cpp", extra_cflags=["-inline auto,depth=3", "-ipa file"]),
-            Object(NonMatching, "Game/World/worldanimobjects.cpp"),
+            Object(NonMatching, "Game/World/worldanimobjects.cpp", extra_cflags=["-inline nobottomup"]),
         ],
     },
     {

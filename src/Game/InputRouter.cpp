@@ -370,7 +370,7 @@ void NetworkInputRouter::ReceiveInput(
     if (queue.mCount < queue.mCapacity)
     {
         u32 position = (queue.mHead + queue.mCount) % queue.mCapacity;
-        memcpy(&queue.mMessages[position], message, sizeof(*message));
+        memcpy(&queue.mBuffer[position], message, sizeof(*message));
         ++queue.mCount;
     }
     else
@@ -393,10 +393,7 @@ NetMessageAllInputsBundle::~NetMessageAllInputsBundle()
 }
 
 NetworkInputMessageQueue::NetworkInputMessageQueue()
-    : mMessages(mStorage)
-    , mHead(0)
-    , mCount(0)
-    , mCapacity(60)
+    : CircularQueueBase<NetMessageInput>(mStorage, 60)
 {
 }
 

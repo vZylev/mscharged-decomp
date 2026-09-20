@@ -26,8 +26,9 @@ public:
 
 extern "C" void fn_80343DE4(
     DrawableObject*, WorldObjectLoadContext*);
-extern "C" void fn_80343E3C(
-    DrawableObject*, WorldObjectLoadContext*);
+struct WorldVertexAnimDrawable_80343E3C;
+void CreateWorldVertexAnimDrawable(
+    WorldVertexAnimDrawable_80343E3C*, WorldObjectLoadContext*);
 extern "C" void fn_80344144(
     DrawableObject*, WorldObjectLoadContext*);
 
@@ -288,7 +289,8 @@ DrawableObject* World::CreateObject(
         break;
     case 0x102:
         pObject = (DrawableObject*)pContext->m_pObject;
-        fn_80343E3C(pObject, pContext);
+        CreateWorldVertexAnimDrawable(
+            (WorldVertexAnimDrawable_80343E3C*)pObject, pContext);
         uSize = 0x30;
         break;
     case 0x103:
