@@ -190,11 +190,11 @@ bool World::LoadChunks(nlChunk* pChunk, unsigned long uSize)
                         - ((u8*)pCurrent + sizeof(nlChunk))),
                 false);
             break;
-        case 0x80008000:
+        case 0x80018000:
             m_pAnimationSet
                 = mWorldAnimManager.LoadHierarchy(pCurrent);
             break;
-        case 0x80007000:
+        case 0x80017000:
             mWorldAnimManager.LoadAnimationSet(
                 m_pAnimationSet, pCurrent);
             break;

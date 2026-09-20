@@ -26,14 +26,6 @@
 
 #include <math.h>
 
-extern "C" void fn_8030B038(cPoseAccumulator*, const cPoseNode*,
-    const nlMatrix4*);
-extern "C" void fn_803438FC(WorldAnimObject_803437C8*);
-extern "C" void fn_803439A4(WorldAnimObject_803437C8*);
-extern "C" void fn_802E4358(EmissionController*);
-extern "C" EffectsGroup* fn_802E7D54(
-    EmissionManager*, unsigned long);
-
 struct WorldPhysicsOwner_80342170
 {
     u8 m_pad00[0x80];
@@ -99,8 +91,11 @@ WorldVisibilityNode* FindWorldVisibilityNode(
     WorldVertexAnimDrawable_80343E3C*, WorldVisibilityNode*);
 
 extern "C" PhysicsObject* fn_80341EEC(
-    WorldPhysicsDescription_80341EEC*, CollisionSpace*);
-extern "C" void fn_80342170(WorldPhysicsOwner_80342170*);
+    WorldPhysicsDescription_80341EEC* pDescription,
+    CollisionSpace* pCollisionSpace);
+extern "C" void fn_80342170(WorldPhysicsOwner_80342170* pOwner);
+extern "C" EffectsGroup* fn_802E7D54(
+    EmissionManager*, unsigned long);
 
 extern "C" void fn_803437C8(WorldAnimObject_803437C8* pObject,
     WorldObjectLoadContext* pContext)
@@ -506,7 +501,7 @@ extern "C" void fn_80344218(WorldEffect* pEffect)
         EmissionController* pController = current->entry;
         if (pController->m_uUserData == (u32)pEffect)
         {
-            fn_802E4358(pController);
+            pController->ClearParticles();
             pController->mUpdateCallback.Clear();
         }
         if (nlDLRingIsEnd(head, current) || current == 0)
