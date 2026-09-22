@@ -119,14 +119,13 @@ void UnregisterEvent(void* eventPtr)
 void RegisterEventConnection(void* event, void* connectionPtr,
     unsigned int owner, int group, void*)
 {
-    UnidentifiedConnection* connection
-        = (UnidentifiedConnection*)connectionPtr;
-    connection->mEvent = (void*)owner;
-    connection->mGroupCount = 0;
-    connection->mTarget = event;
+    ((UnidentifiedConnection*)connectionPtr)->mEvent = (void*)owner;
+    ((UnidentifiedConnection*)connectionPtr)->mGroupCount = 0;
+    ((UnidentifiedConnection*)connectionPtr)->mTarget = event;
     if (owner != 0)
     {
-        *(UnidentifiedConnection**)owner = connection;
+        *(UnidentifiedConnection**)owner
+            = (UnidentifiedConnection*)connectionPtr;
     }
 
     if ((unsigned int)group == (unsigned int)-1)
@@ -134,9 +133,10 @@ void RegisterEventConnection(void* event, void* connectionPtr,
         return;
     }
 
-    ConnectionTree** foundTree;
     ConnectionTree* tree = 0;
+    ConnectionTree** foundTree;
     unsigned int key = (unsigned int)group;
+    ConnectionKey connection = (UnidentifiedConnection*)connectionPtr;
     if (!sConnectionGroups.FindGet(key, &foundTree))
     {
         tree = new (8, false) ConnectionTree;

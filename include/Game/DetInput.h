@@ -30,7 +30,7 @@ public:
     void ResetButtonStateTicks(int button, bool remap);
     void CopyState(const DetInput& input);
     void ReadFromPad(cGlobalPad* pad);
-    int GetPadID();
+    int GetPadID() const;
 
     /* 0x00 */ float m_AnalogLeftX;
     /* 0x04 */ float m_AnalogLeftY;

@@ -257,10 +257,68 @@ void NetworkDraft::BeginTeamDraft(NetMessageDraft* message)
 
 void NetworkDraft::AssignDraftSides()
 {
-    mSideToTeam[0] = 0;
-    mSideToTeam[1] = mTeamCount > 1 ? 1 : -1;
-    mSideDrafted[0] = mSideToTeam[0] >= 0;
-    mSideDrafted[1] = mSideToTeam[1] >= 0;
+    struct SidePlayer
+    {
+        SidePlayer() : machine(-1), guest(false) { }
+
+        s8 machine;
+        bool guest;
+    };
+
+    bool usedMachines[4] = { false };
+    int sideCounts[2] = { 0, 0 };
+    SidePlayer sidePlayers[2][3];
+
+    for (int machine = 0; machine < mDraftMessage.mMachineCount; ++machine)
+    {
+        int side = mDraftMessage.mPlayerSides.mData[machine][0];
+        if (side != -1)
+        {
+            int count = sideCounts[side]++;
+            SidePlayer& player = sidePlayers[side][count];
+            player.machine = machine;
+            player.guest = false;
+        }
+
+        side = mDraftMessage.mPlayerSides.mData[machine][1];
+        if (side != -1)
+        {
+            int count = sideCounts[side]++;
+            SidePlayer& player = sidePlayers[side][count];
+            player.machine = machine;
+            player.guest = true;
+        }
+    }
+
+    int side = 0;
+    if (sideCounts[1] == 1 && sideCounts[0] > 1)
+    {
+        side = 1;
+    }
+
+    mSideToTeam[side] = sidePlayers[side][0].machine;
+    mSideDrafted[side] = sidePlayers[side][0].guest;
+    usedMachines[mSideToTeam[side]] = true;
+
+    if (side == 0)
+    {
+        side = 1;
+    }
+    else if (side == 1)
+    {
+        side = 0;
+    }
+
+    for (int i = 0; i < sideCounts[side]; ++i)
+    {
+        if (!usedMachines[sidePlayers[side][i].machine])
+        {
+            mSideToTeam[side] = sidePlayers[side][i].machine;
+            mSideDrafted[side] = sidePlayers[side][i].guest;
+            usedMachines[mSideToTeam[side]] = true;
+            break;
+        }
+    }
 }
 
 int NetworkDraft::CompareDraftTeams(const void* left, const void* right)

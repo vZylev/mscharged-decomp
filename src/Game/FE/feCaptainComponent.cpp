@@ -9,6 +9,7 @@
 #include "Game/FE/feDPD.h"
 #include "Game/BaseGameSceneManager.h"
 #include "Game/GameSceneManager.h"
+#include "Game/BaseSceneHandler.inl"
 #include "Game/EventDataTypes.h"
 #include "Game/EventRegistry.h"
 #include "Game/OverlayManager.h"
@@ -360,7 +361,7 @@ static inline bool SidekickFacingFlag(int sidekick)
 
 static inline TLImageInstance* FindSidekickImage(int sidekick, int captain)
 {
-    FEPresentation* presentation = GameSceneManager::Instance()->GetCurrentScene()->mPresentation;
+    FEPresentation* presentation = GameSceneManager::Instance()->GetCurrentScene()->GetPresentation();
     const CharacterInfo& sidekickInfo = GetCharacterInfo(GetCharacterIndexFromSidekick(sidekick));
     const CharacterInfo& captainInfo = GetCharacterInfo(GetCharacterIndexFromCaptain(captain));
     char name[64];
@@ -395,7 +396,7 @@ static inline void SetSidekickImage(const TU801DA134Component* component, TLImag
 
 static inline TLImageInstance* FindCaptainImage(int captain, bool left)
 {
-    FEPresentation* presentation = GameSceneManager::Instance()->GetCurrentScene()->mPresentation;
+    FEPresentation* presentation = GameSceneManager::Instance()->GetCurrentScene()->GetPresentation();
     const CharacterInfo& captainInfo = GetCharacterInfo(GetCharacterIndexFromCaptain(captain));
     TLImageInstance* source = 0;
     char name[64];

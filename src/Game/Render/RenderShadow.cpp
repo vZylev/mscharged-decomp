@@ -1,3 +1,5 @@
+#include <revolution/gx/GXTypes.h>
+
 #include "Game/Render/RenderShadow.h"
 
 #include "Game/BasicStadium.h"
@@ -8,6 +10,8 @@
 #include "Game/Render/Frustum.h"
 #include "NL/gl/gl.h"
 #include "NL/gl/glDraw3.h"
+#include "NL/gl/glMaterialParameters.h"
+#include "NL/gl/glMaterialProgram.h"
 #include "NL/gl/glMatrix.h"
 #include "NL/gl/glState.h"
 
@@ -39,6 +43,9 @@ void SetShadowPartitionCamera(int partition, const nlMatrix4& view,
     const nlMatrix4& projection);
 extern "C" void fn_80184C3C(
     GLView* pView, const ProjectedShadowParams& params);
+extern "C" void fn_80186524(nlMatrix4& out, const nlMatrix4& in);
+extern "C" void fn_8018680C(eCLV layer, const glModel* model,
+    const nlMatrix4& transform, unsigned long boundingBoxCacheKey);
 
 static float g_fBallShadowH = 4.0f;
 static float g_fBallShadowR0 = 0.35f;
@@ -59,7 +66,6 @@ int MaxProjectedShadows;
 static u8 g_bShadowBlobs;
 static u8 g_bShadowPositionOverride;
 static RLView* g_CharacterShadowView;
-static const unsigned long CoPlanarTexture = glGetTexture("global/black_coplanar");
 static const unsigned long LightRampTexture = glGetTexture("global/lightramp");
 static const unsigned long BlackTexture = glGetTexture("global/black");
 const unsigned long WhiteTexture = glGetTexture("global/white");
@@ -98,6 +104,100 @@ static inline void CastDirectional(nlVector3& p, const nlVector3& lightPos)
 
 static void DrawBallShadow(
     const nlVector3& vPosition, const BallShadowParams& p, bool bGlow);
+
+/**
+ * Address/Size: 0x801869AC | size: 0x2D8
+ *
+ * Draws one model's ground shadow: the flattened bounding box for the
+ * projected pass and the co-planar geometry for the planar pass.
+ */
+void DrawPlanarShadow(const glModel* model, const nlMatrix4& transform,
+    int ignorePacketMatrices, unsigned long isModelPosed,
+    const void* boundingBoxCacheKey, float shadowTranslucency)
+{
+    nlMatrix4 modelMatrix;
+    nlMatrix4 shadowMatrix;
+    nlMatrix4 combined;
+    nlMatrix4 packetMatrix;
+    nlMatrix4 projected;
+
+    if (g_bShadowBoundingBox)
+        RenderBoundingBox(model, transform);
+
+    if (!g_bPlanarShadows)
+        return;
+
+    if (g_bProjectedShadows)
+    {
+        if (g_bSkipUntransformed && transform.m41 == 0.0f
+            && transform.m42 == 0.0f && transform.m43 == 0.0f)
+        {
+            return;
+        }
+
+        if (ignorePacketMatrices != 0)
+        {
+            projected = transform;
+        }
+        else
+        {
+            glModelGetMatrix(model, packetMatrix);
+            nlMultMatrices(projected, transform, packetMatrix);
+        }
+        fn_8018680C(eCLV_CoPlanar, model, projected,
+            (unsigned long)boundingBoxCacheKey);
+    }
+
+    glModelGetMatrix(model, modelMatrix);
+
+    if (ignorePacketMatrices == 0)
+    {
+        if (isModelPosed != 0)
+        {
+            combined = modelMatrix;
+        }
+        else
+        {
+            nlMultMatrices(combined, transform, modelMatrix);
+        }
+        fn_80186524(shadowMatrix, combined);
+    }
+    else
+    {
+        fn_80186524(shadowMatrix, transform);
+    }
+    glModelSetMatrix((glModel*)model, shadowMatrix);
+
+    glSetRasterState(GLS_DepthTest, 1);
+    glSetCurrentRasterState(glHandleizeRasterState());
+
+    static const unsigned long CoPlanarTexture
+        = glGetTexture("global/black_coplanar");
+
+    for (glModelPacket* packet = model->packets;
+         packet < model->packets + model->numPackets; packet++)
+    {
+        GLMaterialProgram* program = (GLMaterialProgram*)packet->materialProgram;
+        int parameterCount = program->parameterCount;
+        for (int i = 0; i < parameterCount; i++)
+        {
+            const GXMaterialParameter* parameter
+                = glGetMaterialParameterInfo(packet, i);
+            if ((parameter->metadata & 0xF) == 3)
+            {
+                glTextureBinding* binding = (glTextureBinding*)(
+                    (u8*)packet->materialParameters + parameter->offset);
+                binding->texture = CoPlanarTexture;
+                binding->textureIndex = 0xFFFF;
+            }
+        }
+
+        glSetRasterState(packet->rasterState, GLS_AlphaBlend, 1);
+        glSetRasterState(packet->rasterState, GLS_DepthFunc, 3);
+    }
+
+    GetLayerView(eCLV_CoPlanar)->AttachModel(model, 0);
+}
 
 void SetPlanarShadowOpacity(float opacity)
 {
@@ -910,92 +1010,55 @@ extern "C" void fn_80186650(const glModel* model, const nlMatrix4& transform,
 extern "C" void fn_8018680C(eCLV layer, const glModel* model,
     const nlMatrix4& transform, unsigned long boundingBoxCacheKey)
 {
-    float minX;
-    float maxX;
-    float minY;
-    float maxY;
+    float x0;
+    float x1;
+    float y0;
+    float y1;
     float z = sfCoPlanarZ;
-    fn_80186650(model, transform, &minX, &maxX, &minY, &maxY,
+    fn_80186650(model, transform, &x0, &x1, &y0, &y1,
         boundingBoxCacheKey);
 
-    glQuad3 quad;
-    quad.m_pos[0].x = maxY;
-    quad.m_pos[0].y = maxX;
-    quad.m_pos[0].z = z;
-    quad.m_pos[1].x = minY;
-    quad.m_pos[1].y = maxX;
-    quad.m_pos[1].z = z;
-    quad.m_pos[2].x = minY;
-    quad.m_pos[2].y = minX;
-    quad.m_pos[2].z = z;
-    quad.m_pos[3].x = maxY;
-    quad.m_pos[3].y = minX;
-    quad.m_pos[3].z = z;
-    if (maxY + minY < 0.0f)
+    nlVector3 points[4];
+    points[0].x = x0;
+    points[0].y = y0;
+    points[0].z = z;
+    points[1].x = x1;
+    points[1].y = y0;
+    points[1].z = z;
+    points[2].x = x1;
+    points[2].y = y1;
+    points[2].z = z;
+    points[3].x = x0;
+    points[3].y = y1;
+    points[3].z = z;
+    if (x0 + x1 < 0.0f)
     {
-        quad.m_pos[0].x = minY;
-        quad.m_pos[1].x = maxY;
-        quad.m_pos[2].x = maxY;
-        quad.m_pos[3].x = minY;
+        points[0].x = x1;
+        points[1].x = x0;
+        points[2].x = x0;
+        points[3].x = x1;
     }
 
     glSetDefaultState(false);
-    glSetRasterState((eGLState)6, g_bCoPlanarBlend ? 0 : 3);
-    glSetRasterState((eGLState)0, 0);
-    glSetRasterState((eGLState)1, 0);
+    glSetRasterState(GLS_Culling, g_bCoPlanarBlend ? GX_CULL_NONE : GX_CULL_ALL);
+    glSetRasterState(GLS_DepthTest, 0);
+    glSetRasterState(GLS_DepthWrite, 0);
     glSetCurrentRasterState(glHandleizeRasterState());
-    glSetCurrentTexture(WhiteTexture, (eGLTextureType)0);
+    glSetCurrentTexture(WhiteTexture, GLTT_Diffuse);
 
+    glQuad3 quad;
+    quad.m_pos[0] = points[0];
     quad.m_uv[0].x = 0.0f;
     quad.m_uv[0].y = 0.0f;
+    quad.m_pos[1] = points[1];
     quad.m_uv[1].x = 0.0f;
     quad.m_uv[1].y = 0.0f;
+    quad.m_pos[2] = points[2];
     quad.m_uv[2].x = 0.0f;
     quad.m_uv[2].y = 0.0f;
+    quad.m_pos[3] = points[3];
     quad.m_uv[3].x = 0.0f;
     quad.m_uv[3].y = 0.0f;
     quad.SetColour(0xAA, 0xAA, 0xAA, 0xFF);
     quad.Attach((eGLView)GetLayerView(layer), 0);
-}
-
-/**
- * Address/Size: 0x801869AC | size: 0x2D8
- *
- * Draws one model's ground shadow: the flattened bounding box for the
- * projected pass and the co-planar geometry for the planar pass.
- */
-void DrawPlanarShadow(const glModel* model, const nlMatrix4& transform,
-    int hasTransform, unsigned long boundingBoxCacheKey, const void* owner,
-    float opacity)
-{
-    if (g_bShadowBoundingBox)
-        RenderBoundingBox(model, transform);
-
-    if (!g_bPlanarShadows)
-        return;
-
-    if (g_bProjectedShadows)
-    {
-        if (g_bSkipUntransformed && transform.m41 == 0.0f
-            && transform.m42 == 0.0f && transform.m43 == 0.0f)
-        {
-            return;
-        }
-
-        nlMatrix4 projected;
-        if (hasTransform != 0)
-        {
-            projected = transform;
-        }
-        else
-        {
-            nlMatrix4 modelMatrix;
-            glModelGetMatrix(model, modelMatrix);
-            nlMultMatrices(projected, transform, modelMatrix);
-        }
-        fn_8018680C((eCLV)0x1B, model, projected, boundingBoxCacheKey);
-    }
-
-    nlMatrix4 modelMatrix;
-    glModelGetMatrix(model, modelMatrix);
 }

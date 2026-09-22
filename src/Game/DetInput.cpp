@@ -423,7 +423,7 @@ void DetInput::ReadFromPad(cGlobalPad* pad)
     UpdateButtonStateTicks();
 }
 
-int DetInput::GetPadID()
+int DetInput::GetPadID() const
 {
     return ((NetworkPeerChannel*)m_pMyUser)->GetNetworkPeerChannelId();
 }

@@ -116,10 +116,7 @@ extern "C" void fn_802B5CC0(nlVector4& out, const nlVector2& point, const nlVect
 {
     nlVector2 negativeNormal;
     nlVec2Set(negativeNormal, -normal.x, -normal.y);
-    out.x = normal.x;
-    out.y = normal.y;
-    out.z = 0.0f;
-    out.w = nlVec2DotProduct(negativeNormal, point);
+    nlVec4Set(out, normal.x, normal.y, 0.0f, nlVec2DotProduct(negativeNormal, point));
 }
 
 nlMatrix4& nlMakeRotTransMatrix(
