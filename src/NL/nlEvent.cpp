@@ -21,7 +21,6 @@ typedef AVLTreeBase<unsigned int, ConnectionTreePtr, ConnectionGroupPool,
     DefaultKeyCompare<unsigned int> >
     ConnectionGroupTree;
 
-static const ConnectionValue sDefaultConnectionValue = 0;
 static ConnectionGroupTree sConnectionGroups;
 EventRegistry* g_pEventRegistry = 0;
 
@@ -119,13 +118,14 @@ void UnregisterEvent(void* eventPtr)
 void RegisterEventConnection(void* event, void* connectionPtr,
     unsigned int owner, int group, void*)
 {
-    ((UnidentifiedConnection*)connectionPtr)->mEvent = (void*)owner;
-    ((UnidentifiedConnection*)connectionPtr)->mGroupCount = 0;
-    ((UnidentifiedConnection*)connectionPtr)->mTarget = event;
+    UnidentifiedConnection* connection
+        = (UnidentifiedConnection*)connectionPtr;
+    connection->mEvent = (void*)owner;
+    connection->mGroupCount = 0;
+    connection->mTarget = event;
     if (owner != 0)
     {
-        *(UnidentifiedConnection**)owner
-            = (UnidentifiedConnection*)connectionPtr;
+        *(UnidentifiedConnection**)owner = connection;
     }
 
     if ((unsigned int)group == (unsigned int)-1)
@@ -133,27 +133,27 @@ void RegisterEventConnection(void* event, void* connectionPtr,
         return;
     }
 
-    ConnectionTree* tree = 0;
+    unsigned int groupKey = (unsigned int)group;
+    ConnectionKey key = connection;
     ConnectionTree** foundTree;
-    unsigned int key = (unsigned int)group;
-    ConnectionKey connection = (UnidentifiedConnection*)connectionPtr;
-    if (!sConnectionGroups.FindGet(key, &foundTree))
+    ConnectionTree* tree = 0;
+    if (!sConnectionGroups.FindGet(groupKey, &foundTree))
     {
         tree = new (8, false) ConnectionTree;
         if (tree == 0)
         {
             return;
         }
-        sConnectionGroups.Add(key, tree);
+        sConnectionGroups.Add(groupKey, tree);
     }
     else
     {
         tree = *foundTree;
     }
 
-    if (tree->Add(connection, sDefaultConnectionValue) == 0)
+    if (tree->Add(key, 0) == 0)
     {
-        connection->mGroupCount++;
+        key->mGroupCount++;
     }
 }
 

@@ -26,7 +26,8 @@ void SetPlanarShadowOpacity(float opacity);
 float GetPlanarShadowOpacity();
 void DrawPlanarShadow(const glModel* model, const nlMatrix4& transform,
     int ignorePacketMatrices, unsigned long isModelPosed,
-    const void* boundingBoxCacheKey, float shadowTranslucency);
+    const void* boundingBoxCacheKey,
+    float opacity);
 bool ShouldShadowBeUpdated(const ProjectedShadowParams& params);
 void RenderCharacterIntoTexture(const ProjectedShadowParams& params);
 void RenderProjectedShadow(const ProjectedShadowParams& params);

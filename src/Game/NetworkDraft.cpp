@@ -4,6 +4,7 @@
 
 #include "Game/GameInfo.h"
 #include "Game/GameSceneManager.h"
+#include "Game/FE/FEAudio.h"
 #include "Game/NetworkSession.h"
 #include "Game/OnlineMatchmaking.h"
 #include "Game/TweakValue.h"
@@ -496,12 +497,36 @@ void NetworkDraft::AdvanceDraftTeam()
     }
 
     mTimeBeforeDrafting = s_fDefaultTimeToChangeDrafters;
-    mCurrentDraftingTeam = mNextDraftingTeam;
-    if (mCurrentDraftingTeam == mMyTeamIndex)
+    if (IsOnlineRankedMatch())
     {
+        if (mNextDraftingTeam != mMyTeamIndex)
+            return;
+
+        mCurrentDraftingTeam = mMyTeamIndex;
         int captain = GetRandomAvailableCaptain();
         tDebugPrintManager::Print(DC_NETWORK, "Found initial captain choice %d\n", captain);
-        mTeams[mCurrentDraftingTeam].mCaptain = captain;
+        GameInfoManager::Instance()->SetTeam(0, captain);
+        GameInfoManager::Instance()->SetTeam(1, captain);
+        GameInfoManager::Instance()->ResetPlayingSides();
+        FEAudio::PlayAnimAudioEvent(0x74572C29, 0, 0, true);
+        GameSceneManager::Instance()->Push(SCENE_CHOOSE_CAPTAINS_DOMINATION, SCREEN_NOTHING, true);
+    }
+    else
+    {
+        if (mNextDraftingTeam < 0 || mNextDraftingTeam >= 2
+            || mLocalMachineIndex != mSideToTeam[mNextDraftingTeam])
+            return;
+
+        mCurrentDraftingTeam = mNextDraftingTeam;
+        mCurrentDraftingPeer = mSideToTeam[mNextDraftingTeam];
+        mCurrentDrafterIsGuest = mSideDrafted[mNextDraftingTeam];
+        int captain = GetRandomAvailableCaptain();
+        tDebugPrintManager::Print(DC_NETWORK, "Found initial captain choice %d\n", captain);
+        GameInfoManager::Instance()->SetTeam(0, captain);
+        GameInfoManager::Instance()->SetTeam(1, captain);
+        GameInfoManager::Instance()->ResetPlayingSides();
+        FEAudio::PlayAnimAudioEvent(0x74572C29, 0, 0, true);
+        GameSceneManager::Instance()->Push(SCENE_CHOOSE_CAPTAINS_DOMINATION, SCREEN_NOTHING, true);
     }
 }
 
@@ -614,8 +639,19 @@ NetworkDraftTeam* NetworkDraft::FindDraftTeamByPeerIndex(int peerIndex)
 
 int NetworkDraft::ProcessMessage(NetworkMessage* message)
 {
-    int type = message->GetType();
-    if (type == 23)
+    NetworkMachineRoster* roster = g_pNetworkSessionBase->GetMachineRoster();
+    s8 machine = (s8)roster->MachineIdxFromConnection(message->mSource);
+    if (machine < 0 || machine >= roster->GetMachineCount())
+    {
+        tDebugPrintManager::Print(DC_NETWORK,
+            "Discarded message type %d because from unknown connection %x\n",
+            (u8)message->GetType(), message->mSource);
+        return 1;
+    }
+
+    switch ((u8)message->GetType())
+    {
+    case 23:
     {
         NetMessageDraftPickedCaptain* pickedCaptain =
             (NetMessageDraftPickedCaptain*)message;
@@ -625,25 +661,26 @@ int NetworkDraft::ProcessMessage(NetworkMessage* message)
                 "Ignoring ReceivedDraftPickedCaptain because in draft state %d\n",
                 mState);
         }
-        else if ((s8)pickedCaptain->mTeamIndex != mNextDraftingTeam)
+        else if (mNextDraftingTeam != (s8)pickedCaptain->mTeamIndex)
         {
             tDebugPrintManager::Print(DC_NETWORK,
                 "Ignoring ReceivedDraftPickedCaptain because expected update from team %d but got from %d\n",
                 mNextDraftingTeam, (s8)pickedCaptain->mTeamIndex);
         }
-        else if (mNextDraftingTeam < 0 || mNextDraftingTeam >= mTeamCount)
+        else if (mNextDraftingTeam >= 0 && mNextDraftingTeam < mTeamCount)
+        {
+            mTeams[mNextDraftingTeam].mCaptain = pickedCaptain->mCaptain;
+            AdvanceDraftTeam();
+        }
+        else
         {
             tDebugPrintManager::Print(DC_NETWORK,
                 "Ignoring ReceivedDraftPickedCaptain because m_nCurrentDraftingTeam is bad value %d\n",
                 mNextDraftingTeam);
         }
-        else
-        {
-            mTeams[mNextDraftingTeam].mCaptain = pickedCaptain->mCaptain;
-            AdvanceDraftTeam();
-        }
+        break;
     }
-    else if (type == 24)
+    case 24:
     {
         NetMessageDraftPickedSidekicks* pickedSidekicks =
             (NetMessageDraftPickedSidekicks*)message;
@@ -653,20 +690,21 @@ int NetworkDraft::ProcessMessage(NetworkMessage* message)
                 "Ignoring ReceivedDraftPickedSidekicks because in draft state %d\n",
                 mState);
         }
-        else if ((s8)pickedSidekicks->mTeamIndex < 0
-            || (s8)pickedSidekicks->mTeamIndex >= mTeamCount)
+        else if ((s8)pickedSidekicks->mTeamIndex >= 0
+            && (s8)pickedSidekicks->mTeamIndex < mTeamCount)
+        {
+            mTeams[(s8)pickedSidekicks->mTeamIndex].mSidekicks[0] = pickedSidekicks->mSidekick0;
+            mTeams[(s8)pickedSidekicks->mTeamIndex].mSidekicks[1] = pickedSidekicks->mSidekick1;
+            mTeams[(s8)pickedSidekicks->mTeamIndex].mSidekicks[2] = pickedSidekicks->mSidekick2;
+        }
+        else
         {
             tDebugPrintManager::Print(DC_NETWORK,
                 "Ignoring ReceivedDraftPickedSidekicks because pDraftPickedSidekicks m_nMyTeamIndex is bad value %d\n",
                 (s8)pickedSidekicks->mTeamIndex);
         }
-        else
-        {
-            NetworkDraftTeam& team = mTeams[(s8)pickedSidekicks->mTeamIndex];
-            team.mSidekicks[0] = pickedSidekicks->mSidekick0;
-            team.mSidekicks[1] = pickedSidekicks->mSidekick1;
-            team.mSidekicks[2] = pickedSidekicks->mSidekick2;
-        }
+        break;
+    }
     }
     return 1;
 }

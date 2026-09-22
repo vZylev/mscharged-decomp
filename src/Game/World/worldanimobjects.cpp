@@ -549,7 +549,7 @@ static const nlColour s_effectBoundsColour
 void WorldEffect::UpdateVisibility(EmissionController* pController)
 {
     const nlVector3& position = pController->GetPosition();
-    float fRadius = m_fEmissionRadius;
+    float radius = m_fEmissionRadius;
     if (!m_bActive)
     {
         pController->m_bVisible = false;
@@ -562,7 +562,8 @@ void WorldEffect::UpdateVisibility(EmissionController* pController)
     {
         const nlVector4* pCullData = m_pWorld->m_pOpaqueView
                                          ->m_Interface->GetShadowMatrix();
-        if (!ClassifySphereInFrustum(pCullData, &position, fRadius)
+        if (ClassifySphereInFrustum(pCullData, &position, radius)
+                == FRUSTUM_OUTSIDE
             || !m_pWorld->m_bRenderingEnabled)
         {
             pController->m_bVisible = false;
@@ -576,7 +577,7 @@ void WorldEffect::UpdateVisibility(EmissionController* pController)
     if (s_drawEffectBounds)
     {
         nlColour colour = s_effectBoundsColour;
-        g_ShapeRenderer.DrawSphere(position, colour, fRadius);
+        g_ShapeRenderer.DrawSphere(position, colour, radius);
     }
 }
 

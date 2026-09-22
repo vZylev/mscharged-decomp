@@ -123,8 +123,8 @@ bool DetInput::JustReleased(int button, bool remap)
 
 void DetInput::UpdatePolarAnalog()
 {
-    nlCartesianToPolar(m_PolarAnalogLeft, m_AnalogLeftX, m_AnalogLeftY);
-    nlCartesianToPolar(m_PolarAnalogRight, m_AnalogRightX, m_AnalogRightY);
+    nlCartesianToPolar(m_PolarAnalogLeft, AnalogLeftX(), AnalogLeftY());
+    nlCartesianToPolar(m_PolarAnalogRight, AnalogRightX(), AnalogRightY());
 }
 
 void DetInput::UpdateButtonStateTicks()
