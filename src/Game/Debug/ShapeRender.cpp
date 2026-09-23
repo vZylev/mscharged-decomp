@@ -492,6 +492,7 @@ extern "C" void fn_802BC83C(const ShapeRender* arg0, const PrimitiveShape& prim,
         glSetMatrix(matrix, mat_world);
     }
 
+    unsigned long offset;
     glModel* pModel = glModelDupNoStreams(prim.model, false, 0);
     nlFloatColour local_08;
     local_08.c[0] = (float)colour.c[0] * (1.0f / 255.0f);
@@ -499,9 +500,12 @@ extern "C" void fn_802BC83C(const ShapeRender* arg0, const PrimitiveShape& prim,
     local_08.c[2] = (float)colour.c[2] * (1.0f / 255.0f);
     local_08.c[3] = (float)colour.c[3] * (1.0f / 255.0f);
 
-    for (u32 index = 0; index < pModel->numPackets; index++)
+    unsigned long index;
+    index = 0;
+    offset = 0;
+    while (index < pModel->numPackets)
     {
-        glModelPacket* packet = &pModel->packets[index];
+        glModelPacket* packet = (glModelPacket*)((u8*)pModel->packets + offset);
         packet->matrix = matrix;
         memcpy((u8*)packet->materialParameters + sizeof(glTextureBinding),
             &local_08,
@@ -518,6 +522,9 @@ extern "C" void fn_802BC83C(const ShapeRender* arg0, const PrimitiveShape& prim,
             glSetRasterState(packet->rasterState, GLS_FillMode, 1);
             glSetRasterState(packet->rasterState, GLS_Culling, 0);
         }
+
+        offset += sizeof(glModelPacket);
+        ++index;
     }
 
     if (arg0->m_eView != 0)

@@ -148,26 +148,7 @@ public:
         TagValuePair();
 
         template <typename T>
-        T Get() const
-        {
-            if (type == CONFIG_BOOL)
-            {
-                return LexicalCast<T, bool>(value.boolValue);
-            }
-            else if (type == CONFIG_INT)
-            {
-                return LexicalCast<T, int>(value.intValue);
-            }
-            else if (type == CONFIG_FLOAT)
-            {
-                return LexicalCast<T, float>(value.floatValue);
-            }
-            else if (type == CONFIG_STRING)
-            {
-                return LexicalCast<T, const char*>(value.stringValue);
-            }
-            return T();
-        }
+        T Get() const;
 
         const char* tag;
         ConfigType type;
@@ -227,6 +208,28 @@ public:
     unsigned int mTvpCapacity;
     bool mLoaded;
 };
+
+template <typename T>
+T Config::TagValuePair::Get() const
+{
+    if (type == CONFIG_BOOL)
+    {
+        return LexicalCast<T, bool>(value.boolValue);
+    }
+    else if (type == CONFIG_INT)
+    {
+        return LexicalCast<T, int>(value.intValue);
+    }
+    else if (type == CONFIG_FLOAT)
+    {
+        return LexicalCast<T, float>(value.floatValue);
+    }
+    else if (type == CONFIG_STRING)
+    {
+        return LexicalCast<T, const char*>(value.stringValue);
+    }
+    return T();
+}
 
 typedef Config::TagValuePair TagValuePair;
 

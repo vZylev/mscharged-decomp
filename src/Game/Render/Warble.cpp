@@ -1,4 +1,5 @@
 #include "Game/TweakValueFloat.h"
+#include "Game/UnidentifiedStaticStorage.h"
 #include "Game/GL/GLWarbleMeshWriter.h"
 #include "Game/Render/RLView.h"
 #include "NL/gl/gl.h"
@@ -20,15 +21,11 @@
 static char sWarbleBlobTexture[] = "global/warble_blob";
 static char sWarbleTexture[] = "target/warbletexture";
 static char sWarbleColourTexture[] = "target/warblecolour";
-static char sWarbleTweakCategory[] = "/Rendering/Effects/Warble";
-static char sWarbleFrequencyName[] = "gfWarbleFreq";
-static char sWarbleRateName[] = "gfWarbleRate";
 
 static int sWarbleOutputExtent = 400;
 static float sWarbleDisplacementScale = 128.0f;
 static float sWarbleAmplitude = 0.85f;
 
-static WarbleConfiguration sWarbleConfiguration;
 static float sWarbleBlob[64][64];
 
 static float sWarbleLeft;
@@ -40,79 +37,9 @@ static u32 sWarbleColourHandle;
 static char sWarbleColourLoaded;
 
 static TweakValueFloat sWarbleFrequency(
-    sWarbleFrequencyName, sWarbleTweakCategory, 60.0f);
+    "gfWarbleFreq", "/Rendering/Effects/Warble", 60.0f);
 static TweakValueFloat sWarbleRate(
-    sWarbleRateName, sWarbleTweakCategory, 10.0f);
-
-void InitializeWarble(WarbleOwner* owner)
-{
-    owner->instance = 0;
-    nlZeroMemory(&sWarbleConfiguration, sizeof(sWarbleConfiguration));
-    sWarbleConfiguration.view = GetLayerView(eCLV_Warble);
-    sWarbleConfiguration.blobScale = 5.0f;
-    sWarbleConfiguration.duration = 2.0f;
-    sWarbleConfiguration.values18[0] = 3.0f;
-    sWarbleConfiguration.values18[1] = 12.0f;
-    sWarbleConfiguration.values18[2] = 32.0f;
-    sWarbleConfiguration.values18[3] = 32.0f;
-    sWarbleConfiguration.values18[4] = 1.0f;
-    sWarbleConfiguration.values18[5] = 0.0f;
-}
-
-static void ClearWarble(WarbleOwner* owner)
-{
-    if (owner->instance != 0)
-    {
-        delete owner->instance;
-        owner->instance = 0;
-    }
-}
-
-void ShutdownWarble(WarbleOwner* owner)
-{
-    ClearWarble(owner);
-}
-
-void ResetWarble(WarbleOwner* owner)
-{
-    ClearWarble(owner);
-}
-
-void UpdateWarble(WarbleOwner* owner, float dt)
-{
-    WarbleInstance* instance = owner->instance;
-    if (instance == 0)
-        return;
-
-    bool expired = instance->UnidentifiedQuery();
-    if (expired)
-    {
-        delete instance;
-        owner->instance = 0;
-        return;
-    }
-
-    instance->elapsed += dt;
-    if (instance->elapsed >= instance->duration)
-        instance->active = true;
-}
-
-void RenderWarble(WarbleOwner* owner)
-{
-}
-
-void SetWarbleInstance(
-    WarbleOwner* owner, WarbleInstance* instance)
-{
-    owner->instance = instance;
-}
-
-WarbleInstance::WarbleInstance(const WarbleConfiguration& configuration)
-{
-    *static_cast<WarbleConfiguration*>(this) = configuration;
-    elapsed = 0.0f;
-    active = false;
-}
+    "gfWarbleRate", gLastTweakCategory, 10.0f);
 
 static inline u8 ReadWarbleBlobValue(
     const PlatTexture* texture, int x, int y)
