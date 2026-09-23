@@ -86,6 +86,32 @@ public:
         return *this;
     }
 
+    bool operator==(const FuzzyVariant& other) const
+    {
+        bool bEqual = mType == other.mType;
+        if (bEqual)
+        {
+            if (mType >= NUM_V_TYPES)
+            {
+                switch (mType)
+                {
+                case FT_PLAYER:
+                    break;
+                case FT_TEAM:
+                case FT_GAME:
+                case FT_BALL:
+                    bEqual = mData.pointer == other.mData.pointer;
+                    break;
+                }
+            }
+            else
+            {
+                bEqual = other.Variant::operator==(*this);
+            }
+        }
+        return bEqual;
+    }
+
     virtual unsigned long GetHash() const;
     virtual NLString ToString() const;
     virtual bool IsPointerType() const;
@@ -157,7 +183,7 @@ public:
     ~UnidentifiedVariantCollection();
 
     bool IsSet(int index) const;
-    Variant* Get(int index);
+    FuzzyVariant* Get(int index);
     void Remove(int index);
     void Set(int index, const Variant& value);
     void Set(int index, float value)

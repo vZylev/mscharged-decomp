@@ -1530,18 +1530,19 @@ void cFielder::InitActionMegaStrikeMeter(bool bParam)
         fn_8005001C(true);
     }
 
+    bool bDidWindup = false;
     bool bNearGoal = false;
     float fAbsX = (float)fabs(mUnidentified024.m_v3Position.x);
     if (fAbsX > cField::GetGoalLineX(1U) - lbl_806E3570)
     {
-        if ((float)fabs(mUnidentified024.m_v3Position.y)
-            < 0.5f * cNet::m_fNetWidth + 1.0f)
+        float fNetWidth = cNet::m_fNetWidth;
+        float fAbsY = (float)fabs(mUnidentified024.m_v3Position.y);
+        if (fAbsY < 0.5f * fNetWidth + 1.0f)
         {
             bNearGoal = true;
         }
     }
 
-    bool bDidWindup = false;
     if (g_pGame->m_eGameState == 3 || bNearGoal)
     {
         fn_801BA4C8("ball_sts_windup");
@@ -1565,19 +1566,19 @@ void cFielder::InitActionMegaStrikeMeter(bool bParam)
 
         nlVector3 v3NetLocation = m_pTeam->GetOtherNet()->m_v3NetLocation;
 
-        InitMovementFromAnim(
-            (s16)CalcAnimTurnAdjust(mUnidentified024.m_aActualFacingDirection,
-                (u16)(s32)(10430.378f
-                    * nlATan2f(v3NetLocation.y - mUnidentified024.m_v3Position.y,
-                        v3NetLocation.x - mUnidentified024.m_v3Position.x)),
-                m_eAnimID, 1.0f),
-            v3Zero, lbl_806E35CC, false);
+        float fDeltaX = v3NetLocation.x - mUnidentified024.m_v3Position.x;
+        float fDeltaY = v3NetLocation.y - mUnidentified024.m_v3Position.y;
+        float fAngleRad = nlATan2f(fDeltaY, fDeltaX);
+        u16 nAngleUnits = (u16)(s32)(10430.378f * fAngleRad);
+        s16 nTurnAdjust = CalcAnimTurnAdjust(
+            mUnidentified024.m_aActualFacingDirection, nAngleUnits, m_eAnimID, 1.0f);
+        InitMovementFromAnim(nTurnAdjust, v3Zero, lbl_806E35CC, false);
 
         if (bParam)
         {
-            ShootToScoreMeter::instance.m_v3OriginalMeterPosition
+            ShootToScoreMeter::instance.m_v3MeterPosition
+                = ShootToScoreMeter::instance.m_v3OriginalMeterPosition
                 = mUnidentified024.m_v3Position;
-            ShootToScoreMeter::instance.m_v3MeterPosition = mUnidentified024.m_v3Position;
             ShootToScoreMeter::instance.TurnOnMeter();
             PlaySound(0, 0xC4534945, 0, 0);
         }
@@ -1592,10 +1593,11 @@ void cFielder::InitActionMegaStrikeMeter(bool bParam)
 
         g_pGame->mpWeatherManager->Pause();
 
-        fn_800978E8(this, 0);
+        ClearPowerupAnimState(false);
 
-        mUnidentified3B4 = lbl_806DB924;
-        mUnidentified3AC = lbl_806DB924;
+        float fMeterTime = lbl_806DB924;
+        mUnidentified3B4 = fMeterTime;
+        mUnidentified3AC = fMeterTime;
         mUnidentified3B8 = false;
 
         float fShooting = this->GetTweaks()->fShooting;
@@ -1617,10 +1619,10 @@ void cFielder::InitActionMegaStrikeMeter(bool bParam)
         float fSegmentD
             = InterpolateClamped(lbl_806E0C68, lbl_806E0C6C, fShooting);
 
-        float fHalfA = fSegmentA * 0.5f;
-        float fHalfB = fSegmentB * 0.5f;
-        float fHalfD = fSegmentD * 0.5f;
-        float fHalfC = fSegmentC * 0.5f;
+        float fHalfA = fSegmentA / 2.0f;
+        float fHalfB = fSegmentB / 2.0f;
+        float fHalfC = fSegmentC / 2.0f;
+        float fHalfD = fSegmentD / 2.0f;
 
         mUnidentified3C4 = lbl_806DB970 + fHalfA;
         ShootToScoreMeter::instance.fn_801B1004(mUnidentified3C4);
@@ -2091,13 +2093,14 @@ void cFielder::InitActionOneTouchPassFromVolley(cPlayer* pPlayer, bool bParam)
     s16 facingDelta = GetFacingDeltaToPosition(pPlayer->mUnidentified024.m_v3Position);
     int index = (u16)(facingDelta + 0x2000) >> 14;
 
+    int nAnimID;
     bool bMirror = false;
     if (index == 2)
     {
         bMirror = m_pCurrentAnimController->m_bMirror;
     }
 
-    int nAnimID = LateOneTimerFromVolleyAnims[index];
+    nAnimID = LateOneTimerFromVolleyAnims[index];
 
     s16 nTurnAdjust = 0;
     switch (nAnimID)
@@ -4648,8 +4651,7 @@ void cFielder::fn_8004BB80(float fDeltaT)
             nlVector3 v3Dir;
             nlVec3Sub(v3Dir, mUnidentified024.m_v3Position,
                 m_pTeam->GetOtherNet()->m_v3NetLocation);
-            float fRecipLength = nlRecipSqrt(v3Dir.GetLengthSq3D(), true);
-            nlVec3Scale(v3Dir, v3Dir, fRecipLength);
+            nlVec3Normalize(v3Dir, v3Dir);
             nlVec3ScaleAdd(v3Dir, 2.0f, v3Dir, mUnidentified024.m_v3Position);
 
             lbl_806E0C74 = new (nlMalloc(
@@ -4673,8 +4675,9 @@ void cFielder::fn_8004BB80(float fDeltaT)
         float fTime = pShotMeter->m_fTime;
         if (fTime > fReleaseTime - fWindow)
         {
+            float fTimeLeft = fReleaseTime - fTime;
             mUnidentified178 = InterpolateRangeClamped(
-                mUnidentified178, 0.0f, fWindow, 0.0f, fReleaseTime - fTime);
+                mUnidentified178, 0.0f, fWindow, 0.0f, fTimeLeft);
         }
     }
 

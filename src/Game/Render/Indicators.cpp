@@ -121,10 +121,12 @@ extern "C" int fn_801A323C(cPlayer* pCharacter, bool* pSameMachine)
             return -1;
         }
 
-        NetworkPeer* pPeer = g_pNetworkSessionBase->GetLocalPeer();
-        int index = -1;
-        NetworkPeerChannel* pOwner
-            = (NetworkPeerChannel*)pGlobalPad->m_pMyUser;
+        NetworkPeerChannel* pOwner;
+        NetworkPeer* pPeer;
+        int index;
+        pPeer = g_pNetworkSessionBase->GetLocalPeer();
+        index = -1;
+        pOwner = (NetworkPeerChannel*)pGlobalPad->m_pMyUser;
 
         if (pOwner->mPeer == pPeer)
         {
@@ -141,24 +143,15 @@ extern "C" int fn_801A323C(cPlayer* pCharacter, bool* pSameMachine)
                     = true;
             }
 
-            int remoteChannelIndex = pOwner->mChannelIndex;
             int available[4] = { -1, -1, -1, -1 };
             int next = 0;
-            if (!used[0])
+            int remoteChannelIndex = pOwner->mChannelIndex;
+            for (int pad = 0; pad < 4; ++pad)
             {
-                available[0] = next++;
-            }
-            if (!used[1])
-            {
-                available[1] = next++;
-            }
-            if (!used[2])
-            {
-                available[2] = next++;
-            }
-            if (!used[3])
-            {
-                available[3] = next;
+                if (!used[pad])
+                {
+                    available[pad] = next++;
+                }
             }
 
             if (remoteChannelIndex == available[0])

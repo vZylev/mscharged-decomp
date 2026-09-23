@@ -5,6 +5,7 @@
 #include "Game/FE/FEAudio.h"
 #include "Game/FE/feFinder.h"
 #include "Game/FE/feFinder.inl"
+#include "Game/FE/fePointer.inl"
 #include "Game/FE/fePresentation.h"
 #include "Game/FE/fePresentation.inl"
 #include "Game/FE/tlComponentInstance.h"

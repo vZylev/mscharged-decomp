@@ -514,6 +514,14 @@ OptionsVisualMenuV2::~OptionsVisualMenuV2()
 {
 }
 
+inline void OptionsVisualMenuV2::UpdateZoomLevelText(TLTextInstance* text, const u16 (&number)[4], const u16* localized)
+{
+    BasicString<unsigned short, Detail::TempStringAllocator> formatted = Format(
+        BasicString<unsigned short, Detail::TempStringAllocator>(localized), number);
+    memcpy(mFormattedZoomLevel, formatted.c_str(), 0x20);
+    text->SetString(mFormattedZoomLevel);
+}
+
 void OptionsVisualMenuV2::SceneCreated()
 {
     TLComponentInstance* backButton = 0;
@@ -563,11 +571,7 @@ void OptionsVisualMenuV2::SceneCreated()
         mPresentation->m_currentSlide, "Layer", "visual_options", "SERIES SETTING");
     unsigned short number[4];
     nlSNPrintf(number, 4, (const unsigned short*)L"%d", mSettings[1] + 1);
-    BasicString<unsigned short, Detail::TempStringAllocator> formatted = Format(
-        BasicString<unsigned short, Detail::TempStringAllocator>(
-            g_pLocalization->GetString("OPTIONS_VISUAL_ZOOMLEVEL")), number);
-    memcpy(mFormattedZoomLevel, formatted.c_str(), 0x20);
-    text->SetString(mFormattedZoomLevel);
+    UpdateZoomLevelText(text, number, g_pLocalization->GetString("OPTIONS_VISUAL_ZOOMLEVEL"));
 }
 
 void OptionsVisualMenuV2::Update(float fDeltaT)
@@ -757,16 +761,10 @@ void OptionsVisualMenuV2::fn_801D7AA8(int index, void* context)
     GameInfoManager::Instance()->mUserInfo.mVisualOptions.mCameraZoomLevel = item / 4.0;
 
     TLTextInstance* text = FEFinder<TLTextInstance, 4>::Find(
-        mPresentation->m_currentSlide, nlStringLowerHash("Layer"),
-        nlStringLowerHash("visual_options"), nlStringLowerHash("SERIES SETTING"),
-        0UL, 0UL, 0UL);
+        mPresentation->m_currentSlide, "Layer", "visual_options", "SERIES SETTING");
     unsigned short number[4];
     nlSNPrintf(number, 4, (const unsigned short*)L"%d", mSettings[1] + 1);
-    BasicString<unsigned short, Detail::TempStringAllocator> formatted = Format(
-        BasicString<unsigned short, Detail::TempStringAllocator>(
-            g_pLocalization->GetString("OPTIONS_VISUAL_ZOOMLEVEL")), number);
-    memcpy(mFormattedZoomLevel, formatted.c_str(), 0x20);
-    text->SetString(mFormattedZoomLevel);
+    UpdateZoomLevelText(text, number, g_pLocalization->GetString("OPTIONS_VISUAL_ZOOMLEVEL"));
 }
 
 void OptionsVisualMenuV2::fn_801D7EC8(int index, void* context)
@@ -819,16 +817,10 @@ void OptionsVisualMenuV2::fn_801D8048(int index, void* context)
     GameInfoManager::Instance()->mUserInfo.mVisualOptions.mIsAutoZoomCamera = item == 0;
 
     TLTextInstance* text = FEFinder<TLTextInstance, 4>::Find(
-        mPresentation->m_currentSlide, nlStringLowerHash("Layer"),
-        nlStringLowerHash("visual_options"), nlStringLowerHash("SERIES SETTING"),
-        0UL, 0UL, 0UL);
+        mPresentation->m_currentSlide, "Layer", "visual_options", "SERIES SETTING");
     unsigned short number[4];
     nlSNPrintf(number, 4, (const unsigned short*)L"%d", mSettings[1] + 1);
-    BasicString<unsigned short, Detail::TempStringAllocator> formatted = Format(
-        BasicString<unsigned short, Detail::TempStringAllocator>(
-            g_pLocalization->GetString("OPTIONS_VISUAL_ZOOMLEVEL")), number);
-    memcpy(mFormattedZoomLevel, formatted.c_str(), 0x20);
-    text->SetString(mFormattedZoomLevel);
+    UpdateZoomLevelText(text, number, g_pLocalization->GetString("OPTIONS_VISUAL_ZOOMLEVEL"));
 }
 
 void OptionsVisualMenuV2::fn_801D8458(int index, void*)

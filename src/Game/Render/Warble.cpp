@@ -44,21 +44,18 @@ static TweakValueFloat sWarbleRate(
 static inline u8 ReadWarbleBlobValue(
     const PlatTexture* texture, int x, int y)
 {
-    int block =
-        (y >> 2) * (texture->m_Width >> 3) + (x >> 3);
-    const u8 (*tiles)[4][8] =
-        static_cast<const u8 (*)[4][8]>(texture->m_SwizzledData);
-    const u8 paletteIndex =
-        tiles[block][y & 3][x & 7];
-    const u16 colour = texture->m_PaletteData[paletteIndex];
-    if ((colour & 0x8000) != 0)
+    int block = (y >> 2) * (texture->m_Width >> 3) + (x >> 3);
+    int offset = (block << 5) + ((y & 3) << 3) + (x & 7);
+    u8 paletteIndex = ((u8*)texture->m_SwizzledData)[offset];
+    u16 colour = texture->m_PaletteData[paletteIndex];
+    if (colour & 0x8000)
     {
-        const unsigned int value = (colour >> 10) & 0x1F;
-        return (value * 255) / 31;
+        unsigned int component = (colour >> 10) & 0x1F;
+        return component * 255 / 31;
     }
 
-    const unsigned int value = (colour >> 8) & 0xF;
-    return (value * 255) / 15;
+    unsigned int component = (colour >> 8) & 0x0F;
+    return component * 255 / 15;
 }
 
 void LoadWarbleBlob()

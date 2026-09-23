@@ -18,6 +18,7 @@
 #include "Game/FE/fePresentation.h"
 #include "Game/FE/tlImageInstance.h"
 #include "Game/FE/tlSlide.h"
+#include "Game/FE/fePointer.inl"
 #include "Game/Game.h"
 #include "Game/GameInfo.h"
 #include "Game/Render/FrontEndPresentation.h"
@@ -974,7 +975,7 @@ void SHChooseSides2::fn_8021E76C(unsigned int, void*)
 {
     for (int i = 0; i < 4; ++i)
     {
-        gFEPointerInstances[i]->SetActiveSlide("waiting", true, false);
+        GetPointerInstance(i)->SetActiveSlide("waiting", true, false);
     }
 
     FEAudio::PlayAnimAudioEvent(0xF0AFD586, 0, 0, 1);

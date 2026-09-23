@@ -1728,11 +1728,26 @@ Game/SH/SHMoviePlayer.cpp:
 	.sdata2     start:0x806E5648 end:0x806E5660
 
 Game/FE/feCaptainComponent.cpp:
-	.text       start:0x801DA134 end:0x801E2E30
-	.data       start:0x805194E8 end:0x80519AE8
-	.sdata      start:0x806DD4B0 end:0x806DD570
+	.text       start:0x801DA134 end:0x801DCD9C
+	.data       start:0x805194E8 end:0x80519668
+	.sdata      start:0x806DD4B0 end:0x806DD508
+	.sdata2     start:0x806E5660 end:0x806E5668
+
+Game/FE/tu_801DCD9C.cpp:
+	.text       start:0x801DCD9C end:0x801E144C
+	.data       start:0x80519668 end:0x80519920
+	.sdata      start:0x806DD508 end:0x806DD568
+	.sdata2     start:0x806E5668 end:0x806E5698
+
+Game/FE/tu_80519920.cpp:
+	.data       start:0x80519920 end:0x80519950
+
+Game/OverlayManager.cpp:
+	.text       start:0x801E144C end:0x801E2E30
+	.data       start:0x80519950 end:0x80519AE8
+	.sdata      start:0x806DD568 end:0x806DD570
 	.sbss       start:0x806E1860 end:0x806E1868
-	.sdata2     start:0x806E5660 end:0x806E56A0
+	.sdata2     start:0x806E5698 end:0x806E56A0
 
 Game/FE/feScrollText.cpp:
 	.text       start:0x801E2E30 end:0x801E45C0
@@ -3906,12 +3921,17 @@ Game/AI/tu_8030EDB0.cpp:
 	.ctors      start:0x804DBAA8 end:0x804DBAAC
 	.bss        start:0x805841C8 end:0x80584218
 
+Game/AI/FielderInput.cpp:
+	.text       start:0x8030F5DC end:0x8030FD40
+	.data       start:0x805300C8 end:0x805300D8
+	.sdata2     start:0x806E6848 end:0x806E6860
+
 Game/AI/tu_8030F5DC.cpp:
-	.text       start:0x8030F5DC end:0x803115F4
+	.text       start:0x8030FD40 end:0x803115F4
 	.ctors      start:0x804DBAAC end:0x804DBAB0
-	.data       start:0x805300C8 end:0x80530148
+	.data       start:0x805300D8 end:0x80530148
 	.bss        start:0x80584218 end:0x80584240
-	.sdata2     start:0x806E6848 end:0x806E6870
+	.sdata2     start:0x806E6860 end:0x806E6870
 
 Game/AI/tu_803115F4.cpp:
 	.text       start:0x803115F4 end:0x80311734

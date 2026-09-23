@@ -57,32 +57,6 @@ struct LexicalCastImpl<BasicString<char, TempStringAllocator>, const char*>
     }
 };
 
-template <typename Allocator>
-inline BasicString<char, Allocator> LexicalCastImpl<BasicString<char, Allocator>, int>::Do(int t)
-{
-    char s[0x40];
-    nlSNPrintf(s, 0x40, "%i", t);
-    return BasicString<char, Allocator>(s);
-}
-
-template <typename Allocator>
-inline BasicString<char, Allocator> LexicalCastImpl<BasicString<char, Allocator>, float>::Do(float t)
-{
-    char s[0x40];
-    nlSNPrintf(s, 0x40, "%f", t);
-    return BasicString<char, Allocator>(s);
-}
-
-template <typename Allocator>
-inline BasicString<char, Allocator> LexicalCastImpl<BasicString<char, Allocator>, bool>::Do(bool t)
-{
-    if (t)
-    {
-        return BasicString<char, Allocator>("true");
-    }
-    return BasicString<char, Allocator>("false");
-}
-
 template <typename To>
 inline To LexicalCastImpl<To, int>::Do(int t)
 {
