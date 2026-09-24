@@ -46,12 +46,11 @@ void Blinker::Update(float fDeltaT)
         return;
     }
 
-    float deltaTime = fDeltaT;
     if (NisPlayer::Instance()->WorldIsFrozen())
     {
-        deltaTime = 0.0f;
+        fDeltaT = 0.0f;
     }
-    m_fTime += deltaTime;
+    m_fTime += fDeltaT;
 
     if (m_fTime > m_fBlinkTimes[m_State])
     {
@@ -59,12 +58,15 @@ void Blinker::Update(float fDeltaT)
         switch (m_State)
         {
         case Blink_Open:
+        {
             m_State = Blink_HalfClosed;
             if (m_bJustDoubleBlinked == 0)
             {
-                if (RandomizedValue(0.5f, 1.0f) < 0.2f)
+                bool doubleBlink = RandomizedValue(0.5f, 1.0f) < 0.2f;
+                if (doubleBlink)
                 {
-                    m_fBlinkTimes[0] = RandomizedValue(0.06666667f, 0.06666667f);
+                    float doubleBlinkInterval = 0.06666667f;
+                    m_fBlinkTimes[0] = RandomizedValue(doubleBlinkInterval, 0.06666667f);
                     m_bJustDoubleBlinked = 1;
                     return;
                 }
@@ -72,6 +74,7 @@ void Blinker::Update(float fDeltaT)
             m_fBlinkTimes[0] = RandomizedValue(1.2f, 1.0f);
             m_bJustDoubleBlinked = 0;
             break;
+        }
         case Blink_HalfClosed:
             m_State = Blink_Closed;
             break;

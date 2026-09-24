@@ -3,8 +3,8 @@
 
 #include "Game/GameEventQueue.h"
 #include "Game/NetworkMessage.h"
-#include "NL/nlMath.h"
 #include "types.h"
+#include "NL/nlMath.h"
 
 class Clock;
 class FuzzyTweaks;
@@ -16,6 +16,7 @@ class Terrain;
 class CrowdRiot;
 class AvoidablePolygon;
 class UnidentifiedFielderInput;
+struct DetermDataEvent;
 class cFielder;
 class cPlayer;
 
@@ -58,8 +59,12 @@ struct UnidentifiedCircularByteQueue
 void DestroyPowerups();
 void DestroyGame();
 
+extern "C" void fn_80061B1C(int relative, float xTilt, float yTilt);
+
 class cGame : public NetworkMessageReceiver
 {
+    friend void fn_80061B1C(int relative, float xTilt, float yTilt);
+
 public:
     virtual int ProcessMessage(NetworkMessage* message);
     virtual ~cGame();
@@ -75,6 +80,9 @@ public:
     void fn_80058400();
     void fn_8005848C();
     void BeginGame(bool bRematch, bool bStraightToKickoff);
+    void fn_8005A028(DetermDataEvent* data);
+    void OnSuddenDeath();
+    void OnGameOver();
     void SendPauseGameEvent();
     void SendResumingGameEvent();
     void fn_80058498(bool param1, int param2, int param3);
@@ -193,7 +201,7 @@ private:
     /* 0xA4 */ u16 mUnidentified0A4;
     /* 0xA6 */ u16 mUnidentified0A6;
     /* 0xA8 */ u32 mUnidentified0A8;
-    /* 0xAC */ nlVector3 mUnidentified0AC;
+    /* 0xAC */ nlVector3 mTiltDirection;
     /* 0xB8 */ u32 mUnidentified0B8;
 
 public:
